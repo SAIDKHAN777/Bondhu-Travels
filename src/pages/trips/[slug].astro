@@ -1,0 +1,113 @@
+---
+import TripDetailView from '../../components/TripDetailView.astro';
+import { findTripBySlugOrTitle, tripsDatabase, type TripDetail } from '../../lib/tripsData';
+import prisma from '../../lib/prisma.js';
+
+const { slug } = Astro.params;
+
+let matchedTrip: TripDetail | null = null;
+
+if (slug) {
+  matchedTrip = findTripBySlugOrTitle(slug);
+}
+
+// Check database for any custom edits made by admin in 'section_explore_trips'
+try {
+  const exploreSetting = await prisma.systemSetting.findUnique({
+    where: { key: 'section_explore_trips' }
+  });
+
+  if (exploreSetting && Array.isArray(exploreSetting.value?.trips)) {
+    const dbTrips = exploreSetting.value.trips;
+    
+    // Look for matching trip in database
+    const dbMatch = dbTrips.find((t: any) => {
+      const dbSlug = (t.link || '').toLowerCase();
+      const dbTitle = (t.title || '').toLowerCase();
+      return (
+        (slug && dbSlug.includes(slug.toLowerCase())) ||
+        (slug && dbTitle.includes(slug.toLowerCase().replace(/-/g, ' '))) ||
+        (matchedTrip && dbTitle.includes(matchedTrip.title.toLowerCase()))
+      );
+    });
+
+    if (dbMatch) {
+      if (!matchedTrip) {
+        matchedTrip = {
+          slug: slug || 'custom-trip',
+          country: dbMatch.country || 'Destination',
+          title: dbMatch.title || 'Bespoke Luxury Trip',
+          tagline: dbMatch.tagline || 'An authentic curated luxury journey',
+          heroImage: dbMatch.heroImage || dbMatch.img || dbMatch.image || '/2026/04/Lost-Generation-header-mob.jpg',
+          heroVideo: dbMatch.heroVideo || '/ocean-waves.webm',
+          when: dbMatch.when || 'All Year Round',
+          whenSub: dbMatch.whenSub || 'Best Season',
+          price: dbMatch.price || 'From £7,500pp excl. flights',
+          priceSharing: dbMatch.priceSharing || '(based on 2 ppl sharing)',
+          howLong: dbMatch.howLong || dbMatch.nights || '8 nights',
+          howLongSub: dbMatch.howLongSub || 'Ideal length',
+          overviewLead: dbMatch.desc || 'An extraordinary bespoke journey crafted with precision, luxury, and cultural authenticity.',
+          overviewStory: dbMatch.overviewStory || 'Discover secluded sanctuaries and bespoke adventures crafted specifically for your party.',
+          stops: []
+        };
+      } else {
+        if (dbMatch.title) matchedTrip.title = dbMatch.title;
+        if (dbMatch.country) matchedTrip.country = dbMatch.country;
+        if (dbMatch.tagline) matchedTrip.tagline = dbMatch.tagline;
+        (matchedTrip as any).heroMediaType = dbMatch.heroMediaType || (dbMatch.heroVideo ? 'video' : 'image');
+        if (dbMatch.heroImage) matchedTrip.heroImage = dbMatch.heroImage;
+        if (dbMatch.heroVideo !== undefined) matchedTrip.heroVideo = dbMatch.heroVideo;
+        if (dbMatch.when) matchedTrip.when = dbMatch.when;
+        if (dbMatch.whenSub) matchedTrip.whenSub = dbMatch.whenSub;
+        if (dbMatch.price) matchedTrip.price = dbMatch.price;
+        if (dbMatch.priceSharing) matchedTrip.priceSharing = dbMatch.priceSharing;
+        if (dbMatch.howLong || dbMatch.nights) matchedTrip.howLong = dbMatch.howLong || dbMatch.nights;
+        if (dbMatch.howLongSub) matchedTrip.howLongSub = dbMatch.howLongSub;
+        if (dbMatch.desc) matchedTrip.overviewLead = dbMatch.desc;
+        if (dbMatch.overviewStory) matchedTrip.overviewStory = dbMatch.overviewStory;
+      }
+
+      // Dynamically map custom days saved by Admin in PostgreSQL
+      if (Array.isArray(dbMatch.days) && dbMatch.days.length > 0) {
+        const stopGroups: Record<string, any[]> = {};
+        for (const d of dbMatch.days) {
+          const groupName = d.stopName || matchedTrip.country || 'Highlights';
+          if (!stopGroups[groupName]) stopGroups[groupName] = [];
+          stopGroups[groupName].push(d);
+        }
+
+        matchedTrip.stops = Object.entries(stopGroups).map(([stopName, slides], sIdx) => ({
+          id: stopName.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-') || `stop-${sIdx + 1}`,
+          name: stopName,
+          daysTag: slides.length === 1 ? slides[0].day : `${slides[0].day} – ${slides[slides.length - 1].day}`,
+          description: sIdx === 0 ? matchedTrip.overviewLead : `Discover the iconic culture and exquisite highlights of ${stopName}.`,
+          slides: slides.map((s, dIdx) => {
+            const rawImages = Array.isArray(s.images) && s.images.length > 0
+              ? s.images
+              : (s.image ? [s.image] : (s.img ? [s.img] : []));
+            return {
+              day: s.day || `Day ${dIdx + 1}`,
+              title: s.title || `Day ${dIdx + 1} Itinerary`,
+              desc: s.desc || s.description || '',
+              image: rawImages[0] || matchedTrip.heroImage,
+              images: rawImages,
+              video: s.video || '',
+              stay: s.stay || '',
+              dining: s.dining || ''
+            };
+          })
+        }));
+      }
+    }
+  }
+} catch (e: any) {
+  console.warn('Trips SSR db check warning:', e.message);
+}
+
+// Fallback to primary trip if not found
+if (!matchedTrip) {
+  matchedTrip = tripsDatabase['the-rhythm-of-water'];
+}
+---
+
+<TripDetailView trip={matchedTrip} />

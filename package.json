@@ -1,0 +1,25 @@
+{
+  "name": "travel-website-frontend",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Reverse-Engineered Black Tomato Luxury Travel Frontend - Powered by Astro",
+  "scripts": {
+    "dev": "astro dev --host 0.0.0.0 --port 3000",
+    "start": "astro dev --host 0.0.0.0 --port 3000",
+    "build": "astro build",
+    "preview": "astro preview --host 0.0.0.0 --port 3000"
+  },
+  "keywords": [
+    "travel",
+    "luxury",
+    "blacktomato",
+    "frontend",
+    "astro"
+  ],
+  "author": "Said Khan",
+  "license": "ISC",
+  "dependencies": {
+    "@astrojs/node": "^11.1.9",
+    "astro": "^7.4.4"
+  }
+}

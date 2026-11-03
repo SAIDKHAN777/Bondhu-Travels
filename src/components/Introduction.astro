@@ -1,0 +1,126 @@
+---
+interface Props {
+  title?: string;
+  paragraphs?: string[];
+  ctaText?: string;
+  ctaLink?: string;
+}
+
+const {
+  title = "Every journey starts with a feeling",
+  paragraphs = [
+    "The world is vast, full of wonders. But information engulfs us. See this, do that, don’t miss this. It seems the more choice there is, the more overwhelmed we feel. What’s more, you’re never asked how you want to feel.",
+    "That’s not us. Black Tomato is a tailor-made luxury travel company that designs fully personalised itineraries – not templates, not off-the-shelf tours. Whether you’re a couple seeking adventure, a multi-generational family exploring together, or a solo traveller chasing something extraordinary, we craft every detail around you.",
+    "For over 20 years, we’ve been recognised as one of the world’s leading luxury travel planners – featured in Modern Luxury’s ‘Best of Luxury Travel’ Awards – and trusted to deliver tailor-made journeys across 100 destinations."
+  ],
+  ctaText = "Get In Touch",
+  ctaLink = "/make-an-enquiry/"
+} = Astro.props;
+---
+
+<section class="intro-section" aria-label="Brand Introduction">
+  <div class="intro-container">
+    <span class="intro-badge">The Black Tomato Philosophy</span>
+    <h2 class="intro-title">{title}</h2>
+    
+    <div class="intro-body">
+      {paragraphs.map(p => (
+        <p class="intro-p">{p}</p>
+      ))}
+    </div>
+
+    {ctaText && (
+      <div class="intro-cta">
+        <a href={ctaLink} class="btn btn-intro">
+          {ctaText}
+        </a>
+      </div>
+    )}
+  </div>
+</section>
+
+<style>
+  .intro-section {
+    position: relative;
+    padding: 7rem 2rem;
+    background-color: #0C1017;
+    background-image: radial-gradient(circle at 50% 0%, rgba(232, 46, 114, 0.08) 0%, transparent 60%);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .intro-container {
+    max-width: 860px;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .intro-badge {
+    display: inline-block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: #E82E72;
+    margin-bottom: 1.25rem;
+  }
+
+  .intro-title {
+    font-family: 'Chronicle Display', serif;
+    font-size: 3rem;
+    color: #FFFFFF;
+    margin-bottom: 2rem;
+    line-height: 1.2;
+    font-weight: 400;
+  }
+
+  .intro-body {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .intro-p {
+    font-size: 1.15rem;
+    line-height: 1.8;
+    color: #CBD5E1;
+    font-weight: 300;
+  }
+
+  .intro-cta {
+    margin-top: 2.5rem;
+  }
+
+  .btn-intro {
+    display: inline-block;
+    padding: 0.85rem 2.5rem;
+    font-size: 0.85rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    font-weight: 600;
+    border-radius: 999px;
+    background: transparent;
+    color: #FFFFFF;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    text-decoration: none;
+    transition: all 0.25s ease;
+  }
+
+  .btn-intro:hover {
+    background: #E82E72;
+    border-color: #E82E72;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(232, 46, 114, 0.4);
+  }
+
+  @media (max-width: 768px) {
+    .intro-section {
+      padding: 4.5rem 1.5rem;
+    }
+    .intro-title {
+      font-size: 2.2rem;
+    }
+    .intro-p {
+      font-size: 1rem;
+    }
+  }
+</style>

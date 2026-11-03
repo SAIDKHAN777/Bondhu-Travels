@@ -1,0 +1,169 @@
+---
+const categories = [
+  {
+    title: "Family Expeditions",
+    subtitle: "Meaningful adventures crafted for all generations",
+    imageUrl: "/2026/01/Girl-running-in-farm-1.jpg",
+    link: "/experience-types/family-holidays/"
+  },
+  {
+    title: "Couples & Honeymoons",
+    subtitle: "Intimate escapes, private islands & secluded retreats",
+    imageUrl: "/2026/01/Couple-sitting-by-coast.jpg",
+    link: "/experience-types/couples-holidays/"
+  },
+  {
+    title: "Private Group Escapes",
+    subtitle: "Exclusive-use estates, private catamarans & villas",
+    imageUrl: "/2026/01/Group-canoeing-1.jpg",
+    link: "/experience-types/luxury-group-holidays/"
+  }
+];
+---
+
+<section class="themes-section" aria-label="Travel Themes">
+  <div class="themes-container">
+    <div class="themes-header">
+      <span class="themes-badge">Explore by Traveller</span>
+      <h2 class="themes-title">Start Your Journey</h2>
+    </div>
+
+    <div class="themes-grid">
+      {categories.map((cat) => (
+        <a href={cat.link} class="theme-card">
+          <img src={cat.imageUrl} alt={cat.title} loading="lazy" class="theme-bg" />
+          <div class="theme-overlay"></div>
+          <div class="theme-content">
+            <h3 class="theme-card-title">{cat.title}</h3>
+            <p class="theme-card-sub">{cat.subtitle}</p>
+            <span class="theme-link-arrow">Explore Experiences →</span>
+          </div>
+        </a>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .themes-section {
+    padding: 6rem 2rem;
+    background-color: #0C1017;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .themes-container {
+    max-width: 1440px;
+    margin: 0 auto;
+  }
+
+  .themes-header {
+    text-align: center;
+    margin-bottom: 3.5rem;
+  }
+
+  .themes-badge {
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: #E82E72;
+    margin-bottom: 0.75rem;
+    display: inline-block;
+  }
+
+  .themes-title {
+    font-family: 'AlternateGotNo1D', 'Alternate Gothic', 'League Gothic', sans-serif;
+    font-size: 3.25rem;
+    color: #FFFFFF;
+    font-weight: 400;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .themes-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+  }
+
+  .theme-card {
+    position: relative;
+    height: 480px;
+    border-radius: 1.25rem;
+    overflow: hidden;
+    text-decoration: none;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 2.5rem;
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.4s ease;
+  }
+
+  .theme-card:hover {
+    transform: translateY(-8px);
+    border-color: #E82E72;
+  }
+
+  .theme-bg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .theme-card:hover .theme-bg {
+    transform: scale(1.08);
+  }
+
+  .theme-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(7, 10, 14, 0.1) 0%, rgba(7, 10, 14, 0.85) 85%);
+  }
+
+  .theme-content {
+    position: relative;
+    z-index: 2;
+  }
+
+  .theme-card-title {
+    font-family: 'Chronicle Display', serif;
+    font-size: 2rem;
+    color: #FFFFFF;
+    margin-bottom: 0.5rem;
+    font-weight: 400;
+  }
+
+  .theme-card-sub {
+    font-size: 0.95rem;
+    color: #CBD5E1;
+    margin-bottom: 1.25rem;
+    line-height: 1.5;
+  }
+
+  .theme-link-arrow {
+    display: inline-block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #E82E72;
+    transition: transform 0.2s;
+  }
+
+  .theme-card:hover .theme-link-arrow {
+    transform: translateX(6px);
+  }
+
+  @media (max-width: 1024px) {
+    .themes-grid {
+      grid-template-columns: 1fr;
+    }
+    .theme-card {
+      height: 380px;
+    }
+  }
+</style>

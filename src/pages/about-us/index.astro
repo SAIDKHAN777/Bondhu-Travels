@@ -1,0 +1,465 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import CTABannerOriginal from '../../components/CTABannerOriginal.astro';
+import prisma from '../../lib/prisma.js';
+
+let headerConfig: any = null;
+let footerConfig: any = null;
+let aboutConfig: any = null;
+
+try {
+  const headerSetting = await prisma.systemSetting.findUnique({ where: { key: 'section_header' } });
+  if (headerSetting && headerSetting.value) {
+    headerConfig = headerSetting.value;
+  }
+  const footerSetting = await prisma.systemSetting.findUnique({ where: { key: 'section_footer' } });
+  if (footerSetting && footerSetting.value) {
+    footerConfig = footerSetting.value;
+  }
+  const aboutSetting = await prisma.systemSetting.findUnique({ where: { key: 'section_about_us' } });
+  if (aboutSetting && aboutSetting.value) {
+    aboutConfig = aboutSetting.value;
+  }
+} catch (e: any) {
+  console.warn('[About Us Page] DB fetch fallback active:', e.message);
+}
+
+const displayPhone = footerConfig?.phone || headerConfig?.phone || "+44 207 426 9888";
+const displayAddress = footerConfig?.address || "Albert House, 256-260 Old Street, London EC1V 9DD";
+
+// Hero Configuration from Admin Studio / Database
+const miniTag = aboutConfig?.miniTag || "ABOUT BONDHU TRAVEL";
+const heroTitle = aboutConfig?.heroTitle || "ABOUT BONDHU TRAVEL";
+const heroSubtitle = aboutConfig?.heroSubtitle || "WE CREATE REMARKABLE, TAILOR-MADE JOURNEYS";
+const heroMediaType = aboutConfig?.heroMediaType || "video";
+const heroVideo = aboutConfig?.heroVideo || "/uploads/videos/sunamganj_short_16x10-mvwdaq9p.mp4";
+const heroImg = aboutConfig?.heroImg || "/2024/05/Tom-Marchant-Values-Film-scaled-1.jpg";
+
+// Default Editorial Stories matching Black Tomato format (Screenshot 2)
+const defaultStories = [
+  {
+    title: "WHAT WE DO\nAND WHY WE DO IT",
+    desc: "২০০৫ সালে যাত্রা শুরু করার পর থেকে বন্ধু ট্রাভেল (Bondhu Travel) বিশ্বব্যাপী দম্পতি, পরিবার ও এক্সক্লুসিভ প্রাইভেট ট্রাভেলারদের জন্য সম্পূর্ণ ব্যক্তিগতকৃত এবং মানসম্মত লাক্সারি ভ্রমণ পরিকল্পনা উপহার দিয়ে আসছে। আমাদের সহ-প্রতিষ্ঠাতারা বিশ্বাস করেন প্রতিটি মানুষের ভ্রমণের স্বপ্ন আলাদা, তাই আপনার রুচি ও পছন্দ অনুযায়ী প্রতিটি মুহূর্ত নিখুঁতভাবে সাজানো হয়।",
+    img: "/2024/05/Tom-Marchant-Values-Film-scaled-1.jpg",
+    btnText: "GET IN TOUCH",
+    btnLink: "/make-an-enquiry/"
+  },
+  {
+    title: "PURSUIT OF FEELING",
+    desc: "ভ্রমণ কেবল নতুন কোনো স্থানে যাওয়ার নাম নয়; ভ্রমণ হচ্ছে অন্যরকম এক গভীর অনুভূতি অনুভব করা—এক ধরণের আবেগ ও রোমাঞ্চ যা সারাজীবন আপনার হৃদয়ে থেকে যায়। আপনি কোথায় যেতে চান সেটা যেমন গুরুত্বপূর্ণ, তার চেয়েও বড় বিষয় হলো আপনি কীভাবে ভ্রমণটি উপভোগ ও অনুভব করতে চান। সেই আবেগকে বাস্তবে রূপ দিতেই আমাদের প্রতিটি পদক্ষেপ।",
+    img: "/2025/08/Left-right-Hor.jpg",
+    btnText: "EXPLORE DESTINATIONS",
+    btnLink: "/#tour-sessions"
+  },
+  {
+    title: "OUR BESPOKE FLEET\n& PRIVATE RESORTS",
+    desc: "আমরা কোনো মধ্যস্থতাকারী নই—টাঙ্গুয়ার হাওড়ে আমাদের রয়েছে নিজস্ব প্রিমিয়াম ৫-স্টার সুবিধার লাক্সারি হাউসবোট এবং সেন্ট মার্টিনের কোরাল দ্বীপে রয়েছে একান্ত ব্যক্তিগত বিচ রিসোর্ট। নিজস্ব অভিজ্ঞ শেফ, ডেডিকেটেড ক্রু ও ব্যক্তিগত কনসিয়ার্জ সার্ভিসের মাধ্যমে আমরা শতভাগ নিরাপত্তা ও রাজকীয় আতিথেয়তা নিশ্চিত করি।",
+    img: "/uploads/1745423877995-boat-hero-cover.jpg",
+    btnText: "VIEW SPOTLIGHT STAYS",
+    btnLink: "/#tour-sessions"
+  },
+  {
+    title: "RESPONSIBLE &\nREGENERATIVE TRAVEL",
+    desc: "আমরা দায়িত্বশীল পর্যটনে বিশ্বাস করি। প্রতিটি ট্রিপের পরিকল্পনায় স্থানীয় সংস্কৃতি ও পরিবেশের ভারসাম্য রক্ষা করা আমাদের অঙ্গিকার। হাওড়ের বিশুদ্ধ জলরাশি থেকে সেন্ট মার্টিনের কোরাল রিফ—সবকিছু সুরক্ষিত রেখে ভবিষ্যৎ প্রজন্মের জন্য অনুপ্রেরণা জাগিয়ে তোলাই আমাদের নীতি।",
+    img: "/2025/03/Family-hiking-in-Colorado.jpg",
+    btnText: "OUR PRIVACY & POLICY",
+    btnLink: "/privacy-policy/"
+  }
+];
+
+const stories = (aboutConfig?.stories && Array.isArray(aboutConfig.stories) && aboutConfig.stories.length > 0)
+  ? aboutConfig.stories
+  : defaultStories;
+---
+
+<BaseLayout 
+  title="About Us | Bondhu Travel"
+  description="Discover the story, vision and passion behind Bondhu Travel. Two decades of crafting bespoke luxury journeys and unforgettable experiences."
+  theme="light"
+>
+  <Header 
+    phone={displayPhone}
+    enquireText="ENQUIRE NOW"
+    enquireLink="/make-an-enquiry/"
+  />
+
+  <main class="about-page-main">
+    <!-- 1. CINEMA HERO BANNER (Supports Background Video or High-Res Cover Image) -->
+    <section class="about-cinema-hero" id="about-hero">
+      <div class="hero-media-wrapper">
+        {heroMediaType === 'image' ? (
+          <div 
+            class="hero-img-bg" 
+            style={`background-image: url('${heroImg}')`}
+          ></div>
+        ) : heroVideo ? (
+          <video 
+            class="hero-video-bg" 
+            autoplay 
+            loop 
+            muted 
+            playsinline 
+            poster={heroImg}
+          >
+            <source src={heroVideo} type="video/mp4" />
+          </video>
+        ) : (
+          <div 
+            class="hero-img-bg" 
+            style={`background-image: url('${heroImg}')`}
+          ></div>
+        )}
+        <div class="hero-cinematic-overlay"></div>
+      </div>
+
+      <div class="hero-caption-container">
+        <h1 class="hero-main-title">{heroTitle}</h1>
+        {heroSubtitle && (
+          <p class="hero-subtitle">{heroSubtitle}</p>
+        )}
+      </div>
+
+      <div class="hero-scroll-indicator" aria-hidden="true">
+        <span class="scroll-mouse-icon"></span>
+      </div>
+    </section>
+
+    <!-- 2. EDITORIAL STORIES (Exact Black Tomato Split-Screen Layout matching User Screenshot 2) -->
+    <section class="editorial-stories-container">
+      {stories.map((story: any, idx: number) => {
+        const isReverse = idx % 2 === 1;
+        return (
+          <div class={`editorial-story-row ${isReverse ? 'is-reverse' : ''}`}>
+            <!-- Text Column -->
+            <div class="editorial-text-col">
+              <div class="editorial-text-wrap">
+                <h2 class="editorial-title">{story.title}</h2>
+                <div class="editorial-desc">
+                  {story.desc.split('\n').map((paragraph: string) => (
+                    paragraph.trim() ? <p>{paragraph.trim()}</p> : null
+                  ))}
+                </div>
+                {story.btnText && (
+                  <div class="editorial-action-wrap">
+                    <a href={story.btnLink || '/make-an-enquiry/'} class="btn-editorial-action">
+                      <span>{story.btnText}</span>
+                    </a>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <!-- Media Column -->
+            <div class="editorial-media-col">
+              <div class="editorial-media-frame">
+                <img 
+                  src={story.img || '/2024/05/Tom-Marchant-Values-Film-scaled-1.jpg'} 
+                  alt={story.title.replace(/\n/g, ' ')} 
+                  class="editorial-photo"
+                  loading="lazy"
+                />
+              </div>
+            </div>
+          </div>
+        );
+      })}
+    </section>
+
+    <!-- 3. BOTTOM LUXURY CTA BANNER -->
+    <CTABannerOriginal 
+      title="SO, READY TO START?"
+      ctaText="GET IN TOUCH"
+      ctaLink="/make-an-enquiry/"
+    />
+  </main>
+
+  <Footer 
+    phone={displayPhone}
+    address={displayAddress}
+  />
+</BaseLayout>
+
+<style>
+  /* ------------------------------------------------------------- */
+  /* Main Container & Base Typography                              */
+  /* ------------------------------------------------------------- */
+  .about-page-main {
+    background: #FFFFFF;
+    color: #111111;
+    font-family: 'Josefin Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ------------------------------------------------------------- */
+  /* 1. Cinema Hero Banner                                         */
+  /* ------------------------------------------------------------- */
+  .about-cinema-hero {
+    position: relative;
+    width: 100%;
+    height: 78vh;
+    min-height: 520px;
+    max-height: 820px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    overflow: hidden;
+    background: #000000;
+  }
+
+  .hero-media-wrapper {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+  }
+
+  .hero-video-bg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .hero-img-bg {
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center center;
+    display: block;
+  }
+
+  .hero-cinematic-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      180deg, 
+      rgba(0, 0, 0, 0.45) 0%, 
+      rgba(0, 0, 0, 0.55) 50%, 
+      rgba(0, 0, 0, 0.85) 100%
+    );
+    z-index: 2;
+  }
+
+  .hero-caption-container {
+    position: relative;
+    z-index: 10;
+    max-width: 900px;
+    padding: 0 1.5rem;
+    margin-top: 3rem;
+  }
+
+  .hero-mini-tag {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 3px;
+    color: #E29547;
+    background: rgba(226, 149, 71, 0.15);
+    border: 1px solid rgba(226, 149, 71, 0.35);
+    padding: 0.35rem 1.15rem;
+    border-radius: 9999px;
+    margin-bottom: 1.4rem;
+    text-transform: uppercase;
+  }
+
+  .hero-main-title {
+    font-family: 'AlternateGotNo1D', 'Alternate Gothic', sans-serif;
+    font-size: clamp(2.8rem, 6.5vw, 5.2rem);
+    letter-spacing: 3px;
+    line-height: 1.05;
+    color: #FFFFFF;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+    text-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+  }
+
+  .hero-subtitle {
+    font-size: clamp(1rem, 1.8vw, 1.25rem);
+    color: #E2E8F0;
+    line-height: 1.6;
+    letter-spacing: 0.5px;
+    max-width: 700px;
+    margin: 0 auto;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+  }
+
+  .hero-scroll-indicator {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+    opacity: 0.8;
+  }
+
+  .scroll-mouse-icon {
+    display: block;
+    width: 22px;
+    height: 36px;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    border-radius: 12px;
+    position: relative;
+  }
+
+  .scroll-mouse-icon::after {
+    content: '';
+    position: absolute;
+    top: 6px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 3px;
+    height: 6px;
+    background: #FFFFFF;
+    border-radius: 2px;
+    animation: scrollAnim 1.6s infinite ease;
+  }
+
+  @keyframes scrollAnim {
+    0% { transform: translate(-50%, 0); opacity: 1; }
+    100% { transform: translate(-50%, 12px); opacity: 0; }
+  }
+
+  /* ------------------------------------------------------------- */
+  /* 2. Editorial Stories (Exact Match to Screenshot 2)            */
+  /* ------------------------------------------------------------- */
+  .editorial-stories-container {
+    width: 100%;
+    background: #FFFFFF;
+    padding: 2rem 0;
+  }
+
+  .editorial-story-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-height: 560px;
+    align-items: stretch;
+    border-bottom: 1px solid #ECECEC;
+    background: #FFFFFF;
+    overflow: hidden;
+  }
+
+  .editorial-story-row.is-reverse {
+    direction: rtl;
+  }
+
+  .editorial-story-row.is-reverse .editorial-text-wrap {
+    direction: ltr;
+  }
+
+  @media (max-width: 960px) {
+    .editorial-story-row {
+      grid-template-columns: 1fr;
+      min-height: auto;
+    }
+
+    .editorial-story-row.is-reverse {
+      direction: ltr;
+    }
+  }
+
+  /* Text Column */
+  .editorial-text-col {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5rem 4.5rem;
+    background: #FFFFFF;
+  }
+
+  @media (max-width: 1200px) {
+    .editorial-text-col {
+      padding: 4rem 2.5rem;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .editorial-text-col {
+      padding: 3rem 1.5rem;
+    }
+  }
+
+  .editorial-text-wrap {
+    max-width: 520px;
+    width: 100%;
+  }
+
+  .editorial-title {
+    font-family: 'AlternateGotNo1D', 'Alternate Gothic', sans-serif;
+    font-size: clamp(2.4rem, 4.2vw, 3.6rem);
+    line-height: 1.05;
+    letter-spacing: 1.5px;
+    color: #111111;
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+    white-space: pre-line;
+  }
+
+  .editorial-desc {
+    font-size: 1.02rem;
+    line-height: 1.8;
+    color: #4A5568;
+    margin-bottom: 2rem;
+  }
+
+  .editorial-desc p {
+    margin-bottom: 1rem;
+  }
+
+  .editorial-action-wrap {
+    margin-top: 1.5rem;
+  }
+
+  .btn-editorial-action {
+    display: inline-block;
+    background: #000000;
+    color: #FFFFFF;
+    font-family: 'Josefin Sans', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 0.85rem 1.85rem;
+    border-radius: 2px;
+    transition: background-color 0.25s ease, transform 0.25s ease;
+    text-decoration: none;
+  }
+
+  .btn-editorial-action:hover {
+    background: #2D3748;
+    transform: translateY(-2px);
+  }
+
+  /* Media Column */
+  .editorial-media-col {
+    position: relative;
+    background: #F7FAFC;
+    overflow: hidden;
+  }
+
+  .editorial-media-frame {
+    width: 100%;
+    height: 100%;
+    min-height: 420px;
+  }
+
+  .editorial-photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .editorial-media-col:hover .editorial-photo {
+    transform: scale(1.03);
+  }
+</style>

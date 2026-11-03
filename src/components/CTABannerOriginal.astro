@@ -1,0 +1,110 @@
+---
+// Authentic Black Tomato Full-Width CTA Banner
+// 100% Exact match to user screenshot (media_1793288236873_a5b3f482.png)
+interface Props {
+  title?: string;
+  ctaText?: string;
+  ctaLink?: string;
+  bgImage?: string;
+}
+
+const {
+  title = "SO, READY TO START?",
+  ctaText = "GET IN TOUCH",
+  ctaLink = "/make-an-enquiry/",
+  bgImage = "/2022/08/BG-1-1.jpg"
+} = Astro.props;
+---
+
+<section 
+  class="section-cta-banner" 
+  style={`background-image: url(${bgImage});`}
+  id="ready-to-start"
+  aria-label="Call to action banner"
+>
+  <div class="cta-banner-container">
+    <h2 class="cta-banner-heading">{title}</h2>
+    <div class="cta-banner-action">
+      <a href={ctaLink} class="btn-cta-black">
+        {ctaText}
+      </a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .section-cta-banner {
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    padding: 6.5rem 1.5rem;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .cta-banner-container {
+    max-width: 900px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  /* Title: tall, condensed uppercase matching Black Tomato signature typography */
+  .cta-banner-heading {
+    font-family: 'AlternateGotNo1D', 'Alternate Gothic', 'League Gothic', sans-serif;
+    font-size: 3.75rem;
+    font-weight: 400;
+    color: #FFFFFF;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    line-height: 1.1;
+    margin: 0 0 2.25rem;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  }
+
+  .cta-banner-action {
+    display: flex;
+    justify-content: center;
+  }
+
+  /* Exact Black Tomato Black Button */
+  .btn-cta-black {
+    display: inline-block;
+    padding: 0.95rem 2.8rem;
+    background-color: #000000;
+    color: #FFFFFF;
+    font-family: 'Brandon Grotesque', 'Cabin', 'Josefin Sans', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    text-decoration: none;
+    border-radius: 0;
+    border: 1px solid #000000;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+    transition: all 0.25s ease;
+  }
+
+  .btn-cta-black:hover {
+    background-color: #1E293B;
+    border-color: #1E293B;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+  }
+
+  @media (max-width: 768px) {
+    .section-cta-banner {
+      padding: 5rem 1.25rem;
+    }
+    .cta-banner-heading {
+      font-size: 2.15rem;
+      margin-bottom: 1.75rem;
+    }
+    .btn-cta-black {
+      padding: 0.85rem 2.2rem;
+      font-size: 0.78rem;
+    }
+  }
+</style>

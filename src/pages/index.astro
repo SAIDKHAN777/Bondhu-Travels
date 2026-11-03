@@ -1,0 +1,245 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.astro';
+import HeroSlider, { type Slide } from '../components/HeroSlider.astro';
+import LetterSection from '../components/LetterSection.astro';
+import TourSessions from '../components/TourSessions.astro';
+import ExploreOurTrips from '../components/ExploreOurTrips.astro';
+import CraftYourTripSchedule from '../components/CraftYourTripSchedule.astro';
+import EditorialStories from '../components/EditorialStories.astro';
+import WhyUsOriginal from '../components/WhyUsOriginal.astro';
+import CTABannerOriginal from '../components/CTABannerOriginal.astro';
+import Footer from '../components/Footer.astro';
+import prisma from '../lib/prisma.js';
+
+// Server-Side Rendering (SSR) Direct PostgreSQL Fetch
+let heroSlides: Slide[] | undefined = undefined;
+let introConfig: any = null;
+let headerConfig: any = null;
+let ctaConfig: any = null;
+let statsConfig: any = null;
+let testimonialsConfig: any = null;
+let whyUsConfig: any = null;
+let storiesConfig: any = null;
+let tourSessionsConfig: any = null;
+let exploreTripsConfig: any = null;
+let footerConfig: any = null;
+let houseboatConfig: any = null;
+let spotlightConfig: any = null;
+let craftScheduleConfig: any = null;
+
+try {
+  // 1. Fetch live Hero Slides from PostgreSQL
+  const heroSetting = await prisma.systemSetting.findUnique({ where: { key: 'hero_slides' } });
+  if (heroSetting && Array.isArray(heroSetting.value) && heroSetting.value.length > 0) {
+    heroSlides = heroSetting.value as Slide[];
+  }
+
+  // 2. Fetch Introduction / Letter text
+  const introSetting = await prisma.systemSetting.findUnique({ where: { key: 'section_intro' } });
+  if (introSetting && introSetting.value) {
+    introConfig = introSetting.value;
+  }
+
+  // 3. Fetch Header settings
+  const hdrSetting = await prisma.systemSetting.findUnique({ where: { key: 'section_header' } });
+  if (hdrSetting && hdrSetting.value) {
+    headerConfig = hdrSetting.value;
+  }
+
+  // 4. Fetch CTA settings
+  const ctaSetting = await prisma.systemSetting.findUnique({ where: { key: 'section_cta' } });
+  if (ctaSetting && ctaSetting.value) {
+    ctaConfig = ctaSetting.value;
+  }
+
+  // 5. Fetch Stats settings
+  const statsSetting = await prisma.systemSetting.findUnique({ where: { key: 'section_stats' } });
+  if (statsSetting && statsSetting.value) {
+    statsConfig = statsSetting.value;
+  }
+
+  // 6. Fetch Customer Comments / Testimonials settings
+  const testSetting = await prisma.systemSetting.findUnique({ where: { key: 'section_testimonials' } });
+  if (testSetting && testSetting.value) {
+    testimonialsConfig = testSetting.value;
+  }
+
+  // 7. Fetch Why Us settings
+  const whyUsSetting = await prisma.systemSetting.findUnique({ where: { key: 'section_why_us' } });
+  if (whyUsSetting && whyUsSetting.value) {
+    whyUsConfig = whyUsSetting.value;
+  }
+
+  // 8. Fetch Editorial Stories (What we do, Pursuit of feeling, Luxury travel)
+  const storiesSetting = await prisma.systemSetting.findUnique({ where: { key: 'section_stories' } });
+  if (storiesSetting && storiesSetting.value) {
+    storiesConfig = storiesSetting.value;
+  }
+
+  // 9. Fetch Tour Sessions ("START YOUR JOURNEY" - By Traveller, Most Popular, By Month, Spotlight)
+  const tourSetting = await prisma.systemSetting.findUnique({ where: { key: 'section_tour_sessions' } });
+  if (tourSetting && tourSetting.value) {
+    tourSessionsConfig = tourSetting.value;
+  }
+
+  // 10. Fetch Explore Our Trips Packages
+  const tripsSetting = await prisma.systemSetting.findUnique({ where: { key: 'section_explore_trips' } });
+  if (tripsSetting && tripsSetting.value) {
+    exploreTripsConfig = tripsSetting.value;
+  }
+
+  // 11. Fetch Footer Location & Legal Settings
+  const footerSetting = await prisma.systemSetting.findUnique({ where: { key: 'section_footer' } });
+  if (footerSetting && footerSetting.value) {
+    footerConfig = footerSetting.value;
+  }
+
+  // 12. Fetch Spotlight & Houseboat/Resort Settings
+  const spotlightSetting = await prisma.systemSetting.findUnique({ where: { key: 'section_spotlight' } });
+  if (spotlightSetting && spotlightSetting.value) {
+    spotlightConfig = spotlightSetting.value;
+  }
+  const houseboatSetting = await prisma.systemSetting.findUnique({ where: { key: 'section_houseboat' } });
+  if (houseboatSetting && houseboatSetting.value) {
+    houseboatConfig = houseboatSetting.value;
+  }
+
+  // 13. Fetch Craft Your Trip & Schedule Settings
+  const craftSetting = await prisma.systemSetting.findUnique({ where: { key: 'section_craft_schedule' } });
+  if (craftSetting && craftSetting.value) {
+    craftScheduleConfig = craftSetting.value;
+  }
+} catch (err: any) {
+  console.warn('[Astro SSR] Database fallback active:', err.message);
+}
+
+// 12. Dynamic Auto-Sync: Explore Our Trips is the Single Source of Truth!
+// Whenever an admin adds or edits trips in Explore Our Trips,
+// 'Most Popular' and Footer 'POPULAR DESTINATIONS' automatically reflect ALL of them!
+const defaultPopularFallback = [
+  { title: "Sajek Valley", img: "/2022/09/Utah-adventure-2-1-scaled.jpg", link: "/destinations/sajek/" },
+  { title: "Cox's Bazar", img: "/2024/04/Website-Homepage-V9.00_00_00_00.Still002.jpg", link: "/destinations/coxs-bazar/" },
+  { title: "Kuakata", img: "/2026/01/Couple-sitting-by-coast.jpg", link: "/destinations/kuakata/" },
+  { title: "Sundarbans", img: "/2026/02/Lady-in-Forest-1-1.jpg", link: "/destinations/sundarbans/" },
+  { title: "Sreemangal", img: "/2026/01/Group-canoeing-1.jpg", link: "/destinations/sreemangal/" },
+  { title: "Tanzania", img: "/2022/08/zebra-chobe-national-park-botswana-1.jpg", link: "/destinations/tanzania/" },
+  { title: "Italy", img: "/2022/09/Highlights-of-Italy-scaled.jpg", link: "/destinations/italy/" },
+  { title: "France", img: "/2026/04/Lost-Generation-header-mob.jpg", link: "/destinations/france/" }
+];
+
+let syncedPopularCards: any[] = [];
+
+if (exploreTripsConfig?.trips && Array.isArray(exploreTripsConfig.trips) && exploreTripsConfig.trips.length > 0) {
+  syncedPopularCards = exploreTripsConfig.trips.map((t: any) => ({
+    title: t.title,
+    img: t.img || t.heroImage || t.image || '/2022/09/Utah-adventure-2-1-scaled.jpg',
+    link: t.link || (t.slug ? `/destinations/${t.slug}/` : `/destinations/${(t.title || '').toLowerCase().replace(/[^a-z0-9]+/g, '-')}/`)
+  }));
+} else if (tourSessionsConfig?.popularCards && tourSessionsConfig.popularCards.length > 0) {
+  syncedPopularCards = tourSessionsConfig.popularCards;
+} else {
+  syncedPopularCards = defaultPopularFallback;
+}
+
+// 13. Dynamic Auto-Sync for Footer: 'POPULAR DESTINATIONS'
+// Automatically extracts and connects each destination to its full bespoke trip page
+const footerPopularDestinations = syncedPopularCards.map((card: any) => ({
+  text: card.title,
+  url: card.link || `/destinations/${(card.title || '').toLowerCase().replace(/[^a-z0-9]+/g, '-')}/`
+}));
+---
+
+<BaseLayout>
+  <Header 
+    phone={headerConfig?.phone}
+    enquireText={headerConfig?.enquireText || "ENQUIRE NOW"}
+    enquireLink={headerConfig?.enquireLink || "/make-an-enquiry/"}
+  />
+  
+  <main id="main-content">
+    <!-- 1. Hero Video Sequential Carousel -->
+    <HeroSlider slides={heroSlides} />
+
+    <!-- 2. The Letter Section (Every journey starts with a feeling) -->
+    <LetterSection 
+      title={introConfig?.title}
+      body={introConfig?.body}
+      paragraphs={introConfig?.paragraphs}
+    />
+
+    <!-- 3. Tour Sessions (Start your Journey: By Traveller, Most Popular, By Month, In The Spotlight) -->
+    <TourSessions 
+      travellerCards={tourSessionsConfig?.travellerCards}
+      popularCards={syncedPopularCards}
+      monthCards={tourSessionsConfig?.monthCards}
+      spotlightConfig={tourSessionsConfig?.spotlight || spotlightConfig || tourSessionsConfig?.houseboat || houseboatConfig}
+      whatsappPhone={footerConfig?.socialLinks?.whatsapp || footerConfig?.phone}
+    />
+
+    <!-- 4. EXPLORE OUR TRIPS (Exact replica from user screenshot with horizontal carousel) -->
+    <ExploreOurTrips 
+      trips={exploreTripsConfig?.trips}
+    />
+
+    <!-- 4.5. CRAFT YOUR TRIP & SCHEDULE (Warm Terracotta Transition Section) -->
+    <CraftYourTripSchedule 
+      title={craftScheduleConfig?.title}
+      subtitle={craftScheduleConfig?.subtitle}
+      cards={craftScheduleConfig?.cards}
+    />
+
+    <!-- 5. Editorial Stories (What we do, Pursuit of Feeling, Luxury Travel Guide) -->
+    <EditorialStories stories={storiesConfig?.stories} />
+
+    <!-- 6. WHY BLACK TOMATO? (Numbers/Stats + Trustpilot Badge + Client Comments Slider) -->
+    <WhyUsOriginal 
+      title={whyUsConfig?.title || "WHY BLACK TOMATO?"}
+      subtitle={whyUsConfig?.subtitle || statsConfig?.subtitle || "Two decades of delivering the world's most inspiring, high-touch luxury travel experiences."}
+      stats={statsConfig?.stats}
+      reviews={testimonialsConfig?.reviews}
+      trustpilotScore={testimonialsConfig?.trustpilotScore}
+    />
+
+    <!-- 7. Ready to start? CTA Banner (Exact match to screenshot with black button) -->
+    <CTABannerOriginal 
+      title={ctaConfig?.title}
+      ctaText={ctaConfig?.buttonText || ctaConfig?.ctaText}
+      ctaLink={ctaConfig?.buttonLink || ctaConfig?.ctaLink}
+      bgImage={ctaConfig?.bgImage}
+    />
+  </main>
+
+  <!-- 8. Original Luxury Multi-Column Footer with Newsletter & Accreditation Logos -->
+  <Footer 
+    newsletter={footerConfig?.newsletter}
+    partnerLogos={footerConfig?.partnerLogos}
+    socialLinks={footerConfig?.socialLinks}
+    columns={footerConfig?.columns}
+    popularDestinations={footerPopularDestinations}
+    address={footerConfig?.address}
+    phone={footerConfig?.phone}
+    businessLicense={footerConfig?.businessLicense}
+    internationalLicense={footerConfig?.internationalLicense}
+  />
+
+  <script is:inline>
+    // Handle anchor navigation directly to sections (e.g. #craft-your-trip)
+    function scrollToTargetHash() {
+      if (window.location.hash) {
+        const targetId = window.location.hash.substring(1);
+        const targetEl = document.getElementById(targetId);
+        if (targetEl) {
+          setTimeout(() => {
+            targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }, 150);
+        }
+      }
+    }
+    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+      scrollToTargetHash();
+    } else {
+      window.addEventListener('DOMContentLoaded', scrollToTargetHash);
+    }
+  </script>
+</BaseLayout>

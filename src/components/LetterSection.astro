@@ -1,0 +1,46 @@
+---
+interface Props {
+  title?: string;
+  paragraphs?: string[];
+  body?: string;
+  ctaText?: string;
+  ctaLink?: string;
+}
+
+const defaultParagraphs = [
+  "The world is vast, full of wonders. But information engulfs us. See this, do that, don’t miss this. It seems the more choice there is, the more overwhelmed we feel. What’s more, you’re never asked <em>how you want to feel</em>.",
+  "That’s not us. Black Tomato is a tailor-made luxury travel company that designs fully personalised itineraries – not templates, not off-the-shelf tours. Whether you’re a couple seeking adventure, a multi-generational family exploring together, or a solo traveller chasing something extraordinary, we craft every detail around you.",
+  "For over 20 years, we’ve been recognised as one of the world’s leading luxury travel planners – featured in Modern Luxury’s ‘Best of Luxury Travel’ Awards – and trusted to deliver tailor-made journeys across 100 destinations.",
+  "So let’s begin. Let’s do something remarkable."
+];
+
+const {
+  title = "Every journey starts with a feeling",
+  paragraphs: propParagraphs,
+  body: propBody
+} = Astro.props;
+
+let displayParagraphs = defaultParagraphs;
+if (propBody && propBody.trim()) {
+  displayParagraphs = propBody.split(/\n\s*\n/).map(s => s.trim()).filter(Boolean);
+} else if (propParagraphs && propParagraphs.length > 0) {
+  displayParagraphs = propParagraphs;
+}
+---
+
+<section 
+  class="section section--content text-base background-custom py-xl" 
+  style="background-attachment: scroll; background-image: url(/2022/08/Text-Centered-Home.jpg); background-size: cover; background-position: center;"
+  id="letter-section"
+>
+  <div class="container">
+    <div class="row">
+      <div class="col col--lg-8 col--md-8 col--sm-12 col--xs-12 col--lg-offset-2 col--md-offset-2">
+        <h2 style="text-align: center;"><span class="h5">{title}</span></h2>
+        {displayParagraphs.map(p => (
+          <p style="text-align: center;" set:html={p} />
+        ))}
+      </div>
+    </div>
+  </div>
+</section>

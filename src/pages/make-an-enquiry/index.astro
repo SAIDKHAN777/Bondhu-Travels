@@ -1,0 +1,899 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import prisma from '../../lib/prisma.js';
+
+let headerConfig: any = null;
+let footerConfig: any = null;
+
+try {
+  const headerSetting = await prisma.systemSetting.findUnique({ where: { key: 'section_header' } });
+  if (headerSetting && headerSetting.value) {
+    headerConfig = headerSetting.value;
+  }
+  const footerSetting = await prisma.systemSetting.findUnique({ where: { key: 'section_footer' } });
+  if (footerSetting && footerSetting.value) {
+    footerConfig = footerSetting.value;
+  }
+} catch (e: any) {
+  console.warn('[Enquiry Page] DB fallback active:', e.message);
+}
+
+const displayPhone = footerConfig?.phone || headerConfig?.phone || "+44 207 426 9888";
+const displayEmail = footerConfig?.email || "info@bondhutravel.com";
+const displayAddress = footerConfig?.address || "Albert House, 256-260 Old Street, London EC1V 9DD";
+
+// Dynamic Office Hours & Schedule from Admin Studio
+const officeMonFri = footerConfig?.officeMonFri || "9:00am - 11:00pm";
+const officeSat = footerConfig?.officeSat || "Closed";
+const officeSun = footerConfig?.officeSun || "Closed";
+const officeFootnote = footerConfig?.officeFootnote || "(excluding national holidays)";
+---
+
+<BaseLayout 
+  title="Get in Touch & Enquire Now | Bondhu Travel"
+  description="Speak directly to our luxury travel planners. Tailor-made journeys, expert itineraries and bespoke holidays worldwide."
+  theme="light"
+>
+  <Header 
+    phone={displayPhone}
+    enquireText="ENQUIRE NOW"
+    enquireLink="/make-an-enquiry/"
+  />
+
+  <main class="enquiry-page-main">
+    <!-- 1. Hero Title Banner (Clean, Sharp, No Badge, No Bengali Subtitle) -->
+    <section class="enquiry-hero-section">
+      <div class="enquiry-hero-overlay"></div>
+      <div class="enquiry-hero-container">
+        <h1 class="enquiry-hero-title">GET IN TOUCH & ENQUIRE NOW</h1>
+      </div>
+    </section>
+
+    <!-- 2. Main Form & Sidebar Section (Exact Black Tomato 100% Match to Screenshot 1) -->
+    <section class="enquiry-content-section">
+      <!-- Background Decorative Watermark Wave (Right side, matching Black Tomato) -->
+      <div class="watermark-bg-lines" aria-hidden="true">
+        <svg viewBox="0 0 450 700" fill="none" xmlns="http://www.w3.org/2000/svg" class="watermark-svg">
+          <path d="M50 0 C 150 120, 220 280, 180 420 C 150 520, 240 620, 380 700" stroke="#EDE8E1" stroke-width="2.5" fill="none"/>
+          <path d="M90 0 C 190 130, 260 290, 220 430 C 190 530, 280 630, 420 700" stroke="#EDE8E1" stroke-width="2" fill="none"/>
+          <path d="M130 0 C 230 140, 300 300, 260 440 C 230 540, 320 640, 460 700" stroke="#EDE8E1" stroke-width="1.5" fill="none"/>
+          <path d="M170 0 C 270 150, 340 310, 300 450 C 270 550, 360 650, 500 700" stroke="#EDE8E1" stroke-width="1" fill="none"/>
+        </svg>
+      </div>
+
+      <div class="enquiry-container">
+        <div class="enquiry-layout-grid">
+          
+          <!-- LEFT COLUMN: Authentic Black Tomato Multi-Part Enquiry Form -->
+          <div class="enquiry-form-column">
+            <form class="bt-clean-form" id="enquiry-contact-form" autocomplete="on">
+              
+              <!-- PART 1: YOUR TRIP -->
+              <div class="form-section-block">
+                <h2 class="form-block-heading">YOUR TRIP</h2>
+
+                <!-- Destination Select -->
+                <div class="form-field-item">
+                  <label for="trip-destination" class="bt-field-label">Where would you like to go?*</label>
+                  <div class="select-wrapper">
+                    <select id="trip-destination" name="destination" required class="bt-select-input">
+                      <option value="" disabled selected>Select as many options you want</option>
+                      <option value="Tanguar Haor Luxury Houseboat">⛵ টাঙ্গুয়ার হাওড় নিজস্ব লাক্সারি হাউসবোট (Sunamganj)</option>
+                      <option value="Saint Martin Beach Resort">🌴 সেন্ট মার্টিন পার্সোনাল বিচ রিসোর্ট (Coral Island)</option>
+                      <option value="Sajek Valley Cloud Escape">☁️ সাজেক ভ্যালি ক্লাউড এসকেপ</option>
+                      <option value="Bandarban Hilltracts">⛰️ বান্দরবান হিল ট্র্যাক্টস ও নীলগিরি</option>
+                      <option value="Cox's Bazar Private Beach">🏖️ কক্সবাজার এক্সক্লুসিভ বিচ ট্যুর</option>
+                      <option value="Sylhet & Sreemangal">🍃 শ্রীমঙ্গল চা বাগান ও রাতারগুল</option>
+                      <option value="Italy Highlights">🏛️ Highlights of Italy (Rome, Florence, Amalfi)</option>
+                      <option value="Japan Cherry Blossom">🌸 Japan Cultural Odyssey</option>
+                      <option value="Iceland Aurora">❄️ Iceland Northern Lights & Glaciers</option>
+                      <option value="Other Bespoke Destination">✨ Other Custom Bespoke Journey</option>
+                    </select>
+                    <span class="select-chevron">▾</span>
+                  </div>
+                </div>
+
+                <!-- When & How Long -->
+                <div class="form-grid-3">
+                  <div class="form-field-item">
+                    <label class="bt-field-label">When would you like to go?</label>
+                    <div class="select-wrapper">
+                      <select id="trip-month" name="month" class="bt-select-input">
+                        <option value="" disabled selected>Select a month</option>
+                        <option value="January">January</option>
+                        <option value="February">February</option>
+                        <option value="March">March</option>
+                        <option value="April">April</option>
+                        <option value="May">May</option>
+                        <option value="June">June</option>
+                        <option value="July">July</option>
+                        <option value="August">August</option>
+                        <option value="September">September</option>
+                        <option value="October">October</option>
+                        <option value="November">November</option>
+                        <option value="December">December</option>
+                      </select>
+                      <span class="select-chevron">▾</span>
+                    </div>
+                  </div>
+
+                  <div class="form-field-item">
+                    <label class="bt-field-label">&nbsp;</label>
+                    <div class="select-wrapper">
+                      <select id="trip-year" name="year" class="bt-select-input">
+                        <option value="" disabled selected>Select a year</option>
+                        <option value="2026">2026</option>
+                        <option value="2027">2027</option>
+                        <option value="2028">2028</option>
+                      </select>
+                      <span class="select-chevron">▾</span>
+                    </div>
+                  </div>
+
+                  <div class="form-field-item">
+                    <label for="trip-duration" class="bt-field-label">How long for?*</label>
+                    <input 
+                      type="text" 
+                      id="trip-duration" 
+                      name="duration" 
+                      placeholder="Duration of trip (e.g. 4 Days)" 
+                      required 
+                      class="bt-text-input"
+                    />
+                  </div>
+                </div>
+
+                <!-- Number of People -->
+                <div class="form-field-item">
+                  <label for="trip-people" class="bt-field-label">How many people are travelling?*</label>
+                  <div class="select-wrapper">
+                    <select id="trip-people" name="people" required class="bt-select-input">
+                      <option value="" disabled selected>Select a number</option>
+                      <option value="1">1 Person (Solo Explorer)</option>
+                      <option value="2">2 People (Couple / Pair)</option>
+                      <option value="3-4">3 to 4 People (Family / Small Group)</option>
+                      <option value="5-8">5 to 8 People (Group Travel)</option>
+                      <option value="9+">9+ People (Large Private Group / Corporate)</option>
+                    </select>
+                    <span class="select-chevron">▾</span>
+                  </div>
+                </div>
+
+                <!-- Budget per person -->
+                <div class="form-field-item">
+                  <label for="trip-budget" class="bt-field-label">How much would you like to spend per person?*</label>
+                  <div class="select-wrapper">
+                    <select id="trip-budget" name="budget" required class="bt-select-input">
+                      <option value="" disabled selected>Select a range</option>
+                      <option value="৳ 8,000 - ৳ 15,000">৳ ৮,০০০ - ৳ ১৫,০০০ (Standard Luxury)</option>
+                      <option value="৳ 15,000 - ৳ 35,000">৳ ১৫,০০০ - ৳ ৩৫,০০০ (Premium Signature)</option>
+                      <option value="৳ 35,000 - ৳ 65,000">৳ ৩৫,০০০ - ৳ ৬৫,০০০ (Ultra Exclusive / Private Yacht)</option>
+                      <option value="৳ 65,000+">৳ ৬৫,০০০+ (Full Bespoke / International Tour)</option>
+                    </select>
+                    <span class="select-chevron">▾</span>
+                  </div>
+                </div>
+
+                <!-- Comments & Requests -->
+                <div class="form-field-item">
+                  <label for="trip-comments" class="bt-field-label">Any other comments or requests?</label>
+                  <textarea 
+                    id="trip-comments" 
+                    name="comments" 
+                    rows="4" 
+                    placeholder="E.g. special occasion, honeymoon surprise, dietary requirements, must-dos or don'ts..." 
+                    class="bt-textarea-input"
+                  ></textarea>
+                </div>
+              </div>
+
+              <!-- PART 2: YOUR DETAILS -->
+              <div class="form-section-block">
+                <h2 class="form-block-heading">YOUR DETAILS</h2>
+
+                <!-- Name Row -->
+                <div class="form-grid-2">
+                  <div class="form-field-item">
+                    <label for="first-name" class="bt-field-label">Your Name*</label>
+                    <input 
+                      type="text" 
+                      id="first-name" 
+                      name="firstName" 
+                      placeholder="First Name*" 
+                      required 
+                      class="bt-text-input"
+                    />
+                  </div>
+                  <div class="form-field-item">
+                    <label for="last-name" class="bt-field-label">&nbsp;</label>
+                    <input 
+                      type="text" 
+                      id="last-name" 
+                      name="lastName" 
+                      placeholder="Last Name*" 
+                      required 
+                      class="bt-text-input"
+                    />
+                  </div>
+                </div>
+
+                <!-- Email & Confirm Email Row -->
+                <div class="form-grid-2">
+                  <div class="form-field-item">
+                    <label for="user-email" class="bt-field-label">Email Address*</label>
+                    <input 
+                      type="email" 
+                      id="user-email" 
+                      name="email" 
+                      placeholder="example@email.com" 
+                      required 
+                      class="bt-text-input"
+                    />
+                  </div>
+                  <div class="form-field-item">
+                    <label for="confirm-email" class="bt-field-label">Confirm Email Address*</label>
+                    <input 
+                      type="email" 
+                      id="confirm-email" 
+                      name="confirmEmail" 
+                      placeholder="example@email.com" 
+                      required 
+                      class="bt-text-input"
+                    />
+                  </div>
+                </div>
+
+                <!-- Phone & Referral Row -->
+                <div class="form-grid-2">
+                  <div class="form-field-item">
+                    <label for="user-phone" class="bt-field-label">Telephone*</label>
+                    <div class="phone-input-group">
+                      <div class="country-prefix-box">
+                        <span class="flag-icon">🇬🇧</span>
+                        <span class="prefix-code">+44</span>
+                      </div>
+                      <input 
+                        type="tel" 
+                        id="user-phone" 
+                        name="phone" 
+                        placeholder="Phone number" 
+                        required 
+                        class="bt-text-input phone-number-input"
+                      />
+                    </div>
+                  </div>
+
+                  <div class="form-field-item">
+                    <label for="referral-source" class="bt-field-label">How did you hear about us?</label>
+                    <div class="select-wrapper">
+                      <select id="referral-source" name="referral" class="bt-select-input">
+                        <option value="" disabled selected>Select</option>
+                        <option value="Google Search">Google Search</option>
+                        <option value="Social Media">Facebook / Instagram</option>
+                        <option value="Word of Mouth">Friend or Family Recommendation</option>
+                        <option value="Press / Article">Press / Magazine Article</option>
+                        <option value="Repeat Client">Repeat Client</option>
+                      </select>
+                      <span class="select-chevron">▾</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Newsletter Toggle Switch (Matching Screenshot 1) -->
+                <div class="newsletter-toggle-row">
+                  <label class="switch-toggle" for="newsletter-checkbox">
+                    <input type="checkbox" id="newsletter-checkbox" name="newsletter" checked />
+                    <span class="switch-slider"></span>
+                  </label>
+                  <span class="switch-label-text">
+                    Sign up to our newsletter for weekly inspiration curated by our Travel Experts
+                  </span>
+                </div>
+              </div>
+
+              <!-- Submit Button (Pink, Matching Screenshot 1) -->
+              <div class="form-submit-row">
+                <button type="submit" class="btn-submit-pink" id="btn-submit-enquiry">
+                  <span>SUBMIT ENQUIRY</span>
+                </button>
+              </div>
+
+              <!-- Success Alert Box -->
+              <div class="enquiry-success-alert" id="enquiry-success-alert" style="display: none;">
+                <div class="alert-icon-circle">✓</div>
+                <div class="alert-text-wrap">
+                  <h4>ENQUIRY SUBMITTED SUCCESSFULLY</h4>
+                  <p>Thank you! Your bespoke enquiry has been delivered to our private travel planners. We will contact you within 2 to 4 hours with tailor-made options.</p>
+                </div>
+              </div>
+            </form>
+          </div>
+
+          <!-- RIGHT COLUMN: OFFICE HOURS CARD & DIRECT CONTACT (Screenshot 1) -->
+          <div class="enquiry-sidebar-column">
+            
+            <!-- Office Hours Card (Exact 100% Match to Screenshot 1) -->
+            <div class="office-hours-card">
+              <div class="clock-icon-wrap" aria-hidden="true">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+              </div>
+
+              <h3 class="office-hours-title">OFFICE HOURS</h3>
+
+              <div class="hours-schedule-list">
+                <div class="schedule-row">
+                  <span class="day-name">Monday:</span>
+                  <span class="day-time">{officeMonFri}</span>
+                </div>
+                <div class="schedule-row">
+                  <span class="day-name">Tuesday:</span>
+                  <span class="day-time">{officeMonFri}</span>
+                </div>
+                <div class="schedule-row">
+                  <span class="day-name">Wednesday:</span>
+                  <span class="day-time">{officeMonFri}</span>
+                </div>
+                <div class="schedule-row">
+                  <span class="day-name">Thursday:</span>
+                  <span class="day-time">{officeMonFri}</span>
+                </div>
+                <div class="schedule-row">
+                  <span class="day-name">Friday:</span>
+                  <span class="day-time">{officeMonFri}</span>
+                </div>
+                <div class={`schedule-row ${officeSat.toLowerCase().includes('close') ? 'is-closed' : ''}`}>
+                  <span class="day-name">Saturday:</span>
+                  <span class="day-time">{officeSat}</span>
+                </div>
+                <div class={`schedule-row ${officeSun.toLowerCase().includes('close') ? 'is-closed' : ''}`}>
+                  <span class="day-name">Sunday:</span>
+                  <span class="day-time">{officeSun}</span>
+                </div>
+              </div>
+
+              {officeFootnote && (
+                <p class="hours-footnote">{officeFootnote}</p>
+              )}
+
+              <!-- Direct Contact Channels Integrated Below Hours -->
+              <div class="sidebar-contact-divider"></div>
+              
+              <div class="sidebar-direct-info">
+                <div class="direct-info-item">
+                  <span class="direct-info-label">PHONE:</span>
+                  <a href={`tel:${displayPhone.replace(/\s+/g, '')}`} class="direct-info-link">
+                    {displayPhone}
+                  </a>
+                </div>
+                <div class="direct-info-item">
+                  <span class="direct-info-label">EMAIL:</span>
+                  <a href={`mailto:${displayEmail}`} class="direct-info-link">
+                    {displayEmail}
+                  </a>
+                </div>
+                <div class="direct-info-item">
+                  <span class="direct-info-label">ADDRESS:</span>
+                  <p class="direct-info-text">{displayAddress}</p>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <Footer 
+    phone={displayPhone}
+    address={displayAddress}
+  />
+</BaseLayout>
+
+<script>
+  // Form submission and validation
+  const form = document.getElementById('enquiry-contact-form') as HTMLFormElement | null;
+  const submitBtn = document.getElementById('btn-submit-enquiry') as HTMLButtonElement | null;
+  const successAlert = document.getElementById('enquiry-success-alert');
+
+  if (form && submitBtn && successAlert) {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      // Check confirm email match
+      const emailInput = document.getElementById('user-email') as HTMLInputElement;
+      const confirmInput = document.getElementById('confirm-email') as HTMLInputElement;
+
+      if (emailInput && confirmInput && emailInput.value.trim() !== confirmInput.value.trim()) {
+        confirmInput.style.borderColor = '#EF4444';
+        confirmInput.focus();
+        alert('Email addresses do not match. Please verify your email.');
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span>SUBMITTING...</span>';
+
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData.entries());
+
+      try {
+        await fetch('/api/bookings/create', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+      } catch(err) {}
+
+      setTimeout(() => {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<span>SUBMITTED ✓</span>';
+        submitBtn.style.backgroundColor = '#10B981';
+
+        successAlert.style.display = 'flex';
+        form.reset();
+        successAlert.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 600);
+    });
+  }
+</script>
+
+<style>
+  /* ------------------------------------------------------------- */
+  /* Global Page Container & Font                                  */
+  /* ------------------------------------------------------------- */
+  .enquiry-page-main {
+    background-color: #FFFFFF;
+    color: #1A202C;
+    min-height: 100vh;
+    font-family: 'Josefin Sans', sans-serif;
+  }
+
+  /* ------------------------------------------------------------- */
+  /* 1. Hero Title Banner (Clean, Sharp, Minimal)                  */
+  /* ------------------------------------------------------------- */
+  .enquiry-hero-section {
+    position: relative;
+    background-color: #4A525D;
+    background-image: linear-gradient(180deg, #373E47 0%, #4A525D 100%);
+    padding: 8.5rem 1.5rem 4rem;
+    text-align: center;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  }
+
+  .enquiry-hero-container {
+    max-width: 900px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 2;
+  }
+
+  .enquiry-hero-title {
+    font-family: 'AlternateGotNo1D', 'Alternate Gothic', sans-serif;
+    font-size: clamp(2.6rem, 5.2vw, 4.2rem);
+    letter-spacing: 2.5px;
+    line-height: 1.05;
+    color: #FFFFFF;
+    text-transform: uppercase;
+    margin: 0;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  }
+
+  /* ------------------------------------------------------------- */
+  /* 2. Main Content & Watermark                                   */
+  /* ------------------------------------------------------------- */
+  .enquiry-content-section {
+    position: relative;
+    background-color: #FFFFFF;
+    padding: 4.5rem 1.5rem 6.5rem;
+    overflow: hidden;
+  }
+
+  .watermark-bg-lines {
+    position: absolute;
+    top: 5%;
+    right: -5%;
+    width: 480px;
+    height: 750px;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.85;
+  }
+
+  .watermark-svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .enquiry-container {
+    max-width: 1220px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 2;
+  }
+
+  .enquiry-layout-grid {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 4rem;
+    align-items: start;
+  }
+
+  @media (max-width: 1024px) {
+    .enquiry-layout-grid {
+      grid-template-columns: 1fr;
+      gap: 3rem;
+    }
+  }
+
+  /* ------------------------------------------------------------- */
+  /* Form Section Blocks                                           */
+  /* ------------------------------------------------------------- */
+  .bt-clean-form {
+    width: 100%;
+  }
+
+  .form-section-block {
+    margin-bottom: 3rem;
+  }
+
+  .form-block-heading {
+    font-family: 'AlternateGotNo1D', 'Alternate Gothic', sans-serif;
+    font-size: 1.65rem;
+    letter-spacing: 1.5px;
+    color: #1A202C;
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+    font-weight: 700;
+  }
+
+  .form-field-item {
+    margin-bottom: 1.35rem;
+  }
+
+  .bt-field-label {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #4A5568;
+    margin-bottom: 0.45rem;
+    letter-spacing: 0.3px;
+  }
+
+  .bt-text-input,
+  .bt-select-input,
+  .bt-textarea-input {
+    width: 100%;
+    background-color: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 3px;
+    padding: 0.85rem 1rem;
+    font-size: 0.92rem;
+    font-family: 'Josefin Sans', sans-serif;
+    color: #1A202C;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+  }
+
+  .bt-text-input:focus,
+  .bt-select-input:focus,
+  .bt-textarea-input:focus {
+    outline: none;
+    border-color: #111111;
+    box-shadow: 0 0 0 1px #111111;
+  }
+
+  .bt-text-input::placeholder,
+  .bt-textarea-input::placeholder {
+    color: #A0AEC0;
+  }
+
+  .select-wrapper {
+    position: relative;
+    width: 100%;
+  }
+
+  .bt-select-input {
+    appearance: none;
+    -webkit-appearance: none;
+    cursor: pointer;
+    padding-right: 2.5rem;
+  }
+
+  .select-chevron {
+    position: absolute;
+    right: 1.1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    font-size: 0.75rem;
+    color: #718096;
+  }
+
+  .form-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+  }
+
+  .form-grid-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1.2fr;
+    gap: 1rem;
+  }
+
+  @media (max-width: 640px) {
+    .form-grid-2,
+    .form-grid-3 {
+      grid-template-columns: 1fr;
+      gap: 0;
+    }
+  }
+
+  .bt-textarea-input {
+    resize: vertical;
+    min-height: 110px;
+  }
+
+  /* Telephone Input Group */
+  .phone-input-group {
+    display: flex;
+    width: 100%;
+  }
+
+  .country-prefix-box {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0 0.85rem;
+    background: #F7FAFC;
+    border: 1px solid #E2E8F0;
+    border-right: none;
+    border-radius: 3px 0 0 3px;
+    font-size: 0.88rem;
+    color: #4A5568;
+    user-select: none;
+  }
+
+  .phone-number-input {
+    border-radius: 0 3px 3px 0 !important;
+    flex: 1;
+  }
+
+  /* Newsletter Toggle Switch (Matching Screenshot 1) */
+  .newsletter-toggle-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 1.75rem;
+    padding-top: 0.5rem;
+  }
+
+  .switch-toggle {
+    position: relative;
+    display: inline-block;
+    width: 48px;
+    height: 24px;
+    flex-shrink: 0;
+  }
+
+  .switch-toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .switch-slider {
+    position: absolute;
+    cursor: pointer;
+    inset: 0;
+    background-color: #CBD5E0;
+    transition: 0.3s;
+    border-radius: 24px;
+  }
+
+  .switch-slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: 0.3s;
+    border-radius: 50%;
+  }
+
+  .switch-toggle input:checked + .switch-slider {
+    background-color: #E52A6F;
+  }
+
+  .switch-toggle input:checked + .switch-slider:before {
+    transform: translateX(24px);
+  }
+
+  .switch-label-text {
+    font-size: 0.85rem;
+    color: #4A5568;
+    line-height: 1.45;
+  }
+
+  /* Submit Button (Matching Pink in Screenshot 1) */
+  .form-submit-row {
+    margin-top: 2.5rem;
+    text-align: center;
+  }
+
+  .btn-submit-pink {
+    background-color: #E52A6F;
+    color: #FFFFFF;
+    font-family: 'AlternateGotNo1D', 'Alternate Gothic', sans-serif;
+    font-size: 1.25rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 0.95rem 3.5rem;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background-color 0.25s ease, transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 4px 14px rgba(229, 42, 111, 0.3);
+  }
+
+  .btn-submit-pink:hover {
+    background-color: #D41C60;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(229, 42, 111, 0.4);
+  }
+
+  /* Success Alert */
+  .enquiry-success-alert {
+    margin-top: 2rem;
+    padding: 1.5rem 1.75rem;
+    background: #ECFDF5;
+    border: 1px solid #10B981;
+    border-radius: 4px;
+    display: flex;
+    gap: 1.25rem;
+    align-items: center;
+  }
+
+  .alert-icon-circle {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: #10B981;
+    color: #FFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .alert-text-wrap h4 {
+    margin: 0 0 0.25rem 0;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #065F46;
+  }
+
+  .alert-text-wrap p {
+    margin: 0;
+    font-size: 0.88rem;
+    color: #047857;
+    line-height: 1.5;
+  }
+
+  /* ------------------------------------------------------------- */
+  /* 3. Office Hours Sidebar Card (Screenshot 1)                   */
+  /* ------------------------------------------------------------- */
+  .office-hours-card {
+    background-color: #F7F5F2;
+    border-radius: 4px;
+    padding: 2.5rem 2rem;
+    text-align: center;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+  }
+
+  .clock-icon-wrap {
+    color: #2D3748;
+    margin-bottom: 0.75rem;
+  }
+
+  .office-hours-title {
+    font-family: 'AlternateGotNo1D', 'Alternate Gothic', sans-serif;
+    font-size: 1.55rem;
+    letter-spacing: 2px;
+    color: #1A202C;
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+  }
+
+  .hours-schedule-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .schedule-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    color: #4A5568;
+    font-family: 'Josefin Sans', sans-serif;
+  }
+
+  .schedule-row .day-name {
+    font-weight: 600;
+  }
+
+  .schedule-row .day-time {
+    color: #2D3748;
+  }
+
+  .schedule-row.is-closed .day-time {
+    color: #718096;
+    font-style: italic;
+  }
+
+  .hours-footnote {
+    font-size: 0.75rem;
+    color: #718096;
+    font-style: italic;
+    margin: 0;
+  }
+
+  .sidebar-contact-divider {
+    height: 1px;
+    background: #E2DBD2;
+    margin: 1.75rem 0 1.5rem;
+  }
+
+  .sidebar-direct-info {
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .direct-info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+
+  .direct-info-label {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    color: #718096;
+    text-transform: uppercase;
+  }
+
+  .direct-info-link {
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: #1A202C;
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+
+  .direct-info-link:hover {
+    color: #E52A6F;
+  }
+
+  .direct-info-text {
+    font-size: 0.85rem;
+    color: #4A5568;
+    line-height: 1.45;
+    margin: 0;
+  }
+</style>

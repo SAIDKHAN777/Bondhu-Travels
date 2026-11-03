@@ -1,0 +1,2077 @@
+---
+// Authentic Luxury Fixed Topbar Header
+// Left: Brand Logo | Center: DESTINATIONS (Search), PACKAGES, ABOUT | Right: Phone, User Profile (Google Account) & CONTACT
+import prisma from '../lib/prisma.js';
+
+interface Props {
+  phone?: string;
+  enquireText?: string;
+  enquireLink?: string;
+}
+
+const {
+  phone = "+44 207 426 9888",
+  enquireText = "ENQUIRE NOW",
+  enquireLink = "/make-an-enquiry/"
+} = Astro.props;
+
+// Fetch live Explore Our Trips from PostgreSQL to power real-time search suggestions
+let exploreTripsData: any[] = [];
+try {
+  const exploreSetting = await prisma.systemSetting.findUnique({
+    where: { key: 'section_explore_trips' }
+  });
+  if (exploreSetting && Array.isArray(exploreSetting.value?.trips)) {
+    exploreTripsData = exploreSetting.value.trips;
+  }
+} catch (e: any) {
+  console.warn('[Header] Failed to fetch explore trips for search:', e.message);
+}
+---
+
+<header role="banner" class="header header--fixed-luxury" id="main-header">
+  <div class="header__inner">
+    <!-- 1. Left: Brand Logo (Bondhu Travel) & Contextual Back Button -->
+    <div class="header__left">
+      <a href="/" class="logo-link" aria-label="Bondhu Travel Home">
+        <img 
+          src="/img/bondhu-travel-logo.png" 
+          alt="Bondhu Travel" 
+          class="logo-img" 
+          width="48" 
+          height="61" 
+        />
+      </a>
+
+      <!-- Smart Header Back Button (Visible on internal pages / sub-interfaces) -->
+      <button 
+        type="button" 
+        class="header-back-btn" 
+        id="header-back-btn" 
+        aria-label="Back to Previous Page"
+        style="display: none;"
+      >
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12"></line>
+          <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+        <span>BACK</span>
+      </button>
+    </div>
+
+    <!-- 2. Center: 4 Navigation Items: HOME, DESTINATIONS (Search Trigger), PACKAGES, ABOUT -->
+    <nav class="header__center" aria-label="Main Navigation">
+      <!-- HOME -->
+      <a href="/" class="nav-item nav-item--home" id="nav-home-btn">
+        <span>HOME</span>
+      </a>
+
+      <!-- DESTINATIONS (Interactive Search Trigger) -->
+      <button 
+        type="button" 
+        class="nav-destinations-btn" 
+        id="destinations-search-trigger"
+        aria-label="Search destinations and tour plans"
+      >
+        <svg class="search-mini-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <span>DESTINATIONS</span>
+      </button>
+
+      <!-- PACKAGES -->
+      <a href="#tour-sessions" class="nav-item" id="nav-packages-btn">
+        <span>PACKAGES</span>
+      </a>
+
+      <!-- ABOUT -->
+      <a href="/about-us/" class="nav-item" id="nav-about-btn">
+        <span>ABOUT</span>
+      </a>
+    </nav>
+
+    <!-- 3. Right: Phone, Customer Account (Google Profile) & ENQUIRE NOW Button -->
+    <div class="header__right">
+      <!-- Phone Helpline (Desktop matching luxury spec) -->
+      {phone && (
+        <a href={`tel:${phone.replace(/\s+/g, '')}`} class="header-phone-link">
+          <span>{phone}</span>
+        </a>
+      )}
+
+      <!-- Customer Account Button (Switches to Google Avatar when logged in) -->
+      <div class="account-menu-wrapper" id="account-wrapper">
+        <button 
+          type="button" 
+          class="nav-account-btn" 
+          id="account-btn" 
+          aria-label="Customer account and profile"
+          aria-haspopup="true"
+        >
+          <!-- Default State: Sleek Luxury User Icon -->
+          <span class="user-default-icon" id="user-default-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+          </span>
+
+          <!-- Logged-in State: Google Avatar Image (hidden by default, shown via JS) -->
+          <div class="google-avatar-box" id="google-avatar-box" style="display: none;">
+            <img 
+              id="google-avatar-img" 
+              src="/uploads/users/said_google_avatar.png" 
+              alt="Google Profile Avatar" 
+              class="google-profile-img" 
+            />
+            <span class="avatar-online-dot"></span>
+          </div>
+        </button>
+
+        <!-- Account Dropdown Menu (When Logged In) -->
+        <div class="account-dropdown-menu" id="account-dropdown">
+          <div class="dropdown-header">
+            <div class="dropdown-avatar-wrap">
+              <img id="dropdown-user-avatar" class="dropdown-avatar-img" src="/uploads/users/said_google_avatar.png" alt="Said Khan" />
+              <button type="button" class="btn-avatar-camera" id="btn-camera-upload" title="আপনার আসল ছবি আপলোড করুন">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+              </button>
+            </div>
+            <div class="user-info">
+              <span class="user-name" id="user-display-name">Said Khan</span>
+              <span class="user-email" id="user-display-email">saidkhan.dev@gmail.com</span>
+            </div>
+          </div>
+          <div class="dropdown-items">
+            <!-- 1-Click Upload Real Profile Photo -->
+            <button type="button" class="drop-item" id="btn-upload-real-photo" style="width: 100%; border: none; background: transparent; cursor: pointer; text-align: left; color: #38BDF8; font-weight: 600;">
+              <span class="drop-icon">📸</span> আপনার আসল ছবি আপলোড করুন
+            </button>
+            <input type="file" id="user-real-avatar-input" accept="image/*" style="display: none;" />
+
+            <a href="#tour-sessions" class="drop-item">
+              <span class="drop-icon">📦</span> My Tour Bookings
+            </a>
+            <a href="#explore-our-trips" class="drop-item">
+              <span class="drop-icon">🤍</span> Saved Destinations
+            </a>
+            <a href="/admin" class="drop-item" style="color: #E82E72; font-weight: 600;">
+              <span class="drop-icon">⚙️</span> Admin Studio
+            </a>
+            <hr class="drop-divider" />
+            <button type="button" class="drop-logout-btn" id="logout-trigger-btn">
+              <span class="drop-icon">🚪</span> Sign Out
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- CONTACT / ENQUIRE NOW Button -->
+      <a href={enquireLink} class="nav-contact-btn" id="header-contact-btn">
+        {enquireText}
+      </a>
+    </div>
+  </div>
+
+  <!-- Hidden JSON payload with live Explore Our Trips data from DB -->
+  <script id="header-explore-trips-data" type="application/json" set:html={JSON.stringify(exploreTripsData)}></script>
+
+  <!-- ============================================================== -->
+  <!-- INTERACTIVE DESTINATIONS SEARCH OVERLAY MODAL -->
+  <!-- ============================================================== -->
+  <div class="destinations-search-modal" id="destinations-search-modal" aria-hidden="true">
+    <div class="search-modal-backdrop" id="search-modal-backdrop"></div>
+    <div class="search-modal-card">
+      <div class="search-modal-header">
+        <div class="search-input-wrap">
+          <svg class="search-input-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input 
+            type="text" 
+            id="destinations-query-input" 
+            class="destinations-query-input" 
+            placeholder="Search tours & destinations (e.g. Sajek, Bandarban, Cox's Bazar)..." 
+            autocomplete="off"
+          />
+          <button type="button" class="search-clear-btn" id="search-clear-btn" aria-label="Clear search">&times;</button>
+        </div>
+        <button type="button" class="search-close-btn" id="search-close-btn" aria-label="Close search">
+          <span>ESC</span>
+        </button>
+      </div>
+
+      <!-- Popular Search Suggestions Quick Pills -->
+      <div class="popular-tags-row" id="popular-tags-row">
+        <span class="popular-tags-label">Popular Destinations:</span>
+        <div id="dynamic-tags-container" style="display: contents;">
+          <!-- Dynamically populated from Explore Our Trips via JS -->
+        </div>
+      </div>
+
+      <!-- Live Search Results Header Bar -->
+      <div class="search-section-bar" id="search-section-bar">
+        <span class="search-section-badge" id="search-section-badge">EXPLORE OUR TRIPS</span>
+        <span class="search-section-title" id="search-section-title">Explore Our Trips Destinations</span>
+      </div>
+
+      <!-- Live Search Results Grid (Text-only) -->
+      <div class="search-results-container" id="search-results-container">
+        <!-- Results dynamically rendered via JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- GOOGLE ACCOUNT SIGN-IN MODAL (When not logged in) -->
+  <!-- ============================================================== -->
+  <div class="account-login-modal" id="account-login-modal" aria-hidden="true">
+    <div class="login-modal-backdrop" id="login-modal-backdrop"></div>
+    <div class="login-modal-card">
+      <button type="button" class="login-modal-close" id="login-modal-close">&times;</button>
+      <div class="login-modal-header">
+        <img src="/img/bondhu-travel-logo.png" alt="Bondhu Travel" class="login-brand-logo" width="56" height="72" />
+        <h3 class="login-title">Customer Account Access</h3>
+        <p class="login-subtitle">Sign in with your Google account to manage tailor-made itineraries, private bookings, and custom quotes.</p>
+      </div>
+
+      <div class="login-actions">
+        <!-- Google One-Click Sign-In Button -->
+        <button type="button" class="btn-google-auth" id="btn-google-signin">
+          <svg class="google-svg" width="20" height="20" viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+          </svg>
+          <span>Continue with Google</span>
+        </button>
+      </div>
+
+      <p class="login-privacy-note">
+        By continuing, you agree to Black Tomato's <a href="/booking-conditions/">Booking Terms</a> and <a href="/privacy-policy/">Privacy Policy</a>.
+      </p>
+    </div>
+  </div>
+</header>
+
+<style>
+  /* Seamless Floating Topbar Header (Ultra-sleek, hides on scroll down, reveals on scroll up) */
+  .header--fixed-luxury {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 100000;
+    background: transparent;
+    border-bottom: 1px solid transparent;
+    box-shadow: none;
+    transform: translateY(0);
+    transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1),
+                background-color 0.28s ease,
+                border-color 0.28s ease,
+                box-shadow 0.28s ease;
+  }
+
+  /* When scrolling down: smoothly hide completely off-screen */
+  .header--fixed-luxury.header--hidden {
+    transform: translateY(-100%);
+  }
+
+  /* Seamless ambient top vignette - protects text contrast over dark hero videos/images */
+  .header--fixed-luxury::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 125%;
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.45) 0%, rgba(0, 0, 0, 0.12) 60%, transparent 100%);
+    pointer-events: none;
+    z-index: 1;
+    transition: opacity 0.3s ease;
+  }
+
+  /* WHITE THEME WHEN SCROLLED (blends seamlessly into white page background) */
+  .header--fixed-luxury.header--scrolled-white {
+    background-color: #FFFFFF;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+  }
+
+  .header--fixed-luxury.header--scrolled-white::before {
+    opacity: 0;
+  }
+
+  /* Ultra Sleek & Slim Header Bar Inner Container */
+  .header__inner {
+    position: relative;
+    z-index: 2;
+    max-width: 1560px;
+    margin: 0 auto;
+    padding: 0.55rem 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: padding 0.25s ease;
+  }
+
+  /* 1. Left: Brand Logo */
+  .header__left {
+    display: flex;
+    align-items: center;
+  }
+
+  .logo-link {
+    display: inline-flex;
+    align-items: center;
+    line-height: 1;
+    text-decoration: none;
+  }
+
+  /* Contextual Header Back Button (Crisp Square Shape, Dynamic Contrast) */
+  .header-back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding: 0.42rem 0.85rem;
+    border-radius: 0px !important; /* Full crisp square shape as requested */
+    cursor: pointer;
+    transition: all 0.22s ease;
+    margin-left: 1rem;
+    line-height: 1;
+
+    /* Over Dark Picture / Transparent Header state (White text & border) */
+    color: #FFFFFF;
+    background: rgba(0, 0, 0, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  }
+
+  .header-back-btn svg {
+    stroke: #FFFFFF;
+    transition: transform 0.2s ease, stroke 0.2s ease;
+  }
+
+  .header-back-btn:hover {
+    background: #FFFFFF;
+    color: #000000;
+    border-color: #FFFFFF;
+    text-shadow: none;
+    transform: translateX(-3px);
+  }
+
+  .header-back-btn:hover svg {
+    stroke: #000000;
+    transform: translateX(-2px);
+  }
+
+  /* In White Header state / White Pages: Crisp Square Back Button turns Black */
+  .header--fixed-luxury.header--scrolled-white .header-back-btn {
+    color: #111111;
+    background: rgba(0, 0, 0, 0.04);
+    border: 1px solid rgba(0, 0, 0, 0.25);
+    text-shadow: none;
+    box-shadow: none;
+  }
+
+  .header--fixed-luxury.header--scrolled-white .header-back-btn svg {
+    stroke: #111111;
+  }
+
+  .header--fixed-luxury.header--scrolled-white .header-back-btn:hover {
+    background: #000000;
+    color: #FFFFFF;
+    border-color: #000000;
+    text-shadow: none;
+    transform: translateX(-3px);
+  }
+
+  .header--fixed-luxury.header--scrolled-white .header-back-btn:hover svg {
+    stroke: #FFFFFF;
+    transform: translateX(-2px);
+  }
+
+  .logo-img {
+    height: 34px;
+    width: auto;
+    display: block;
+    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.65));
+    transition: opacity 0.2s ease, transform 0.2s ease, filter 0.28s ease, height 0.25s ease;
+  }
+
+  .logo-link:hover .logo-img {
+    opacity: 0.95;
+    transform: scale(1.03);
+  }
+
+  /* In White Header state: logo turns sleek solid black */
+  .header--fixed-luxury.header--scrolled-white .logo-img {
+    filter: brightness(0);
+    opacity: 0.92;
+  }
+
+  /* 2. Center: 3 Navigation Items */
+  .header__center {
+    display: flex;
+    align-items: center;
+    gap: 2.25rem;
+  }
+
+  /* DESTINATIONS (Search Trigger Button) */
+  .nav-destinations-btn {
+    position: relative;
+    background: transparent;
+    border: none;
+    color: #FFFFFF;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 0.73rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.35rem 0.15rem;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8), 0 2px 8px rgba(0, 0, 0, 0.5);
+    transition: color 0.25s ease;
+  }
+
+  /* Animated underline line that emerges on hover */
+  .nav-destinations-btn::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background-color: #E82E72;
+    transform: scaleX(0);
+    transform-origin: center;
+    transition: transform 0.25s cubic-bezier(0.25, 1, 0.5, 1);
+    border-radius: 2px;
+  }
+
+  .nav-destinations-btn:hover {
+    color: #FFFFFF;
+  }
+
+  .nav-destinations-btn:hover::after,
+  .nav-destinations-btn:focus::after {
+    transform: scaleX(1);
+  }
+
+  .search-mini-icon {
+    stroke: currentColor;
+    opacity: 0.92;
+    filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.8));
+    transition: transform 0.25s ease, stroke 0.25s ease;
+  }
+
+  .nav-destinations-btn:hover .search-mini-icon {
+    transform: scale(1.12);
+    stroke: #E82E72;
+  }
+
+  /* PACKAGES & ABOUT */
+  .nav-item {
+    position: relative;
+    color: #FFFFFF;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 0.73rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    text-decoration: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    padding: 0.35rem 0.15rem;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8), 0 2px 8px rgba(0, 0, 0, 0.5);
+    transition: color 0.25s ease;
+  }
+
+  .nav-item::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background-color: #E82E72;
+    transform: scaleX(0);
+    transform-origin: center;
+    transition: transform 0.25s cubic-bezier(0.25, 1, 0.5, 1);
+    border-radius: 2px;
+  }
+
+  .nav-item:hover {
+    color: #FFFFFF;
+  }
+
+  .nav-item:hover::after,
+  .nav-item:focus::after {
+    transform: scaleX(1);
+  }
+
+  /* In White Header state: Nav links turn sleek dark/black */
+  .header--fixed-luxury.header--scrolled-white .nav-destinations-btn,
+  .header--fixed-luxury.header--scrolled-white .nav-item {
+    color: #111111;
+    text-shadow: none;
+  }
+
+  .header--fixed-luxury.header--scrolled-white .nav-destinations-btn:hover,
+  .header--fixed-luxury.header--scrolled-white .nav-item:hover {
+    color: #E82E72;
+  }
+
+  .header--fixed-luxury.header--scrolled-white .search-mini-icon {
+    stroke: #111111;
+    filter: none;
+  }
+
+  .header--fixed-luxury.header--scrolled-white .nav-destinations-btn:hover .search-mini-icon {
+    stroke: #E82E72;
+  }
+
+  /* 3. Right: Phone, Customer Account & CONTACT */
+  .header__right {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  /* Phone Helpline (Desktop) */
+  .header-phone-link {
+    color: #FFFFFF;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 0.73rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-decoration: none;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
+    transition: color 0.25s ease;
+    white-space: nowrap;
+  }
+
+  .header-phone-link:hover {
+    color: #E82E72;
+  }
+
+  .header--fixed-luxury.header--scrolled-white .header-phone-link {
+    color: #111111;
+    text-shadow: none;
+  }
+
+  .header--fixed-luxury.header--scrolled-white .header-phone-link:hover {
+    color: #E82E72;
+  }
+
+  .account-menu-wrapper {
+    position: relative;
+  }
+
+  .nav-account-btn {
+    position: relative;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0.35rem 0.2rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #FFFFFF;
+    transition: color 0.25s ease;
+  }
+
+  .nav-account-btn::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background-color: #E82E72;
+    transform: scaleX(0);
+    transform-origin: center;
+    transition: transform 0.25s cubic-bezier(0.25, 1, 0.5, 1);
+    border-radius: 2px;
+  }
+
+  .nav-account-btn:hover::after {
+    transform: scaleX(1);
+  }
+
+  .user-default-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #FFFFFF;
+    filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.8));
+    transition: color 0.25s ease, transform 0.2s ease;
+  }
+
+  .nav-account-btn:hover .user-default-icon {
+    color: #E82E72;
+    transform: scale(1.12);
+  }
+
+  .header--fixed-luxury.header--scrolled-white .user-default-icon {
+    color: #111111;
+    filter: none;
+  }
+
+  .header--fixed-luxury.header--scrolled-white .nav-account-btn:hover .user-default-icon {
+    color: #E82E72;
+  }
+
+  /* Google Profile Avatar Box */
+  .google-avatar-box {
+    position: relative;
+    width: 30px;
+    height: 30px;
+  }
+
+  .google-profile-img {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #10B981;
+    display: block;
+  }
+
+  .avatar-online-dot {
+    position: absolute;
+    bottom: -1px;
+    right: -1px;
+    width: 8px;
+    height: 8px;
+    background-color: #10B981;
+    border: 2px solid #FFFFFF;
+    border-radius: 50%;
+  }
+
+  /* Account Dropdown Menu */
+  .account-dropdown-menu {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    width: 250px;
+    background: #0C1017;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.7);
+    padding: 0.85rem 0;
+    display: none;
+    z-index: 1100;
+  }
+
+  .header--fixed-luxury.header--scrolled-white .account-dropdown-menu {
+    background: #FFFFFF;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.12);
+  }
+
+  .account-dropdown-menu.is-open {
+    display: block;
+    animation: fadeInDropdown 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  @keyframes fadeInDropdown {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .dropdown-header {
+    padding: 0.75rem 1.15rem;
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .dropdown-avatar-wrap {
+    position: relative;
+    width: 42px;
+    height: 42px;
+    flex-shrink: 0;
+  }
+
+  .dropdown-avatar-img {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #06B6D4;
+    display: block;
+  }
+
+  .btn-avatar-camera {
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #E82E72;
+    border: 1.5px solid #FFFFFF;
+    color: #FFFFFF;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    transition: transform 0.2s ease;
+  }
+
+  .btn-avatar-camera:hover {
+    transform: scale(1.15);
+  }
+
+
+  .header--fixed-luxury.header--scrolled-white .dropdown-header {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  }
+
+  .user-name {
+    display: block;
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #F1F5F9;
+  }
+
+  .header--fixed-luxury.header--scrolled-white .user-name {
+    color: #0F172A;
+  }
+
+  .user-email {
+    display: block;
+    font-size: 0.75rem;
+    color: #94A3B8;
+    margin-top: 2px;
+  }
+
+  .header--fixed-luxury.header--scrolled-white .user-email {
+    color: #64748B;
+  }
+
+  .dropdown-items {
+    padding: 0.4rem 0;
+  }
+
+  .drop-item {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.55rem 1.25rem;
+    color: #CBD5E1;
+    font-size: 0.82rem;
+    text-decoration: none;
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+
+  .drop-item:hover {
+    background: rgba(255, 255, 255, 0.06);
+    color: #FFFFFF;
+  }
+
+  .header--fixed-luxury.header--scrolled-white .drop-item {
+    color: #334155;
+  }
+
+  .header--fixed-luxury.header--scrolled-white .drop-item:hover {
+    background: rgba(0, 0, 0, 0.04);
+    color: #0F172A;
+  }
+
+  .drop-divider {
+    border: none;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.08);
+    margin: 0.4rem 0;
+  }
+
+  .header--fixed-luxury.header--scrolled-white .drop-divider {
+    background: rgba(0, 0, 0, 0.06);
+  }
+
+  .drop-logout-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.55rem 1.25rem;
+    color: #EF4444;
+    font-size: 0.82rem;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.2s ease;
+  }
+
+  .drop-logout-btn:hover {
+    background: rgba(239, 68, 68, 0.1);
+  }
+
+  /* CONTACT / ENQUIRE NOW Button */
+  .nav-contact-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.48rem 1.25rem;
+    background-color: #E82E72;
+    color: #FFFFFF;
+    border: 1px solid #E82E72;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    text-decoration: none;
+    border-radius: 0px !important;
+    transition: all 0.25s ease;
+    box-shadow: 0 2px 8px rgba(232, 46, 114, 0.3);
+    white-space: nowrap;
+  }
+
+  /* When hovered: button turns AUTOMATICALLY WHITE! */
+  .nav-contact-btn:hover {
+    background-color: #FFFFFF !important;
+    color: #E82E72 !important;
+    border-color: #E82E72 !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(232, 46, 114, 0.35);
+  }
+
+  /* ============================================================== */
+  /* DESTINATIONS SEARCH MODAL STYLES */
+  /* ============================================================== */
+  .destinations-search-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 2000;
+    display: none;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 6rem 1.5rem 2rem;
+    box-sizing: border-box;
+  }
+
+  .destinations-search-modal.is-open {
+    display: flex;
+  }
+
+  .search-modal-backdrop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(15, 23, 42, 0.45);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  /* ============================================================== */
+  /* DESTINATIONS SEARCH MODAL STYLES (CLEAN LUXURY WHITE THEME)   */
+  /* ============================================================== */
+  .search-modal-card {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: 820px;
+    background: #FFFFFF !important;
+    border: 1px solid #E2E8F0;
+    border-radius: 12px;
+    box-shadow: 0 25px 65px rgba(0, 0, 0, 0.22);
+    overflow: hidden;
+    animation: modalSlideDown 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  @keyframes modalSlideDown {
+    from { opacity: 0; transform: translateY(-20px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .search-modal-header {
+    display: flex;
+    align-items: center;
+    padding: 1.25rem 1.75rem;
+    border-bottom: 1px solid #E2E8F0;
+    background: #FFFFFF;
+    gap: 1.25rem;
+  }
+
+  .search-input-wrap {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    position: relative;
+  }
+
+  .search-input-icon {
+    color: #E82E72;
+    flex-shrink: 0;
+  }
+
+  .destinations-query-input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #0F172A !important;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 1.15rem;
+    font-weight: 600;
+  }
+
+  .destinations-query-input::placeholder {
+    color: #94A3B8 !important;
+    font-weight: 400;
+    font-size: 1.05rem;
+  }
+
+  .search-clear-btn {
+    background: none;
+    border: none;
+    color: #94A3B8;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0 0.5rem;
+    display: none;
+    line-height: 1;
+  }
+
+  .search-clear-btn:hover {
+    color: #0F172A;
+  }
+
+  .search-close-btn {
+    background: #F1F5F9;
+    border: 1px solid #E2E8F0;
+    color: #64748B;
+    padding: 0.35rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .search-close-btn:hover {
+    background: #E82E72;
+    border-color: #E82E72;
+    color: #FFF;
+  }
+
+  /* Popular Tags Row */
+  .popular-tags-row {
+    padding: 0.75rem 1.75rem;
+    background: #F8FAFC;
+    border-bottom: 1px solid #E2E8F0;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+  }
+
+  .popular-tags-label {
+    font-size: 0.75rem;
+    color: #64748B;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 700;
+  }
+
+  .search-tag-pill {
+    background: #FFFFFF;
+    border: 1px solid #CBD5E1;
+    color: #334155;
+    padding: 0.28rem 0.8rem;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-weight: 600;
+  }
+
+  .search-tag-pill:hover,
+  .search-tag-pill.is-active {
+    background: #E82E72;
+    border-color: #E82E72;
+    color: #FFF;
+    transform: translateY(-1px);
+  }
+
+  /* Search Section Bar */
+  .search-section-bar {
+    padding: 0.85rem 1.75rem 0.35rem;
+    background: #FFFFFF;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .search-section-badge {
+    background: #EFF6FF;
+    border: 1px solid #BFDBFE;
+    color: #2563EB;
+    padding: 0.2rem 0.55rem;
+    border-radius: 4px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .search-section-title {
+    font-weight: 700;
+    color: #1E293B;
+    font-size: 0.82rem;
+  }
+
+  /* Search Results Text List (NO IMAGES) */
+  .search-results-container {
+    max-height: 420px;
+    overflow-y: auto;
+    padding: 0.5rem 1.75rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    background: #FFFFFF;
+    scrollbar-width: thin;
+  }
+
+  .search-text-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.95rem 1.15rem;
+    background: #FFFFFF;
+    border: 1px solid #F1F5F9;
+    border-radius: 8px;
+    text-decoration: none;
+    color: #0F172A;
+    transition: all 0.2s ease;
+    cursor: pointer;
+  }
+
+  .search-text-item:hover {
+    background: #F8FAFC;
+    border-color: #CBD5E1;
+    transform: translateX(4px);
+  }
+
+  .search-text-item:hover .item-headline {
+    color: #E82E72;
+  }
+
+  .search-text-item:hover .item-icon-circle {
+    background: rgba(232, 46, 114, 0.12);
+    color: #E82E72;
+    border-color: rgba(232, 46, 114, 0.3);
+  }
+
+  .search-text-item:hover .item-arrow-icon {
+    transform: translateX(4px);
+    color: #E82E72;
+  }
+
+  .item-left {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+  }
+
+  .item-icon-circle {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #F1F5F9;
+    border: 1px solid #E2E8F0;
+    color: #64748B;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+  }
+
+  .item-texts {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .item-headline {
+    font-size: 1.08rem;
+    font-weight: 700;
+    color: #0F172A;
+    letter-spacing: 0.01em;
+    transition: color 0.2s ease;
+  }
+
+  .item-meta {
+    font-size: 0.76rem;
+    color: #64748B;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .item-right {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+  }
+
+  .item-badge {
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: #2563EB;
+    background: #EFF6FF;
+    border: 1px solid #DBEAFE;
+    padding: 0.2rem 0.55rem;
+    border-radius: 4px;
+    letter-spacing: 0.04em;
+  }
+
+  .item-arrow-icon {
+    color: #94A3B8;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+  }
+
+  /* ============================================================== */
+  /* GOOGLE SIGN-IN MODAL STYLES */
+  /* ============================================================== */
+  .account-login-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 2000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    box-sizing: border-box;
+  }
+
+  .account-login-modal.is-open {
+    display: flex;
+  }
+
+  .login-modal-backdrop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(3, 7, 12, 0.85);
+    backdrop-filter: blur(16px);
+  }
+
+  .login-modal-card {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: 440px;
+    background: #0C1017;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8);
+    padding: 2.75rem 2.25rem;
+    text-align: center;
+    animation: modalSlideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .login-modal-close {
+    position: absolute;
+    top: 1.25rem;
+    right: 1.25rem;
+    background: none;
+    border: none;
+    font-size: 1.75rem;
+    color: #64748B;
+    cursor: pointer;
+    line-height: 1;
+  }
+
+  .login-modal-close:hover {
+    color: #FFF;
+  }
+
+  .login-brand-logo {
+    height: 64px;
+    width: auto;
+    margin: 0 auto 1.25rem;
+    display: block;
+    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.45));
+  }
+
+  .login-title {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #FFFFFF;
+    margin: 0 0 0.75rem;
+  }
+
+  .login-subtitle {
+    font-size: 0.88rem;
+    color: #94A3B8;
+    line-height: 1.55;
+    margin: 0 0 2rem;
+  }
+
+  .btn-google-auth {
+    width: 100%;
+    height: 48px;
+    background: #FFFFFF;
+    color: #1F2937;
+    border: 1px solid #E5E7EB;
+    border-radius: 6px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    transition: all 0.2s ease;
+  }
+
+  .btn-google-auth:hover {
+    background: #F9FAFB;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .google-svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .login-privacy-note {
+    font-size: 0.75rem;
+    color: #64748B;
+    margin-top: 1.75rem;
+    line-height: 1.5;
+  }
+
+  .login-privacy-note a {
+    color: #94A3B8;
+    text-decoration: underline;
+  }
+
+  /* Responsive Breakpoints */
+  @media (max-width: 1024px) {
+    .header-phone-link {
+      display: none;
+    }
+    .header__center {
+      gap: 1.5rem;
+    }
+    .header__inner {
+      padding: 0.5rem 1.5rem;
+    }
+    .search-results-container {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 680px) {
+    .header__inner {
+      padding: 0.45rem 1rem;
+    }
+    .logo-img {
+      height: 28px;
+    }
+    .header__center {
+      gap: 0.85rem;
+    }
+    .nav-destinations-btn, .nav-item {
+      font-size: 0.68rem;
+      letter-spacing: 0.1em;
+    }
+    .nav-contact-btn {
+      padding: 0.38rem 0.85rem;
+      font-size: 0.68rem;
+      letter-spacing: 0.1em;
+    }
+  }
+</style>
+
+<script>
+  // Tour Plans & Destinations Search Database (Dynamically synced with Explore Our Trips)
+  function getExploreSearchDatabase() {
+    const dataTag = document.getElementById('header-explore-trips-data');
+    let dbTrips: any[] = [];
+    try {
+      if (dataTag && dataTag.textContent) {
+        dbTrips = JSON.parse(dataTag.textContent);
+      }
+    } catch (e) {
+      console.warn('Could not parse explore trips in header search:', e);
+    }
+
+    function getTripBnName(title: string) {
+      const l = (title || '').toLowerCase();
+      if (l.includes('sajek')) return 'সাজেক ভ্যালি';
+      if (l.includes('bandarban')) return 'বান্দরবান';
+      if (l.includes('cox')) return 'কক্সবাজার';
+      if (l.includes('sylhet')) return 'সিলেট ও হাওর';
+      if (l.includes('sundarban')) return 'সুন্দরবন';
+      if (l.includes('kuakata')) return 'কুয়াকাটা';
+      return '';
+    }
+
+    function getTripEmoji(title: string) {
+      const l = (title || '').toLowerCase();
+      if (l.includes('sajek')) return '☁️';
+      if (l.includes('bandarban')) return '🏔️';
+      if (l.includes('cox')) return '🌊';
+      if (l.includes('sylhet')) return '🍃';
+      if (l.includes('sundarban')) return '🐅';
+      if (l.includes('kuakata')) return '🌅';
+      return '✨';
+    }
+
+    function getTripDirectLink(t: any) {
+      if (t.link && t.link.startsWith('/destinations/')) {
+        return t.link;
+      }
+      const slug = (t.title || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+      return slug ? `/destinations/${slug}/` : '/destinations/new-luxury-tour/';
+    }
+
+    // 1. Process Explore Our Trips from Database (Primary Recommendations)
+    const exploreTripsFormatted = (Array.isArray(dbTrips) && dbTrips.length > 0)
+      ? dbTrips.map((t: any) => {
+          const bnName = getTripBnName(t.title);
+          const emoji = getTripEmoji(t.title);
+          const link = getTripDirectLink(t);
+          return {
+            name: t.title,
+            bnName,
+            emoji,
+            title: t.title,
+            tagline: t.tagline || t.desc || 'An unforgettable curated private journey',
+            nights: t.nights || t.howLong || '3 NIGHTS',
+            region: t.country || 'BANGLADESH',
+            price: t.price ? (t.price.includes('৳') || t.price.includes('Tk') || t.price.includes('£') ? t.price : `৳ ${t.price}`) : 'ইনকোয়ারি করুন',
+            img: t.img || t.heroImage || t.image || '/2024/04/Website-Homepage-V9.00_00_00_00.Still002.jpg',
+            link,
+            isExploreTrip: true,
+            keywords: [
+              t.title,
+              bnName,
+              t.country,
+              t.tagline,
+              t.desc,
+              t.nights,
+              'explore our trips',
+              'ট্যুর'
+            ].filter(Boolean)
+          };
+        })
+      : [];
+
+    // Fallback defaults if DB is temporarily empty
+    if (exploreTripsFormatted.length === 0) {
+      exploreTripsFormatted.push(
+        {
+          name: "Sajek",
+          bnName: "সাজেক ভ্যালি",
+          emoji: "☁️",
+          title: "Sajek",
+          tagline: "An unforgettable curated private journey",
+          nights: "3 NIGHTS",
+          region: "BANGLADESH",
+          price: "৳ 4,500 per person",
+          img: "/uploads/images/obintehasan_pindown_io_1793483591-mvwxtycm.jpg",
+          link: "/destinations/sajek/",
+          isExploreTrip: true,
+          keywords: ["sajek", "সাজেক", "sajek valley", "সাজেক ভ্যালি", "মেঘ", "cloud", "খাগড়াছড়ি", "কংলাক"]
+        },
+        {
+          name: "Bandarban",
+          bnName: "বান্দরবান",
+          emoji: "🏔️",
+          title: "Bandarban",
+          tagline: "An unforgettable curated private journey",
+          nights: "4 NIGHTS",
+          region: "BANGLADESH",
+          price: "৳ 4,500 per person",
+          img: "/uploads/images/From_Klickpin_com-_Copy_this_guide_to_elegant_herb-mvwx285b.jpg",
+          link: "/destinations/bandarban/",
+          isExploreTrip: true,
+          keywords: ["bandarban", "বান্দরবান", "nilgiri", "নীলগিরি", "hill tracts", "পাহাড়", "বগালেক"]
+        },
+        {
+          name: "Cox's bazar",
+          bnName: "কক্সবাজার",
+          emoji: "🌊",
+          title: "Cox's bazar",
+          tagline: "An unforgettable curated private journey",
+          nights: "4 NIGHTS",
+          region: "BANGLADESH",
+          price: "৳ 5,000 per person",
+          img: "/uploads/images/From_Klickpin_com-_1010776710108124418-pin-id-1010-mvwjuz21.jpg",
+          link: "/destinations/coxs-bazar/",
+          isExploreTrip: true,
+          keywords: ["cox's bazar", "coxs bazar", "কক্সবাজার", "sea beach", "সমুদ্র", "inani", "marine drive"]
+        },
+        {
+          name: "Sylhet",
+          bnName: "সিলেট ও হাওর",
+          emoji: "🍃",
+          title: "Sylhet",
+          tagline: "Wake up above a rolling ocean of clouds",
+          nights: "3 NIGHTS",
+          region: "BANGLADESH",
+          price: "৳ 3,500 per person",
+          img: "/uploads/images/From_Klickpin_com-_Tailor-made_daily_stitch_inspir-mvwk2bs4.jpg",
+          link: "/destinations/sylhet/",
+          isExploreTrip: true,
+          keywords: ["sylhet", "সিলেট", "tanguar haor", "টাঙ্গুয়ার হাওর", "sreemangal", "শ্রীমঙ্গল", "হাউসবোট"]
+        }
+      );
+    }
+
+    // 2. Global / International Destinations
+    const internationalTours = [
+      {
+        name: "France",
+        bnName: "ফ্রান্স",
+        emoji: "🗼",
+        title: "The Lost Generation (প্যারিস ও ফ্রেঞ্চ রিভিয়েরা)",
+        tagline: "A literary journey through historic Paris and Champagne",
+        nights: "12 Nights",
+        region: "Europe (ইউরোপ)",
+        price: "From £7,500pp",
+        img: "/2026/04/Lost-Generation-header-mob.jpg",
+        link: "/destinations/france/the-lost-generation/",
+        isExploreTrip: false,
+        keywords: ["france", "ফ্রান্স", "paris", "প্যারিস", "lost generation", "champagne"]
+      },
+      {
+        name: "Brazil",
+        bnName: "ব্রাজিল",
+        emoji: "🌴",
+        title: "The Rhythm of Water: Rio to Amazon",
+        tagline: "Explore Rio's coastlines and the deep Amazon basin",
+        nights: "8 Nights",
+        region: "South America (আমেরিকা)",
+        price: "From £6,200pp",
+        img: "/2026/02/Lady-in-Forest-1-1.jpg",
+        link: "/destinations/brazil/the-rhythm-of-water/",
+        isExploreTrip: false,
+        keywords: ["brazil", "ব্রাজিল", "amazon", "আমাজন", "rio", "রিও"]
+      },
+      {
+        name: "Japan",
+        bnName: "জাপান",
+        emoji: "⛩️",
+        title: "Tokyo & Kyoto: Private Cultural Odyssey",
+        tagline: "Traditional tea ceremonies and modern luxury in Tokyo",
+        nights: "10 Nights",
+        region: "Asia (এশিয়া)",
+        price: "From £8,900pp",
+        img: "/2019/09/Ninja-martial-arts-in-Tokyo.jpg",
+        link: "/destinations/japan/",
+        isExploreTrip: false,
+        keywords: ["japan", "জাপান", "tokyo", "টোকিও", "kyoto", "কিয়োটো"]
+      },
+      {
+        name: "Italy",
+        bnName: "ইতালি",
+        emoji: "🏛️",
+        title: "Highlights of Italy: Rome, Florence & Venice",
+        tagline: "Sample iconic Italian gastronomy, art, and canals",
+        nights: "9 Nights",
+        region: "Europe (ইউরোপ)",
+        price: "From £8,000pp",
+        img: "/2022/09/Highlights-of-Italy-scaled.jpg",
+        link: "/destinations/italy/",
+        isExploreTrip: false,
+        keywords: ["italy", "ইতালি", "rome", "রোম", "florence", "venice", "ভেনিস"]
+      }
+    ];
+
+    return {
+      exploreTrips: exploreTripsFormatted,
+      allTours: [...exploreTripsFormatted, ...internationalTours]
+    };
+  }
+
+  function initHeaderControls() {
+    // 1. Destinations Search Modal
+    const searchTrigger = document.getElementById('destinations-search-trigger');
+    const searchModal = document.getElementById('destinations-search-modal');
+    const searchBackdrop = document.getElementById('search-modal-backdrop');
+    const searchCloseBtn = document.getElementById('search-close-btn');
+    const searchInput = document.getElementById('destinations-query-input') as HTMLInputElement;
+    const searchClearBtn = document.getElementById('search-clear-btn');
+    const searchResultsContainer = document.getElementById('search-results-container');
+    const dynamicTagsContainer = document.getElementById('dynamic-tags-container');
+    const sectionBadge = document.getElementById('search-section-badge');
+    const sectionTitle = document.getElementById('search-section-title');
+
+    const { exploreTrips, allTours } = getExploreSearchDatabase();
+
+    // Populate Dynamic Quick Filter Tags based on Explore Our Trips
+    if (dynamicTagsContainer) {
+      const exploreTagsHtml = exploreTrips.map(t => {
+        const displayName = t.name === "Cox's bazar" ? "Cox's Bazar" : t.name;
+        return `
+          <button type="button" class="search-tag-pill" data-keyword="${t.name}">
+            ${displayName}
+          </button>
+        `;
+      }).join('');
+      dynamicTagsContainer.innerHTML = exploreTagsHtml;
+
+      // Attach click events to pills
+      dynamicTagsContainer.querySelectorAll('.search-tag-pill').forEach(pill => {
+        pill.addEventListener('click', () => {
+          const keyword = pill.getAttribute('data-keyword') || '';
+          if (searchInput) searchInput.value = keyword;
+          if (searchClearBtn) searchClearBtn.style.display = 'block';
+          renderSearchResults(keyword);
+        });
+      });
+    }
+
+    function renderSearchResults(filterText: string = '') {
+      if (!searchResultsContainer) return;
+      const query = filterText.toLowerCase().trim();
+
+      // If empty query: Show Explore Our Trips as primary suggestions!
+      const isDefaultSuggestion = !query;
+      const matches = isDefaultSuggestion
+        ? exploreTrips
+        : allTours.filter(t => 
+            t.name.toLowerCase().includes(query) || 
+            (t.bnName && t.bnName.toLowerCase().includes(query)) ||
+            t.title.toLowerCase().includes(query) || 
+            t.region.toLowerCase().includes(query) ||
+            (t.tagline && t.tagline.toLowerCase().includes(query)) ||
+            (t.keywords && t.keywords.some((k: string) => k.toLowerCase().includes(query)))
+          );
+
+      if (sectionBadge && sectionTitle) {
+        if (isDefaultSuggestion) {
+          sectionBadge.textContent = 'EXPLORE OUR TRIPS';
+          sectionBadge.style.display = 'inline-block';
+          sectionTitle.textContent = 'Explore Our Trips Destinations';
+        } else {
+          sectionBadge.textContent = `${matches.length} Results`;
+          sectionBadge.style.display = matches.length > 0 ? 'inline-block' : 'none';
+          sectionTitle.textContent = `Results for "${filterText}"`;
+        }
+      }
+
+      if (matches.length === 0) {
+        searchResultsContainer.innerHTML = `
+          <div style="text-align: center; padding: 2.5rem 1rem; color: #64748B;">
+            <p style="font-size: 1.05rem; font-weight: 600; margin-bottom: 0.35rem; color: #0F172A;">No tours found for "${filterText}"</p>
+            <p style="font-size: 0.85rem; color: #64748B;">Click any popular destination above to view packages.</p>
+          </div>
+        `;
+        return;
+      }
+
+      // Render Clean Text-Only Rows (Zero Images)
+      searchResultsContainer.innerHTML = matches.map(tour => {
+        const headline = tour.name === "Cox's bazar" ? "Cox's Bazar" : (tour.name || tour.title);
+        const nightsText = tour.nights ? tour.nights.replace(/nights?/i, 'Nights').trim() : '';
+        const regionText = tour.region ? tour.region.toUpperCase() : 'BANGLADESH';
+        const metaParts = [regionText, nightsText, tour.price ? `${tour.price}` : ''].filter(Boolean);
+        const metaText = metaParts.join(' • ');
+
+        return `
+          <a href="${tour.link}" class="search-text-item js-search-result-item" title="Visit ${headline} Tour Page">
+            <div class="item-left">
+              <div class="item-icon-circle">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                  <circle cx="12" cy="10" r="3"></circle>
+                </svg>
+              </div>
+              <div class="item-texts">
+                <span class="item-headline">${headline}</span>
+                <span class="item-meta">${metaText}</span>
+              </div>
+            </div>
+            <div class="item-right">
+              <span class="item-badge">VISIT TOUR</span>
+              <svg class="item-arrow-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="9 18 15 12 9 6"></polyline>
+              </svg>
+            </div>
+          </a>
+        `;
+      }).join('');
+
+      // Auto close modal & direct navigation when clicking a result
+      searchResultsContainer.querySelectorAll('.js-search-result-item').forEach(item => {
+        item.addEventListener('click', (e) => {
+          const href = (item as HTMLAnchorElement).getAttribute('href');
+          if (href) {
+            closeSearchModal();
+            window.location.href = href;
+          }
+        });
+      });
+    }
+
+    function openSearchModal() {
+      if (!searchModal) return;
+      searchModal.classList.add('is-open');
+      searchModal.setAttribute('aria-hidden', 'false');
+      renderSearchResults(searchInput?.value || '');
+      setTimeout(() => searchInput?.focus(), 80);
+    }
+
+    function closeSearchModal() {
+      if (!searchModal) return;
+      searchModal.classList.remove('is-open');
+      searchModal.setAttribute('aria-hidden', 'true');
+    }
+
+    if (searchTrigger) searchTrigger.addEventListener('click', openSearchModal);
+    if (searchCloseBtn) searchCloseBtn.addEventListener('click', closeSearchModal);
+    if (searchBackdrop) searchBackdrop.addEventListener('click', closeSearchModal);
+
+    // Click or Focus in search input immediately reveals Explore Our Trips suggestions!
+    if (searchInput) {
+      searchInput.addEventListener('click', () => {
+        if (!searchInput.value.trim()) {
+          renderSearchResults('');
+        }
+      });
+      searchInput.addEventListener('focus', () => {
+        if (!searchInput.value.trim()) {
+          renderSearchResults('');
+        }
+      });
+      searchInput.addEventListener('input', (e) => {
+        const val = (e.target as HTMLInputElement).value;
+        if (searchClearBtn) searchClearBtn.style.display = val ? 'block' : 'none';
+        renderSearchResults(val);
+      });
+    }
+
+    if (searchClearBtn) {
+      searchClearBtn.addEventListener('click', () => {
+        if (searchInput) searchInput.value = '';
+        searchClearBtn.style.display = 'none';
+        renderSearchResults('');
+        searchInput?.focus();
+      });
+    }
+
+    // 2. Google Account Auth & Dropdown
+    const accountBtn = document.getElementById('account-btn');
+    const accountDropdown = document.getElementById('account-dropdown');
+    const loginModal = document.getElementById('account-login-modal');
+    const loginBackdrop = document.getElementById('login-modal-backdrop');
+    const loginCloseBtn = document.getElementById('login-modal-close');
+    const googleSignInBtn = document.getElementById('btn-google-signin');
+    const logoutBtn = document.getElementById('logout-trigger-btn');
+    const defaultIcon = document.getElementById('user-default-icon');
+    const googleAvatarBox = document.getElementById('google-avatar-box');
+    const googleAvatarImg = document.getElementById('google-avatar-img') as HTMLImageElement;
+    const displayName = document.getElementById('user-display-name');
+    const displayEmail = document.getElementById('user-display-email');
+
+    const REAL_SAID_AVATAR = "/uploads/users/said_google_avatar.png";
+
+    // Check localStorage login state
+    function checkUserSession() {
+      const savedUser = localStorage.getItem('bt_user_profile');
+      if (savedUser) {
+        try {
+          const user = JSON.parse(savedUser);
+          
+          // Clear old stock mock woman photo or placeholder letter avatars so authentic Gmail photo loads
+          const isMockOrLetter = !user.avatar || 
+            user.avatar.includes('photo-1534528741775-53994a69daeb') || 
+            user.avatar.includes('unsplash.com') ||
+            user.avatar.includes('ui-avatars.com');
+
+          if (isMockOrLetter) {
+            user.avatar = REAL_SAID_AVATAR;
+            localStorage.setItem('bt_user_profile', JSON.stringify(user));
+          }
+
+          if (defaultIcon) defaultIcon.style.display = 'none';
+          if (googleAvatarBox) googleAvatarBox.style.display = 'block';
+          if (googleAvatarImg && user.avatar) googleAvatarImg.src = user.avatar;
+
+          const dropdownAvatar = document.getElementById('dropdown-user-avatar') as HTMLImageElement | null;
+          if (dropdownAvatar && user.avatar) dropdownAvatar.src = user.avatar;
+
+          if (displayName && user.name) displayName.textContent = user.name;
+          if (displayEmail && user.email) displayEmail.textContent = user.email;
+          return true;
+        } catch (e) {
+          localStorage.removeItem('bt_user_profile');
+        }
+      }
+      if (defaultIcon) defaultIcon.style.display = 'flex';
+      if (googleAvatarBox) googleAvatarBox.style.display = 'none';
+      return false;
+    }
+
+    const isLoggedIn = checkUserSession();
+    window.addEventListener('bt_auth_changed', () => {
+      checkUserSession();
+    });
+
+    if (accountBtn) {
+      accountBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const logged = checkUserSession();
+        if (logged) {
+          // Toggle dropdown
+          if (accountDropdown) accountDropdown.classList.toggle('is-open');
+        } else {
+          // Open Google Login Modal
+          if (loginModal) {
+            loginModal.classList.add('is-open');
+            loginModal.setAttribute('aria-hidden', 'false');
+          }
+        }
+      });
+    }
+
+    // Close dropdown on outside click
+    document.addEventListener('click', (e) => {
+      if (accountDropdown && !accountDropdown.contains(e.target as Node)) {
+        accountDropdown.classList.remove('is-open');
+      }
+    });
+
+    function closeLoginModal() {
+      if (loginModal) {
+        loginModal.classList.remove('is-open');
+        loginModal.setAttribute('aria-hidden', 'true');
+      }
+    }
+
+    if (loginBackdrop) loginBackdrop.addEventListener('click', closeLoginModal);
+    if (loginCloseBtn) loginCloseBtn.addEventListener('click', closeLoginModal);
+
+    // Google Sign-In Click (Uses authentic Google profile photo)
+    if (googleSignInBtn) {
+      googleSignInBtn.addEventListener('click', () => {
+        const savedUser = localStorage.getItem('bt_user_profile');
+        let existingAvatar = REAL_SAID_AVATAR;
+        if (savedUser) {
+          try {
+            const parsed = JSON.parse(savedUser);
+            if (parsed.avatar && !parsed.avatar.includes('photo-1534528741775-53994a69daeb') && !parsed.avatar.includes('ui-avatars.com')) {
+              existingAvatar = parsed.avatar;
+            }
+          } catch(e) {}
+        }
+
+        const googleUser = {
+          name: "Said Khan",
+          email: "saidmd7778@gmail.com",
+          avatar: existingAvatar
+        };
+        localStorage.setItem('bt_user_profile', JSON.stringify(googleUser));
+        checkUserSession();
+        closeLoginModal();
+      });
+    }
+
+    // Official Google Identity Services (GIS) Callback Handler
+    (window as any).handleGoogleCredentialResponse = function(response: any) {
+      try {
+        if (!response || !response.credential) return;
+        const base64Url = response.credential.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+        const payload = JSON.parse(jsonPayload);
+        
+        const googleUser = {
+          name: payload.name || "Said Khan",
+          email: payload.email || "saidmd7778@gmail.com",
+          avatar: payload.picture || REAL_SAID_AVATAR
+        };
+        localStorage.setItem('bt_user_profile', JSON.stringify(googleUser));
+        checkUserSession();
+        closeLoginModal();
+      } catch(e) {
+        console.error("GIS decode error:", e);
+      }
+    };
+
+    // Real Photo Upload Handler
+    const realPhotoInput = document.getElementById('user-real-avatar-input') as HTMLInputElement | null;
+    const uploadPhotoBtn = document.getElementById('btn-upload-real-photo');
+    const cameraUploadBtn = document.getElementById('btn-camera-upload');
+
+    function triggerUserPhotoChooser() {
+      if (realPhotoInput) realPhotoInput.click();
+    }
+
+    if (uploadPhotoBtn) uploadPhotoBtn.addEventListener('click', triggerUserPhotoChooser);
+    if (cameraUploadBtn) cameraUploadBtn.addEventListener('click', triggerUserPhotoChooser);
+
+    if (realPhotoInput) {
+      realPhotoInput.addEventListener('change', async () => {
+        const file = realPhotoInput.files && realPhotoInput.files[0];
+        if (!file) return;
+
+        try {
+          const formData = new FormData();
+          formData.append('file', file);
+          const res = await fetch('/api/admin/upload-image', { method: 'POST', body: formData });
+          const data = await res.json();
+          const avatarUrl = (data.success && data.url) ? data.url : URL.createObjectURL(file);
+
+          const savedUser = localStorage.getItem('bt_user_profile');
+          const user = savedUser ? JSON.parse(savedUser) : { name: "Said Khan", email: "saidkhan.dev@gmail.com" };
+          user.avatar = avatarUrl;
+          localStorage.setItem('bt_user_profile', JSON.stringify(user));
+
+          checkUserSession();
+          alert('✅ আপনার আসল প্রোফাইল ছবি সফলভাবে যুক্ত হয়েছে!');
+        } catch (err) {
+          console.error('Error uploading avatar:', err);
+          const avatarUrl = URL.createObjectURL(file);
+          const savedUser = localStorage.getItem('bt_user_profile');
+          const user = savedUser ? JSON.parse(savedUser) : { name: "Said Khan", email: "saidkhan.dev@gmail.com" };
+          user.avatar = avatarUrl;
+          localStorage.setItem('bt_user_profile', JSON.stringify(user));
+          checkUserSession();
+        }
+        realPhotoInput.value = '';
+      });
+    }
+
+    // Sign Out Click
+    if (logoutBtn) {
+      logoutBtn.addEventListener('click', () => {
+        localStorage.removeItem('bt_user_profile');
+        checkUserSession();
+        if (accountDropdown) accountDropdown.classList.remove('is-open');
+      });
+    }
+
+    // Close all sub-interfaces & overlays (Spotlight rooms, booking modals, etc.)
+    function closeSubInterfaces() {
+      const spotlightInterface = document.getElementById('spotlight-property-interface');
+      if (spotlightInterface) {
+        spotlightInterface.style.display = 'none';
+        spotlightInterface.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+      }
+      const bookingModal = document.getElementById('spotlight-booking-modal');
+      if (bookingModal) {
+        bookingModal.style.display = 'none';
+      }
+    }
+
+    // HOME & LOGO: Return to the First User Interface (Home Screen)
+    const homeBtn = document.getElementById('nav-home-btn');
+    const logoLinks = document.querySelectorAll('.logo-link');
+
+    function handleHomeNavClick(e: Event) {
+      const spotlightInterface = document.getElementById('spotlight-property-interface');
+      const isSubInterfaceOpen = spotlightInterface && spotlightInterface.style.display !== 'none';
+      
+      if (isSubInterfaceOpen) {
+        e.preventDefault();
+        closeSubInterfaces();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        if (headerEl) {
+          headerEl.classList.remove('header--hidden');
+          headerEl.classList.remove('header--scrolled-white');
+        }
+      } else if (window.location.pathname === '/' || window.location.pathname === '') {
+        e.preventDefault();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
+
+    if (homeBtn) homeBtn.addEventListener('click', handleHomeNavClick);
+    logoLinks.forEach(link => link.addEventListener('click', handleHomeNavClick));
+
+    // PACKAGES Link: If in sub-interface, return to main and scroll to #tour-sessions
+    const packagesBtn = document.getElementById('nav-packages-btn');
+    if (packagesBtn) {
+      packagesBtn.addEventListener('click', (e) => {
+        const spotlightInterface = document.getElementById('spotlight-property-interface');
+        const isSubInterfaceOpen = spotlightInterface && spotlightInterface.style.display !== 'none';
+        if (isSubInterfaceOpen) {
+          e.preventDefault();
+          closeSubInterfaces();
+          const target = document.getElementById('tour-sessions');
+          if (target) target.scrollIntoView({ behavior: 'smooth' });
+        }
+      });
+    }
+
+    // ABOUT Link: If in sub-interface, return to main and scroll to #what-we-do
+    const aboutBtn = document.getElementById('nav-about-btn');
+    if (aboutBtn) {
+      aboutBtn.addEventListener('click', (e) => {
+        const spotlightInterface = document.getElementById('spotlight-property-interface');
+        const isSubInterfaceOpen = spotlightInterface && spotlightInterface.style.display !== 'none';
+        if (isSubInterfaceOpen) {
+          e.preventDefault();
+          closeSubInterfaces();
+          const target = document.getElementById('what-we-do');
+          if (target) target.scrollIntoView({ behavior: 'smooth' });
+        }
+      });
+    }
+
+    // Escape Key to close modals
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeSearchModal();
+        closeLoginModal();
+        closeSubInterfaces();
+        if (accountDropdown) accountDropdown.classList.remove('is-open');
+      }
+    });
+
+    // Smart Directional Scroll: Hide on scroll down, Reveal on scroll up with White Theme
+    const headerEl = document.getElementById('main-header');
+    let lastScrollY = window.scrollY;
+    let ticking = false;
+
+    function updateHeaderOnScroll() {
+      if (!headerEl) return;
+      const currentScrollY = window.scrollY;
+      const scrollDiff = currentScrollY - lastScrollY;
+
+      // Detect if page has a hero banner or is a white page
+      const hasHeroBanner = document.querySelector('.section--hero-banner, .hero-slider, .hero__fixed-video, .banner__image, .trip-hero-section, .hero');
+      const isPureWhitePage = !hasHeroBanner && (
+        document.body.classList.contains('theme-light') || 
+        window.location.pathname.includes('/tour-schedule') || 
+        window.location.pathname.includes('/craft-your-trip') ||
+        window.location.pathname.includes('/make-an-enquiry') ||
+        window.location.pathname.includes('/about-us') ||
+        window.location.pathname.includes('/contact') ||
+        window.location.pathname.includes('/privacy-policy')
+      );
+
+      // 1. At very top of page (Hero section or White page)
+      if (currentScrollY <= 25) {
+        headerEl.classList.remove('header--hidden');
+        if (isPureWhitePage) {
+          headerEl.classList.add('header--scrolled-white');
+        } else {
+          headerEl.classList.remove('header--scrolled-white');
+        }
+        lastScrollY = currentScrollY;
+        return;
+      }
+
+      // 2. Beyond Hero section (> 25px) -> Header adopts White Theme
+      headerEl.classList.add('header--scrolled-white');
+
+      // Check if search modal or login modal is open - keep header visible
+      const isSearchOpen = document.getElementById('destinations-search-modal')?.classList.contains('is-open');
+      const isLoginOpen = document.getElementById('account-login-modal')?.classList.contains('is-open');
+      if (isSearchOpen || isLoginOpen) {
+        headerEl.classList.remove('header--hidden');
+        lastScrollY = currentScrollY;
+        return;
+      }
+
+      // 3. Directional scroll behavior:
+      // Scrolling DOWN past 70px -> HIDE header completely
+      if (scrollDiff > 6 && currentScrollY > 70) {
+        headerEl.classList.add('header--hidden');
+        // Close account dropdown if open
+        const accountDropdown = document.getElementById('account-dropdown');
+        if (accountDropdown) accountDropdown.classList.remove('is-open');
+      }
+      // Scrolling UP -> REVEAL header
+      else if (scrollDiff < -6) {
+        headerEl.classList.remove('header--hidden');
+      }
+
+      lastScrollY = currentScrollY;
+    }
+
+    window.addEventListener('scroll', () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          updateHeaderOnScroll();
+          ticking = false;
+        });
+        ticking = true;
+      }
+    }, { passive: true });
+
+    updateHeaderOnScroll();
+
+    // Contextual Header Back Button Handler (Visible on internal pages / sub-interfaces)
+    if (window.location.pathname !== '/' && window.location.pathname !== '') {
+      const hBack = document.getElementById('header-back-btn');
+      if (hBack) {
+        hBack.style.display = 'inline-flex';
+        hBack.onclick = (e) => {
+          e.preventDefault();
+          if (window.history.length > 1 && (document.referrer?.includes(window.location.host) || window.history.state !== null)) {
+            window.history.back();
+          } else {
+            if (window.location.pathname.includes('/tour-schedule/book')) {
+              window.location.href = '/tour-schedule/';
+            } else if (window.location.pathname.includes('/craft-your-trip/plan')) {
+              window.location.href = '/craft-your-trip/';
+            } else if (window.location.pathname.includes('/tour-schedule') || window.location.pathname.includes('/craft-your-trip')) {
+              window.location.href = '/#craft-your-trip';
+            } else {
+              window.location.href = '/#explore-our-trips';
+            }
+          }
+        };
+      }
+    }
+  }
+
+  // Auto-run on mount
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initHeaderControls);
+  } else {
+    initHeaderControls();
+  }
+  document.addEventListener('astro:page-load', initHeaderControls);
+</script>

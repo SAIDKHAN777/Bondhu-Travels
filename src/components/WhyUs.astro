@@ -1,0 +1,132 @@
+---
+const pillars = [
+  {
+    icon: "🧭",
+    title: "100% Tailor-Made",
+    desc: "No off-the-shelf packages. Every day of your trip is handcrafted around how you want to feel."
+  },
+  {
+    icon: "💎",
+    title: "The Keepers Network",
+    desc: "Unrivalled access to local experts, private custodians, historians, and remote sanctuaries."
+  },
+  {
+    icon: "🛡️",
+    title: "Total Peace of Mind",
+    desc: "24/7 global on-the-ground concierge support, vetted luxury lodgings, and financial protection."
+  }
+];
+---
+
+<section class="why-section" aria-label="Why Black Tomato">
+  <div class="why-container">
+    <div class="why-header">
+      <span class="why-badge">The Difference</span>
+      <h2 class="why-title">Why Travel With Black Tomato</h2>
+    </div>
+
+    <div class="why-grid">
+      {pillars.map((item) => (
+        <div class="why-item">
+          <div class="why-icon-wrap">
+            <span class="why-icon">{item.icon}</span>
+          </div>
+          <h3 class="why-item-title">{item.title}</h3>
+          <p class="why-item-desc">{item.desc}</p>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .why-section {
+    padding: 6rem 2rem;
+    background-color: #070A0E;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .why-container {
+    max-width: 1440px;
+    margin: 0 auto;
+  }
+
+  .why-header {
+    text-align: center;
+    margin-bottom: 4rem;
+  }
+
+  .why-badge {
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: #E82E72;
+    margin-bottom: 0.75rem;
+    display: inline-block;
+  }
+
+  .why-title {
+    font-family: 'Chronicle Display', serif;
+    font-size: 3rem;
+    color: #FFFFFF;
+    font-weight: 400;
+  }
+
+  .why-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 3rem;
+  }
+
+  .why-item {
+    text-align: center;
+    padding: 2.5rem 1.5rem;
+    background: #0C1017;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 1rem;
+    transition: transform 0.3s, border-color 0.3s;
+  }
+
+  .why-item:hover {
+    transform: translateY(-4px);
+    border-color: rgba(232, 46, 114, 0.4);
+  }
+
+  .why-icon-wrap {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: rgba(232, 46, 114, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    border: 1px solid rgba(232, 46, 114, 0.2);
+  }
+
+  .why-icon {
+    font-size: 1.8rem;
+  }
+
+  .why-item-title {
+    font-family: 'Chronicle Display', serif;
+    font-size: 1.5rem;
+    color: #FFFFFF;
+    margin-bottom: 0.75rem;
+    font-weight: 400;
+  }
+
+  .why-item-desc {
+    font-size: 0.95rem;
+    color: #94A3B8;
+    line-height: 1.6;
+  }
+
+  @media (max-width: 900px) {
+    .why-grid {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+  }
+</style>

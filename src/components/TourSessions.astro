@@ -1,0 +1,2272 @@
+---
+// Tour Sessions (Filtered Tiles: By Traveller, Most Popular, By Month, In The Spotlight)
+// In The Spotlight includes two flagship private properties:
+// 1. টাঙ্গুয়ার হাওড় নিজস্ব লাক্সারি হাউসবোট (Tanguar Haor Luxury Houseboat)
+// 2. সেন্ট মার্টিন পার্সোনাল বিচ রিসোর্ট (Saint Martin Private Beach Resort)
+
+export interface TourCardItem {
+  title: string;
+  img: string;
+  link?: string;
+}
+
+export interface SpotlightRoom {
+  id: string;
+  name: string;
+  subtitle: string;
+  img: string;
+  gallery?: string[];
+  price: string;
+  priceUnit?: string;
+  capacity: string;
+  bedType: string;
+  features: string[];
+  description: string;
+}
+
+export interface SpotlightProperty {
+  id: string;
+  title: string;
+  englishTitle: string;
+  bengaliTitle?: string;
+  cardHeadline?: string;
+  badge: string;
+  location: string;
+  tagline: string;
+  startingPrice: string;
+  charterPrice?: string;
+  thumbnailImg: string;
+  heroImg?: string;
+  heroVideo?: string;
+  features: string[];
+  gallery: { title: string; img: string; desc: string }[];
+  rooms: SpotlightRoom[];
+}
+
+export interface SpotlightConfig {
+  houseboat?: Partial<SpotlightProperty>;
+  resort?: Partial<SpotlightProperty>;
+}
+
+interface Props {
+  travellerCards?: TourCardItem[];
+  popularCards?: TourCardItem[];
+  monthCards?: TourCardItem[];
+  spotlightConfig?: SpotlightConfig | any;
+  whatsappPhone?: string;
+}
+
+const defaultTravellerCards: TourCardItem[] = [
+  { title: "Family", img: "/2026/01/Girl-running-in-farm-1.jpg", link: "/experience-types/family-holidays/" },
+  { title: "Couples", img: "/2026/01/Couple-sitting-by-coast.jpg", link: "/experience-types/couples-holidays/" },
+  { title: "Groups", img: "/2026/01/Group-canoeing-1.jpg", link: "/experience-types/luxury-group-holidays/" },
+  { title: "Honeymoon", img: "/2026/01/Couple-Italy-couple-swimming.jpg", link: "/experience-types/luxury-honeymoons/" },
+  { title: "Solo", img: "/2026/01/Lady-on-a-horse-1.jpg", link: "/experience-types/solo-holidays/" }
+];
+
+const defaultPopularCards: TourCardItem[] = [
+  { title: "Sajek Valley", img: "/2022/09/Utah-adventure-2-1-scaled.jpg", link: "/destinations/sajek/" },
+  { title: "Cox's Bazar", img: "/2024/04/Website-Homepage-V9.00_00_00_00.Still002.jpg", link: "/destinations/coxs-bazar/" },
+  { title: "Kuakata", img: "/2026/01/Couple-sitting-by-coast.jpg", link: "/destinations/kuakata/" },
+  { title: "Sundarbans", img: "/2026/02/Lady-in-Forest-1-1.jpg", link: "/destinations/sundarbans/" },
+  { title: "Sreemangal", img: "/2026/01/Group-canoeing-1.jpg", link: "/destinations/sreemangal/" },
+  { title: "Tanzania", img: "/2022/08/zebra-chobe-national-park-botswana-1.jpg", link: "/destinations/tanzania/" },
+  { title: "Italy", img: "/2022/09/Highlights-of-Italy-scaled.jpg", link: "/destinations/italy/" },
+  { title: "France", img: "/2026/04/Lost-Generation-header-mob.jpg", link: "/destinations/france/" }
+];
+
+const defaultMonthCards: TourCardItem[] = [
+  { title: "January", img: "/2023/12/Months_january.jpg", link: "/where-travel-now/january/" },
+  { title: "February", img: "/2023/12/Months_february.jpg", link: "/where-travel-now/february/" },
+  { title: "March", img: "/2023/12/Months_march.jpg", link: "/where-travel-now/march/" },
+  { title: "April", img: "/2023/12/Months_april.jpg", link: "/where-travel-now/april/" },
+  { title: "May", img: "/2023/12/Months_may.jpg", link: "/where-travel-now/may/" },
+  { title: "June", img: "/2023/12/Months_june.jpg", link: "/where-travel-now/june/" },
+  { title: "July", img: "/2023/12/Months_july.jpg", link: "/where-travel-now/july/" },
+  { title: "August", img: "/2023/12/Months_august.jpg", link: "/where-travel-now/august/" },
+  { title: "September", img: "/2023/12/Months_september.jpg", link: "/where-travel-now/september/" },
+  { title: "October", img: "/2023/12/Months_october.jpg", link: "/where-travel-now/october/" },
+  { title: "November", img: "/2023/12/Months_november.jpg", link: "/where-travel-now/november/" },
+  { title: "December", img: "/2023/12/Months_december.jpg", link: "/where-travel-now/december/" }
+];
+
+// 1. Default Houseboat Property Spec
+const defaultHouseboatProperty: SpotlightProperty = {
+  id: "houseboat",
+  title: "TANGUAR HAOR LUXURY HOUSEBOAT",
+  englishTitle: "TANGUAR HAOR LUXURY HOUSEBOAT",
+  bengaliTitle: "টাঙ্গুয়ার হাওড় নিজস্ব লাক্সারি হাউসবোট",
+  badge: "EXCLUSIVE HOUSEBOAT",
+  location: "টাঙ্গুয়ার হাওড় ও মেঘালয় ফুটহিলস, সুনামগঞ্জ",
+  tagline: "হাওড়ের নীল জলরাশি আর মেঘালয়ের পাহাড়ঘেরা নয়নাভিরাম সৌন্দর্যের মাঝে ভেসে চলুন আমাদের নিজস্ব প্রিমিয়াম লাক্সারি হাউসবোটে।",
+  startingPrice: "From ৳ ৮,৫০০ / Night",
+  charterPrice: "৳ ৪৫,০০০ / পুরো বোট (প্রতি দিন-রাত)",
+  heroVideo: "/uploads/videos/sunamganj_short_16x10-mvwdaq9p.mp4",
+  heroImg: "/uploads/images/obintehasan_pindown_io_1793483591-mvwxtycm.jpg",
+  thumbnailImg: "/uploads/images/obintehasan_pindown_io_1793483591-mvwxtycm.jpg",
+  features: [
+    "৪টি মাস্টার ও কাপল ব্যালকনি কেবিন",
+    "৩৬০° রুফটপ সান ডেক ও রিলাক্স লাউঞ্জ",
+    "নিজস্ব শেফ, টাটকা হাওড়ের মাছ ও বারবিকিউ",
+    "২৪ ঘণ্টা নিরবচ্ছিন্ন বিদ্যুৎ, ফ্যান ও নিরাপত্তা"
+  ],
+  gallery: [
+    { title: "মাস্টার স্যুট ইন্টেরিয়র", img: "/uploads/images/obintehasan_pindown_io_1793483591-mvwxtycm.jpg", desc: "প্রাকৃতিক কাঠের ডিজাইন ও নরম লাক্সারি বিছানা" },
+    { title: "রুফটপ সান ডেক", img: "/2026/01/Couple-sitting-by-coast.jpg", desc: "৩৬০ ডিগ্রি মুক্ত বাতাস ও হাওড়ের নীল জলের দৃশ্য" },
+    { title: "ওপেন ডাইনিং লাউঞ্জ", img: "/2026/01/Group-canoeing-1.jpg", desc: "টাটকা দেশি মাছ ও স্থানীয় রসনার বিশেষ আয়োজন" },
+    { title: "হাওড় ভিউ ব্যালকনি", img: "/2022/09/Utah-adventure-2-1-scaled.jpg", desc: "সূর্যাস্ত ও মেঘালয়ের সবুজ পাহাড় উপভোগের নিরিবিলি স্থান" }
+  ],
+  rooms: [
+    {
+      id: "hb-joltorongo",
+      name: "জলতরঙ্গ (Joltorongo)",
+      subtitle: "মাস্টার লেক ভিউ স্যুট (Master Suite)",
+      img: "/uploads/images/obintehasan_pindown_io_1793483591-mvwxtycm.jpg",
+      gallery: [
+        "/uploads/images/obintehasan_pindown_io_1793483591-mvwxtycm.jpg",
+        "/2022/09/Utah-adventure-2-1-scaled.jpg"
+      ],
+      price: "৳ ১২,০০০",
+      priceUnit: "প্রতি রাত",
+      capacity: "২-৩ জন",
+      bedType: "১টি কিং সাইজ বেড",
+      features: ["প্যানোরামিক লেক ভিউ", "অ্যাটাচড প্রিমিয়াম ওয়াশরুম", "প্রাইভেট ব্যালকনি", "২৪ ঘণ্টা বিদ্যুৎ ও ফ্যান", "লাইফ জ্যাকেট ও সেফটি কিট"],
+      description: "হাউসবোটের সবচেয়ে বিলাসবহুল কেবিন। সামনের অংশে অবস্থিত হওয়ায় সরাসরি হাওড়ের ঢেউ ও মেঘালয়ের পাহাড়ের অপরূপ দৃশ্য উপভোগ করা যায়।"
+    },
+    {
+      id: "hb-jolkutir",
+      name: "জলকুটির (Jolkutir)",
+      subtitle: "প্রিমিয়াম ব্যালকনি কেবিন (Balcony Cabin)",
+      img: "/uploads/images/From_Klickpin_com-_Copy_this_guide_to_elegant_herb-mvwx285b.jpg",
+      gallery: [
+        "/uploads/images/From_Klickpin_com-_Copy_this_guide_to_elegant_herb-mvwx285b.jpg",
+        "/2026/01/Couple-sitting-by-coast.jpg"
+      ],
+      price: "৳ ৯,৫০০",
+      priceUnit: "প্রতি রাত",
+      capacity: "২ জন",
+      bedType: "১টি কুইন সাইজ বেড",
+      features: ["বড় ওয়াটার-লেভেল গ্লাস উইন্ডো", "অ্যাটাচড ওয়াশরুম", "শান্ত নিরিবিলি অ্যাম্বিয়েন্স", "২৪ ঘণ্টা বিদ্যুৎ"],
+      description: "দম্পতিদের জন্য সেরা রোমান্টিক কেবিন। পানির খুব কাছাকাছি থেকে হাওড়ের শান্ত কলতান উপভোগ করার জন্য এটি অতুলনীয়।"
+    },
+    {
+      id: "hb-meghboron",
+      name: "মেঘবরণ (Meghboron)",
+      subtitle: "ফ্যামিলি লাক্সারি স্যুট (Family Suite)",
+      img: "/2026/01/Girl-running-in-farm-1.jpg",
+      gallery: [
+        "/2026/01/Girl-running-in-farm-1.jpg",
+        "/2026/01/Group-canoeing-1.jpg"
+      ],
+      price: "৳ ১৪,০০০",
+      priceUnit: "প্রতি রাত",
+      capacity: "৪ জন",
+      bedType: "২টি বড় ডাবল বেড",
+      features: ["প্রশস্ত ফ্যামিলি স্পেস", "অ্যাটাচড ওয়াশরুম", "বাচ্চাদের জন্য নিরাপদ ব্যারিকেড", "প্রাইভেট সিটিং স্পেস"],
+      description: "পরিবার বা ৪ জনের ঘনিষ্ঠ বন্ধুদের গ্রুপের জন্য নিখুঁত পছন্দ। একসাথে নিরাপদে থাকার সেরা বন্দোবস্ত।"
+    },
+    {
+      id: "hb-joljochona",
+      name: "জলজোছনা (Joljochona)",
+      subtitle: "ডিলাক্স টুইন কেবিন (Deluxe Twin)",
+      img: "/2026/01/Group-canoeing-1.jpg",
+      gallery: [
+        "/2026/01/Group-canoeing-1.jpg",
+        "/2022/09/Utah-adventure-2-1-scaled.jpg"
+      ],
+      price: "৳ ৮,৫০০",
+      priceUnit: "প্রতি রাত",
+      capacity: "২ জন",
+      bedType: "২টি আলাদা সিংগেল বেড",
+      features: ["টুইন বেড কনফিগারেশন", "অ্যাটাচড ওয়াশরুম", "হাওড় ব্রিজ উইন্ডো", "নিরাপদ লকার"],
+      description: "দুই বন্ধু বা সহকর্মীদের জন্য নিখুঁত টুইন বেড কেবিন। হাওড়ের খোলা হাওয়ায় প্রশান্তিময় রাত কাটানোর দারুণ ব্যবস্থা।"
+    }
+  ]
+};
+
+// 2. Default Saint Martin Resort Property Spec
+const defaultResortProperty: SpotlightProperty = {
+  id: "resort",
+  title: "সেন্ট মার্টিন পার্সোনাল বিচ রিসোর্ট",
+  englishTitle: "SAINT MARTIN PRIVATE BEACH RESORT",
+  badge: "CORAL ISLAND EXCLUSIVE",
+  location: "পশ্চিম বিচ ও কোরাল ভিউ পয়েন্ট, সেন্ট মার্টিন দ্বীপ",
+  tagline: "সেন্ট মার্টিন দ্বীপে সমুদ্রের একদম কোল ঘেঁষে নারিকেল বাগানে ঘেরা আমাদের নিজস্ব প্রাইভেট বিচ রিসোর্ট। নিজস্ব বিচফ্রন্ট অ্যাক্সেস, সমুদ্রের গর্জন শুনে ঘুম ভাঙা, ফ্রেশ সি-ফুড ডাইনিং, বারবিকিউ কর্নার ও আধুনিক এসি কটেজ।",
+  startingPrice: "From ৳ ৬,০০০ / Night",
+  charterPrice: "৳ ৫০,০০০ / সম্পূর্ণ রিসোর্ট কটেজ গ্রুপ প্যাকেজ",
+  thumbnailImg: "/2026/01/Couple-sitting-by-coast.jpg",
+  features: [
+    "সরাসরি প্রাইভেট বিচফ্রন্ট ও কোরাল ভিউ",
+    "সবুজ নারিকেল বাগানে ঘেরা এসি ইকো কটেজ",
+    "লাইভ বারবিকিউ ডিনার ও টাটকা সি-ফুড",
+    "২৪ ঘণ্টা সোলার ও জেনারেটর বিদ্যুৎ ব্যাকআপ"
+  ],
+  gallery: [
+    { title: "প্রাইভেট বিচফ্রন্ট ভিউ", img: "/2026/01/Couple-sitting-by-coast.jpg", desc: "রিসোর্টের সামনেই শান্ত নীলাভ সমুদ্রের ঢেউ ও কোরাল বিচ" },
+    { title: "ইকো বিচ কটেজ", img: "/2022/09/Utah-adventure-2-1-scaled.jpg", desc: "আধুনিক কাঠের নান্দনিক কটেজ ও সবুজ নারিকেল বাগান" },
+    { title: "বিচফ্রন্ট সানসেট লাউঞ্জ", img: "/2026/01/Group-canoeing-1.jpg", desc: "হ্যামকে শুয়ে সেন্ট মার্টিনের রক্তিম সূর্যাস্ত দেখার রোমাঞ্চ" },
+    { title: "সি-ফুড ও বারবিকিউ কর্নার", img: "/2026/01/Girl-running-in-farm-1.jpg", desc: "টাটকা কোরাল, টুনা, লবস্টার ও লাইভ বারবিকিউ আয়োজন" }
+  ],
+  rooms: [
+    {
+      id: "resort-probalkutir",
+      name: "প্রবাল কুটির (Probal Kutir)",
+      subtitle: "মাস্টার ওশানফ্রন্ট ভিলা (Oceanfront Villa)",
+      img: "/2026/01/Couple-sitting-by-coast.jpg",
+      gallery: [
+        "/2026/01/Couple-sitting-by-coast.jpg",
+        "/2022/09/Utah-adventure-2-1-scaled.jpg"
+      ],
+      price: "৳ ৯,৫০০",
+      priceUnit: "প্রতি রাত",
+      capacity: "২-৩ জন",
+      bedType: "১টি কিং সাইজ বেড",
+      features: ["সরাসরি সমুদ্রের দৃশ্য", "প্রাইভেট সি-ভিউ বারান্দা ও হ্যামক", "স্প্লিট এসি ও গিজার", "লাক্সারি ফিটিংস বাথরুম", "কমপ্লিমেন্টারি বিচ ব্রেকফাস্ট"],
+      description: "রিসোর্টের সবচেয়ে আকর্ষণীয় বিচফ্রন্ট ভিলা। বারান্দায় বসে সরাসরি নীল সমুদ্রের ঢেউ ও সূর্যাস্ত দেখার এক অনন্য অভিজ্ঞতা।"
+    },
+    {
+      id: "resort-nildigonto",
+      name: "নীল দিগন্ত (Neel Digonto)",
+      subtitle: "ডিলাক্স কাপল কটেজ (Deluxe Cottage)",
+      img: "/2022/09/Utah-adventure-2-1-scaled.jpg",
+      gallery: [
+        "/2022/09/Utah-adventure-2-1-scaled.jpg",
+        "/uploads/images/From_Klickpin_com-_Copy_this_guide_to_elegant_herb-mvwx285b.jpg"
+      ],
+      price: "৳ ৭,৫০০",
+      priceUnit: "প্রতি রাত",
+      capacity: "২ জন",
+      bedType: "১টি কুইন সাইজ বেড",
+      features: ["সমুদ্রমুখী ব্যালকনি", "এসি ও সিলিং ফ্যান", "নারিকেল বাগানের ছায়া", "২৪ ঘণ্টা নিরবচ্ছিন্ন বিদ্যুৎ"],
+      description: "দম্পতি ও কাপলদের জন্য সেরা রোমান্টিক কটেজ। সমুদ্রের সুমধুর গর্জন আর নারিকেল পাতার শীতল ছায়ায় পরিপূর্ণ প্রশান্তি।"
+    },
+    {
+      id: "resort-dwipchhaya",
+      name: "দ্বীপ ছায়া (Dwip Chhaya)",
+      subtitle: "ফ্যামিলি বিচফ্রন্ট স্যুট (Family Suite)",
+      img: "/2026/01/Girl-running-in-farm-1.jpg",
+      gallery: [
+        "/2026/01/Girl-running-in-farm-1.jpg",
+        "/2026/01/Couple-sitting-by-coast.jpg"
+      ],
+      price: "৳ ১১,০০০",
+      priceUnit: "প্রতি রাত",
+      capacity: "৪-৫ জন",
+      bedType: "২টি বড় ডাবল বেড",
+      features: ["২টি আলাদা বেডরুম জোন", "প্রশস্ত সি-ফেসিং বারান্দা", "এসি ও আধুনিক ওয়াশরুম", "বাচ্চাদের খেলার জন্য নিরাপদ বিচ"],
+      description: "পরিবার নিয়ে সেন্ট মার্টিন ভ্রমণের জন্য সবচেয়ে নিরাপদ ও আরামদায়ক স্যুট। পরিবারের সবাই একসাথে চমৎকার সময় কাটাতে পারবেন।"
+    },
+    {
+      id: "resort-coconutgrove",
+      name: "কোকোনাট গ্রোভ (Coconut Grove)",
+      subtitle: "ডিলাক্স টুইন/ইকো রুম (Deluxe Twin)",
+      img: "/2026/01/Group-canoeing-1.jpg",
+      gallery: [
+        "/2026/01/Group-canoeing-1.jpg",
+        "/2022/09/Utah-adventure-2-1-scaled.jpg"
+      ],
+      price: "৳ ৬,০০০",
+      priceUnit: "প্রতি রাত",
+      capacity: "২ জন",
+      bedType: "২টি আলাদা সিঙ্গেল বেড",
+      features: ["টুইন বেড সেটআপ", "অ্যাটাচড ওয়াশরুম", "রিসোর্ট গার্ডেন লাউঞ্জ", "সি-ফুড বারবিকিউ বিশেষ ছাড়"],
+      description: "বন্ধু বা সহকর্মীদের সাথে ভ্রমণের জন্য আদর্শ ও সাশ্রয়ী আধুনিক কটেজ। সাশ্রয়ী বাজেটে প্রিমিয়াম বিচ রিসোর্ট ফিল।"
+    }
+  ]
+};
+
+const {
+  travellerCards: propTraveller,
+  popularCards: propPopular,
+  monthCards: propMonth,
+  spotlightConfig: propSpotlight,
+  whatsappPhone: propWhatsapp
+} = Astro.props;
+
+const travellerCards = propTraveller && propTraveller.length > 0 ? propTraveller : defaultTravellerCards;
+const popularCards = propPopular && propPopular.length > 0 ? propPopular : defaultPopularCards;
+const monthCards = propMonth && propMonth.length > 0 ? propMonth : defaultMonthCards;
+
+// Merge Live DB Spotlight settings with robust fallback
+const liveHouseboat: SpotlightProperty = {
+  ...defaultHouseboatProperty,
+  ...(propSpotlight?.houseboat || (propSpotlight?.cabins ? propSpotlight : {})),
+  thumbnailImg: propSpotlight?.houseboat?.thumbnailImg || defaultHouseboatProperty.thumbnailImg,
+  cardHeadline: propSpotlight?.houseboat?.cardHeadline || propSpotlight?.houseboat?.bengaliTitle || defaultHouseboatProperty.bengaliTitle,
+  heroVideo: propSpotlight?.houseboat?.heroVideo !== undefined ? propSpotlight.houseboat.heroVideo : defaultHouseboatProperty.heroVideo,
+  heroImg: propSpotlight?.houseboat?.heroImg || defaultHouseboatProperty.heroImg,
+  englishTitle: propSpotlight?.houseboat?.englishTitle || propSpotlight?.houseboat?.title || defaultHouseboatProperty.englishTitle,
+  rooms: (propSpotlight?.houseboat?.rooms && propSpotlight.houseboat.rooms.length > 0)
+    ? propSpotlight.houseboat.rooms
+    : (propSpotlight?.cabins && propSpotlight.cabins.length > 0)
+      ? propSpotlight.cabins
+      : defaultHouseboatProperty.rooms
+};
+
+const liveResort: SpotlightProperty = {
+  ...defaultResortProperty,
+  ...(propSpotlight?.resort || {}),
+  thumbnailImg: propSpotlight?.resort?.thumbnailImg || defaultResortProperty.thumbnailImg,
+  cardHeadline: propSpotlight?.resort?.cardHeadline || propSpotlight?.resort?.bengaliTitle || defaultResortProperty.bengaliTitle,
+  heroVideo: propSpotlight?.resort?.heroVideo !== undefined ? propSpotlight.resort.heroVideo : defaultResortProperty.heroVideo,
+  heroImg: propSpotlight?.resort?.heroImg || defaultResortProperty.heroImg,
+  englishTitle: propSpotlight?.resort?.englishTitle || propSpotlight?.resort?.title || defaultResortProperty.englishTitle,
+  rooms: (propSpotlight?.resort?.rooms && propSpotlight.resort.rooms.length > 0)
+    ? propSpotlight.resort.rooms
+    : defaultResortProperty.rooms
+};
+
+const targetWhatsapp = propWhatsapp || "+442074269888";
+---
+
+<section class="section section--filtered_tiles pt-xl sm:pt-xl pb-lg bg-light" id="tour-sessions">
+  <div class="container">
+    <header class="align-text-center">
+      <h2 class="section-heading">START YOUR JOURNEY</h2>
+      <ul class="list list--tabs filter-tab-buttons">
+        <li>
+          <button class="text-sm-xs text-headings uppercase js-tab-btn is-active" data-tab-target="by-traveller">
+            BY TRAVELLER
+          </button>
+        </li>
+        <li>
+          <button class="text-sm-xs text-headings uppercase js-tab-btn" data-tab-target="most-popular">
+            MOST POPULAR
+          </button>
+        </li>
+        <li>
+          <button class="text-sm-xs text-headings uppercase js-tab-btn" data-tab-target="by-month">
+            BY MONTH
+          </button>
+        </li>
+        <li>
+          <button class="text-sm-xs text-headings uppercase js-tab-btn" data-tab-target="in-the-spotlight">
+            IN THE SPOTLIGHT
+          </button>
+        </li>
+      </ul>
+    </header>
+
+    <div class="section__content section__content--row section">
+      <!-- TAB 1: BY TRAVELLER -->
+      <div class="tab-panel is-active" id="tab-by-traveller">
+        <div class="tiles-grid tiles-grid--5">
+          {travellerCards.map((card) => (
+            <div class="tile-card">
+              <div class="tile-content" style={`background-image: url(${card.img || (card as any).image});`}>
+                <a href={card.link || '/destinations/'} class="tile-link">
+                  <h5 class="h6 strong tile-title">{card.title}</h5>
+                  <div class="tile-overlay"></div>
+                </a>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <!-- TAB 2: MOST POPULAR -->
+      <div class="tab-panel" id="tab-most-popular">
+        <div class="tiles-grid tiles-grid--4">
+          {popularCards.map((card) => (
+            <div class="tile-card">
+              <div class="tile-content" style={`background-image: url(${card.img || (card as any).image});`}>
+                <a href={card.link} class="tile-link">
+                  <h5 class="h6 strong tile-title">{card.title}</h5>
+                  <div class="tile-overlay"></div>
+                </a>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <!-- TAB 3: BY MONTH -->
+      <div class="tab-panel" id="tab-by-month">
+        <div class="tiles-grid tiles-grid--4">
+          {monthCards.map((card) => (
+            <div class="tile-card">
+              <div class="tile-content" style={`background-image: url(${card.img || (card as any).image});`}>
+                <a href={card.link} class="tile-link">
+                  <h5 class="h6 strong tile-title">{card.title}</h5>
+                  <div class="tile-overlay"></div>
+                </a>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <!-- TAB 4: IN THE SPOTLIGHT (2 Clean Destination Cards, matching other tabs) -->
+      <div class="tab-panel" id="tab-in-the-spotlight">
+        <div class="tiles-grid tiles-grid--2">
+          <!-- CARD 1: TANGUAR HAOR LUXURY HOUSEBOAT -->
+          <div class="tile-card js-open-property-interface" data-property-target="houseboat" style="cursor: pointer;">
+            <div class="tile-content" style={`background-image: url('${liveHouseboat.thumbnailImg || "/uploads/images/obintehasan_pindown_io_1793483591-mvwxtycm.jpg"}');`}>
+              <div class="tile-link">
+                <h5 class="h6 strong tile-title">{liveHouseboat.cardHeadline || liveHouseboat.bengaliTitle || liveHouseboat.title || "টাঙ্গুয়ার হাওড় নিজস্ব লাক্সারি হাউসবোট"}</h5>
+                <div class="tile-overlay"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- CARD 2: SAINT MARTIN PERSONAL BEACH RESORT -->
+          <div class="tile-card js-open-property-interface" data-property-target="resort" style="cursor: pointer;">
+            <div class="tile-content" style={`background-image: url('${liveResort.thumbnailImg || "/2026/01/Couple-sitting-by-coast.jpg"}');`}>
+              <div class="tile-link">
+                <h5 class="h6 strong tile-title">{liveResort.cardHeadline || liveResort.bengaliTitle || liveResort.title || "সেন্ট মার্টিন পার্সোনাল বিচ রিসোর্ট"}</h5>
+                <div class="tile-overlay"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================== -->
+<!-- NEW DEDICATED FULL-SCREEN LUXURY ROOM INTERFACE -->
+<!-- Full-Bleed 50/50 Split Matching Black Tomato Screenshot 3 -->
+<!-- ============================================================== -->
+<div class="spotlight-room-interface-overlay" id="spotlight-property-interface" style="display: none;" aria-hidden="true">
+  <div class="interface-container">
+    
+    <!-- 2. PROPERTY 1 VIEW: TANGUAR HAOR HOUSEBOAT ROOM SESSIONS -->
+    <main class="interface-content-view is-active" id="interface-view-houseboat">
+      
+      <!-- CINEMA HERO BANNER (Video or Image with English Title & Top-Left Back Button) -->
+      <section class="property-cinema-hero">
+        {liveHouseboat.heroVideo ? (
+          <video 
+            class="property-hero-media" 
+            src={liveHouseboat.heroVideo} 
+            autoplay 
+            loop 
+            muted 
+            playsinline
+          />
+        ) : (
+          <div 
+            class="property-hero-media property-hero-media--img" 
+            style={`background-image: url('${liveHouseboat.heroImg || liveHouseboat.thumbnailImg || "/uploads/images/obintehasan_pindown_io_1793483591-mvwxtycm.jpg"}');`}
+          />
+        )}
+
+        <div class="property-hero-overlay"></div>
+
+        <!-- Back button in top-left corner -->
+        <div class="property-hero-topbar">
+          <button type="button" class="btn-hero-back js-close-property-interface" aria-label="Back">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="19" y1="12" x2="5" y2="12"></line>
+              <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+            <span>Back</span>
+          </button>
+        </div>
+
+        <!-- Centered Luxury English Property Title -->
+        <div class="property-hero-center">
+          <h1 class="property-hero-title">{liveHouseboat.englishTitle || "TANGUAR HAOR LUXURY HOUSEBOAT"}</h1>
+        </div>
+      </section>
+
+      <!-- Full-Bleed 50/50 Alternating Room Rows (Clean 3 Items: Title, Description, Price + Book Button) -->
+      <section class="interface-rooms-section">
+        <div class="editorial-rooms-container">
+          {liveHouseboat.rooms.map((room: SpotlightRoom, idx: number) => {
+            const isReversed = idx % 2 !== 0;
+            const galleryImgs = (room.gallery && room.gallery.length > 0) ? room.gallery : [room.img];
+            return (
+              <article class={`editorial-room-row ${isReversed ? 'is-reversed' : ''}`} id={`room-${room.id}`}>
+                
+                <!-- TEXT & BOOKING COLUMN (Only 3 Items: Title, Description, Price) -->
+                <div class="editorial-text-col">
+                  <div class="editorial-text-inner">
+                    <h3 class="editorial-room-title">{room.name}</h3>
+                    <p class="editorial-room-desc">{room.description}</p>
+                    
+                    <div class="editorial-price-wrap">
+                      <span class="editorial-price-label">ভাড়া:</span>
+                      <strong class="editorial-price-value">{room.price}</strong>
+                      <span class="editorial-price-unit">/{room.priceUnit || 'প্রতি রাত'}</span>
+                    </div>
+
+                    <div class="editorial-action-wrap">
+                      <button 
+                        type="button" 
+                        class="editorial-book-btn js-open-booking-modal"
+                        data-property-name="টাঙ্গুয়ার হাওড় নিজস্ব হাউসবোট"
+                        data-room-name={room.name}
+                        data-room-price={room.price}
+                        data-room-id={room.id}
+                      >
+                        <span>রুম বুকিং করুন</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- FULL-BLEED SLIDER MEDIA COLUMN (Flush to monitor edge) -->
+                <div class="editorial-media-col">
+                  <div class="editorial-slider-box" data-active-slide="0" data-total-slides={galleryImgs.length}>
+                    <div class="slider-slides-track">
+                      {galleryImgs.map((imgSrc: string, imgIdx: number) => (
+                        <div class={`slider-slide ${imgIdx === 0 ? 'is-active' : ''}`} data-slide-index={imgIdx}>
+                          <img src={imgSrc} alt={`${room.name} - ছবি ${imgIdx + 1}`} loading="lazy" class="slider-img" />
+                        </div>
+                      ))}
+                    </div>
+
+                    {galleryImgs.length > 1 && (
+                      <div class="slider-controls">
+                        <button type="button" class="slider-arrow slider-arrow--prev js-room-slider-prev" aria-label="Previous photo">
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="15 18 9 12 15 6"></polyline>
+                          </svg>
+                        </button>
+                        
+                        <div class="slider-indicator">
+                          <span class="slider-counter js-room-slider-counter">1 / {galleryImgs.length}</span>
+                        </div>
+
+                        <button type="button" class="slider-arrow slider-arrow--next js-room-slider-next" aria-label="Next photo">
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                          </svg>
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+              </article>
+            );
+          })}
+        </div>
+      </section>
+    </main>
+
+    <!-- 3. PROPERTY 2 VIEW: SAINT MARTIN BEACH RESORT ROOM SESSIONS -->
+    <main class="interface-content-view" id="interface-view-resort">
+      
+      <!-- CINEMA HERO BANNER (Video or Image with English Title & Top-Left Back Button) -->
+      <section class="property-cinema-hero">
+        {liveResort.heroVideo ? (
+          <video 
+            class="property-hero-media" 
+            src={liveResort.heroVideo} 
+            autoplay 
+            loop 
+            muted 
+            playsinline
+          />
+        ) : (
+          <div 
+            class="property-hero-media property-hero-media--img" 
+            style={`background-image: url('${liveResort.heroImg || liveResort.thumbnailImg || "/2026/01/Couple-sitting-by-coast.jpg"}');`}
+          />
+        )}
+
+        <div class="property-hero-overlay"></div>
+
+        <!-- Back button in top-left corner -->
+        <div class="property-hero-topbar">
+          <button type="button" class="btn-hero-back js-close-property-interface" aria-label="Back">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="19" y1="12" x2="5" y2="12"></line>
+              <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+            <span>Back</span>
+          </button>
+        </div>
+
+        <!-- Centered Luxury English Property Title -->
+        <div class="property-hero-center">
+          <h1 class="property-hero-title">{liveResort.englishTitle || "SAINT MARTIN BEACH RESORT"}</h1>
+        </div>
+      </section>
+
+      <!-- Full-Bleed 50/50 Alternating Room Rows (Clean 3 Items: Title, Description, Price + Book Button) -->
+      <section class="interface-rooms-section">
+        <div class="editorial-rooms-container">
+          {liveResort.rooms.map((room: SpotlightRoom, idx: number) => {
+            const isReversed = idx % 2 !== 0;
+            const galleryImgs = (room.gallery && room.gallery.length > 0) ? room.gallery : [room.img];
+            return (
+              <article class={`editorial-room-row ${isReversed ? 'is-reversed' : ''}`} id={`room-${room.id}`}>
+                
+                <!-- TEXT & BOOKING COLUMN (Only 3 Items: Title, Description, Price) -->
+                <div class="editorial-text-col">
+                  <div class="editorial-text-inner">
+                    <h3 class="editorial-room-title">{room.name}</h3>
+                    <p class="editorial-room-desc">{room.description}</p>
+                    
+                    <div class="editorial-price-wrap">
+                      <span class="editorial-price-label">ভাড়া:</span>
+                      <strong class="editorial-price-value">{room.price}</strong>
+                      <span class="editorial-price-unit">/{room.priceUnit || 'প্রতি রাত'}</span>
+                    </div>
+
+                    <div class="editorial-action-wrap">
+                      <button 
+                        type="button" 
+                        class="editorial-book-btn js-open-booking-modal"
+                        data-property-name="সেন্ট মার্টিন পার্সোনাল বিচ রিসোর্ট"
+                        data-room-name={room.name}
+                        data-room-price={room.price}
+                        data-room-id={room.id}
+                      >
+                        <span>রুম বুকিং করুন</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- FULL-BLEED SLIDER MEDIA COLUMN (Flush to monitor edge) -->
+                <div class="editorial-media-col">
+                  <div class="editorial-slider-box" data-active-slide="0" data-total-slides={galleryImgs.length}>
+                    <div class="slider-slides-track">
+                      {galleryImgs.map((imgSrc: string, imgIdx: number) => (
+                        <div class={`slider-slide ${imgIdx === 0 ? 'is-active' : ''}`} data-slide-index={imgIdx}>
+                          <img src={imgSrc} alt={`${room.name} - ছবি ${imgIdx + 1}`} loading="lazy" class="slider-img" />
+                        </div>
+                      ))}
+                    </div>
+
+                    {galleryImgs.length > 1 && (
+                      <div class="slider-controls">
+                        <button type="button" class="slider-arrow slider-arrow--prev js-room-slider-prev" aria-label="Previous photo">
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="15 18 9 12 15 6"></polyline>
+                          </svg>
+                        </button>
+                        
+                        <div class="slider-indicator">
+                          <span class="slider-counter js-room-slider-counter">1 / {galleryImgs.length}</span>
+                        </div>
+
+                        <button type="button" class="slider-arrow slider-arrow--next js-room-slider-next" aria-label="Next photo">
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                          </svg>
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+              </article>
+            );
+          })}
+        </div>
+      </section>
+    </main>
+
+  </div>
+</div>
+
+
+
+<!-- ============================================================== -->
+<!-- UNIFIED SPOTLIGHT ROOM & PROPERTY BOOKING MODAL -->
+<!-- ============================================================== -->
+<div class="spotlight-modal-backdrop" id="spotlight-booking-modal" style="display: none;" data-whatsapp-number={targetWhatsapp}>
+  <div class="spotlight-modal-dialog">
+    <button type="button" class="modal-close-btn" id="spotlight-modal-close" aria-label="Close modal">&times;</button>
+    
+    <div class="modal-header">
+      <span class="modal-badge" id="modal-property-badge">✨ বন্ডু ট্রাভেল এক্সক্লুসিভ বুকিং</span>
+      <h3 class="modal-title" id="modal-selected-room-title">রুম ও কামরা নির্বাচন</h3>
+      <p class="modal-subtitle">সুবিধাজনক তারিখ ও বিবরণ দিন। সরাসরি WhatsApp বা অনলাইনের মাধ্যমে বুকিং নিশ্চিত করুন।</p>
+    </div>
+
+    <form class="spotlight-booking-form" id="spotlight-booking-form">
+      <div class="form-row-2">
+        <div class="form-group">
+          <label class="form-label">প্রপার্টি (Property)</label>
+          <select class="form-select" id="modal-property-select">
+            <option value="houseboat" selected>⛵ টাঙ্গুয়ার হাওড় নিজস্ব লাক্সারি হাউসবোট</option>
+            <option value="resort">🌴 সেন্ট মার্টিন পার্সোনাল বিচ রিসোর্ট</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">নির্বাচিত রুম / কেবিন</label>
+          <select class="form-select" id="modal-room-select" required>
+            <!-- Dynamically populated via JS -->
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row-2">
+        <div class="form-group">
+          <label class="form-label">ভ্রমণ শুরুর তারিখ (Check-in)</label>
+          <input type="date" class="form-input" id="modal-checkin-date" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label">ভ্রমণ শেষের তারিখ (Check-out)</label>
+          <input type="date" class="form-input" id="modal-checkout-date" required />
+        </div>
+      </div>
+
+      <div class="form-row-2">
+        <div class="form-group">
+          <label class="form-label">আপনার নাম (Full Name)</label>
+          <input type="text" class="form-input" id="modal-guest-name" placeholder="আপনার নাম লিখুন..." required />
+        </div>
+        <div class="form-group">
+          <label class="form-label">মোবাইল / WhatsApp নম্বর</label>
+          <input type="tel" class="form-input" id="modal-guest-phone" placeholder="017XXXXXXXX" required />
+        </div>
+      </div>
+
+      <div class="form-row-2">
+        <div class="form-group">
+          <label class="form-label">অতিথির সংখ্যা (Guests)</label>
+          <select class="form-select" id="modal-guest-count">
+            <option value="১ জন">১ জন</option>
+            <option value="২ জন" selected>২ জন</option>
+            <option value="৩ জন">৩ জন</option>
+            <option value="৪ জন">৪ জন</option>
+            <option value="৫-১০ জন (গ্রুপ)">৫-১০ জন (গ্রুপ)</option>
+            <option value="১০+ জন (ফুল রিজার্ভেশন)">১০+ জন (ফুল রিজার্ভেশন)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">খাবার / স্পেশাল মেনু</label>
+          <select class="form-select" id="modal-food-pref">
+            <option value="টাটকা দেশি মাছ ও স্থানীয় রসনা" selected>টাটকা দেশি মাছ ও স্থানীয় রসনা</option>
+            <option value="সি-ফুড ও ফ্রেশ কোরাল বারবিকিউ">সি-ফুড ও ফ্রেশ কোরাল বারবিকিউ</option>
+            <option value="হাঁসের মাংস ও ভুনা খিচুড়ি">হাঁসের মাংস ও ভুনা খিচুড়ি</option>
+            <option value="নিরামিষ / ভেজিটেরিয়ান মেনু">নিরামিষ / ভেজিটেরিয়ান মেনু</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">বিশেষ অনুরোধ বা নোট (ঐচ্ছিক)</label>
+        <textarea class="form-textarea" id="modal-guest-note" rows="2" placeholder="আপনার কোনো বিশেষ চাহিদা বা স্পেশাল রিকোয়েস্ট থাকলে জানান..."></textarea>
+      </div>
+
+      <div class="modal-actions-grid">
+        <button type="button" class="btn-submit-whatsapp" id="modal-btn-whatsapp">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/>
+          </svg>
+          <span>WhatsApp-এ সরাসরি পাঠান</span>
+        </button>
+        <button type="submit" class="btn-submit-online">
+          <span>📨 অনলাইন রিকোয়েস্ট সাবমিট</span>
+        </button>
+      </div>
+
+      <div id="modal-form-status" style="display: none; margin-top: 0.85rem; padding: 0.65rem 1rem; border-radius: 6px; font-size: 0.85rem; text-align: center;"></div>
+    </form>
+  </div>
+</div>
+
+<!-- ============================================================== -->
+<!-- ROOM & PROPERTY GALLERY LIGHTBOX -->
+<!-- ============================================================== -->
+<div class="spotlight-gallery-lightbox" id="spotlight-gallery-modal" style="display: none;">
+  <div class="lightbox-dialog">
+    <button type="button" class="lightbox-close" id="lightbox-close">&times;</button>
+    <div class="lightbox-header">
+      <span class="lightbox-badge">📷 এক্সক্লুসিভ ফটো গ্যালারি</span>
+      <h4 id="lightbox-title" class="lightbox-title">রুম ও প্রপার্টির ছবি</h4>
+    </div>
+    <div class="lightbox-img-container">
+      <img id="lightbox-img" src="" alt="Preview" />
+    </div>
+    <div class="lightbox-thumbs" id="lightbox-thumbs"></div>
+  </div>
+</div>
+
+<style>
+  .section-heading {
+    font-family: 'AlternateGotNo1D', 'Alternate Gothic', 'League Gothic', sans-serif;
+    font-size: 3.25rem;
+    font-weight: 400;
+    letter-spacing: 0.05em;
+    line-height: 1;
+    text-transform: uppercase;
+    color: #000000;
+    margin: 0 auto 1.5rem;
+    text-align: center;
+  }
+
+  @media (max-width: 768px) {
+    .section-heading {
+      font-size: 2.25rem;
+      letter-spacing: 0.04em;
+    }
+  }
+
+  .filter-tab-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 2.5rem;
+    list-style: none;
+    padding: 0;
+    margin: 0 auto 3rem;
+    flex-wrap: wrap;
+  }
+
+  .js-tab-btn {
+    background: transparent;
+    border: none;
+    padding: 0 0 6px 0;
+    font-family: 'Brandon Grotesque', Cabin, Josefin Sans, sans-serif;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #2F2F2F;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.25s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  .js-tab-btn.is-active {
+    color: #000000;
+    border-bottom: 2px solid #E82E72;
+  }
+
+  .js-tab-btn:hover {
+    color: #E82E72;
+  }
+
+  .spotlight-badge-dot {
+    color: #F59E0B;
+    font-size: 0.8rem;
+    animation: pulseGlow 1.8s infinite;
+  }
+
+  @keyframes pulseGlow {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.45; transform: scale(1.3); }
+  }
+
+  .tab-panel {
+    display: none;
+  }
+
+  .tab-panel.is-active {
+    display: block;
+    animation: fadeIn 0.4s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .tiles-grid {
+    display: grid;
+    gap: 1.25rem;
+  }
+
+  .tiles-grid--5 { grid-template-columns: repeat(5, 1fr); }
+  .tiles-grid--4 { grid-template-columns: repeat(4, 1fr); }
+
+  .tile-card {
+    height: 480px;
+    border-radius: 2px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.45);
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s ease;
+  }
+
+  .tile-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.65);
+  }
+
+  .tile-content {
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center center;
+    position: relative;
+  }
+
+  .tile-link {
+    display: block;
+    width: 100%;
+    height: 100%;
+    position: relative;
+    text-decoration: none;
+  }
+
+  .tile-title {
+    position: absolute;
+    bottom: 24px;
+    left: 20px;
+    right: 20px;
+    margin: 0;
+    font-family: 'Brandon Grotesque', Cabin, Josefin Sans, sans-serif;
+    font-size: 1.25rem;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #FFFFFF;
+    z-index: 2;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.7);
+  }
+
+  .tile-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.85) 100%);
+    z-index: 1;
+    transition: background 0.3s ease;
+  }
+
+  .tile-card:hover .tile-overlay {
+    background: linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.3) 40%, rgba(0,0,0,0.92) 100%);
+  }
+
+  .tiles-grid--2 {
+    grid-template-columns: repeat(2, 1fr);
+    max-width: 960px;
+    margin: 0 auto;
+    gap: 1.75rem;
+  }
+
+  /* ============================================================== */
+  /* NEW DEDICATED FULL-SCREEN LUXURY ROOM INTERFACE OVERLAY */
+  /* Full-Bleed 50/50 Split - 100% Pure White Background Theme */
+  /* ============================================================== */
+    /* ============================================================== */
+  /* CINEMA HERO BANNER (Video/Photo + English Title + Top-Left Back) */
+  /* ============================================================== */
+  .property-cinema-hero {
+    position: relative;
+    width: 100%;
+    height: 52vh;
+    min-height: 380px;
+    max-height: 520px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #0B0E14;
+  }
+
+  .property-hero-media {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 1;
+  }
+
+  .property-hero-media--img {
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    transform: scale(1.02);
+  }
+
+  .property-hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.45) 0%, rgba(0, 0, 0, 0.25) 50%, rgba(0, 0, 0, 0.65) 100%);
+    z-index: 2;
+  }
+
+  .property-hero-topbar {
+    position: absolute;
+    top: 1.5rem;
+    left: 2.5rem;
+    z-index: 5;
+  }
+
+  .btn-hero-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    background: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    color: #FFFFFF;
+    padding: 0.52rem 1.35rem;
+    border-radius: 999px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 0.86rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+  }
+
+  .btn-hero-back:hover {
+    background: #FFFFFF;
+    color: #111111;
+    border-color: #FFFFFF;
+    transform: translateX(-3px);
+  }
+
+  .property-hero-center {
+    position: relative;
+    z-index: 4;
+    text-align: center;
+    padding: 0 1.5rem;
+  }
+
+  .property-hero-title {
+    font-family: 'Brandon Grotesque', Cabin, Josefin Sans, -apple-system, sans-serif;
+    font-size: clamp(2.2rem, 5vw, 3.8rem);
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #FFFFFF;
+    text-shadow: 0 2px 20px rgba(0, 0, 0, 0.85);
+    margin: 0;
+    line-height: 1.15;
+  }
+
+  .spotlight-room-interface-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 2500;
+    background: #FFFFFF;
+    color: #111827;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-top: 75px;
+    -webkit-overflow-scrolling: touch;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .interface-container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: #FFFFFF;
+  }
+
+  /* 1. Sticky Slim White Top Bar */
+  .interface-top-bar {
+    position: sticky;
+    top: 0;
+    z-index: 200;
+    background: #FFFFFF;
+    border-bottom: 1px solid #E5E7EB;
+    padding: 0.85rem 3rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  }
+
+  .interface-bar-inner {
+    max-width: 1600px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+  }
+
+  .btn-interface-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    background: transparent;
+    border: 1px solid #D1D5DB;
+    color: #111827;
+    padding: 0.5rem 1.35rem;
+    border-radius: 999px;
+    font-family: 'Brandon Grotesque', Cabin, Josefin Sans, sans-serif;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.25s ease;
+  }
+
+  .btn-interface-back:hover {
+    background: #111827;
+    color: #FFFFFF;
+    border-color: #111827;
+  }
+
+  .interface-bar-actions {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .interface-switch-pills {
+    display: inline-flex;
+    gap: 0.35rem;
+    background: #F3F4F6;
+    padding: 4px;
+    border-radius: 999px;
+  }
+
+  .interface-pill {
+    background: transparent;
+    border: none;
+    color: #4B5563;
+    padding: 0.4rem 1.15rem;
+    border-radius: 999px;
+    font-family: 'Brandon Grotesque', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+  }
+
+  .interface-pill.is-active {
+    background: #FFFFFF;
+    color: #111827;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  }
+
+  .interface-close-btn {
+    background: transparent;
+    border: none;
+    color: #6B7280;
+    font-size: 1.85rem;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0.2rem 0.5rem;
+    transition: color 0.2s ease;
+  }
+
+  .interface-close-btn:hover {
+    color: #111827;
+  }
+
+  /* 2. Content Views */
+  .btn-clean-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #F9FAFB;
+    border: 1px solid #E5E7EB;
+    border-radius: 999px;
+    padding: 0.42rem 1.15rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #4B5563;
+    cursor: pointer;
+    margin-bottom: 1.25rem;
+    transition: all 0.25s ease;
+  }
+
+  .btn-clean-back:hover {
+    border-color: #E82E72;
+    color: #E82E72;
+    background: rgba(232, 46, 114, 0.05);
+  }
+
+  .interface-content-view {
+    display: none;
+    background: #FFFFFF;
+  }
+
+  .interface-content-view.is-active {
+    display: block !important;
+    animation: fadeIn 0.35s ease;
+  }
+
+  /* 3. Destination Minimal Header */
+  .interface-property-header {
+    background: #FFFFFF;
+    padding: 3.5rem 2rem 2.5rem;
+    text-align: center;
+    border-bottom: 1px solid #F3F4F6;
+  }
+
+  .property-header-inner {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .property-tagline-badge {
+    display: inline-block;
+    font-family: 'Brandon Grotesque', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: #E82E72;
+    margin-bottom: 0.5rem;
+  }
+
+  .property-headline {
+    font-family: 'AlternateGotNo1D', 'Alternate Gothic', 'League Gothic', sans-serif;
+    font-size: 3rem;
+    font-size: clamp(2.2rem, 3.5vw, 3.25rem);
+    font-weight: 400;
+    line-height: 1.1;
+    color: #000000;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin: 0 0 1rem;
+  }
+
+  .property-tagline-text {
+    font-family: 'Brandon Grotesque', sans-serif;
+    font-size: 1.05rem;
+    line-height: 1.6;
+    color: #52575C;
+    margin: 0 auto 1.5rem;
+  }
+
+  .property-charter-btn {
+    display: inline-block;
+    background: #FFF7ED;
+    border: 1px solid #FDBA74;
+    color: #C2410C;
+    padding: 0.65rem 1.5rem;
+    border-radius: 999px;
+    font-family: 'Brandon Grotesque', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .property-charter-btn:hover {
+    background: #EA580C;
+    color: #FFFFFF;
+    border-color: #EA580C;
+  }
+
+  /* 4. Full-Bleed 50/50 Alternating Room Rows (Screenshot 3 Signature Design) */
+  .interface-rooms-section {
+    padding: 0;
+    background: #FFFFFF;
+  }
+
+  .editorial-rooms-container {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .editorial-room-row {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-height: 520px;
+    background-color: #FFFFFF;
+    border-bottom: 1px solid #E5E7EB;
+  }
+
+  /* Normal row: Text on Left (Inset), Media on Right (Flush to screen edge) */
+  .editorial-room-row:not(.is-reversed) {
+    flex-direction: row;
+  }
+
+  .editorial-room-row:not(.is-reversed) .editorial-text-col {
+    flex: 0 0 50%;
+    display: flex;
+    justify-content: flex-end;
+    padding: 4rem 5rem 4rem 6rem;
+    box-sizing: border-box;
+  }
+
+  .editorial-room-row:not(.is-reversed) .editorial-media-col {
+    flex: 0 0 50%;
+    height: 540px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Reversed row: Media on Left (Flush to screen edge), Text on Right (Inset) */
+  .editorial-room-row.is-reversed {
+    flex-direction: row-reverse;
+  }
+
+  .editorial-room-row.is-reversed .editorial-text-col {
+    flex: 0 0 50%;
+    display: flex;
+    justify-content: flex-start;
+    padding: 4rem 6rem 4rem 5rem;
+    box-sizing: border-box;
+  }
+
+  .editorial-room-row.is-reversed .editorial-media-col {
+    flex: 0 0 50%;
+    height: 540px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .editorial-text-inner {
+    max-width: 480px;
+    width: 100%;
+  }
+
+
+  .editorial-room-title {
+    font-family: 'AlternateGotNo1D', 'Alternate Gothic', 'League Gothic', sans-serif;
+    font-size: 45px;
+    font-size: clamp(2.3rem, 3.2vw, 2.85rem);
+    font-weight: 400;
+    line-height: 1.05;
+    color: #000000;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin: 0 0 1.25rem;
+  }
+
+  .editorial-room-desc {
+    font-family: 'Brandon Grotesque', Cabin, Josefin Sans, sans-serif;
+    font-size: 1.05rem;
+    line-height: 1.65;
+    color: #52575C;
+    margin: 0 0 1.75rem;
+    text-align: left;
+  }
+
+  .editorial-price-wrap {
+    margin-bottom: 1.25rem;
+    display: flex;
+    align-items: baseline;
+    gap: 0.4rem;
+  }
+
+  .editorial-price-label {
+    font-family: 'Brandon Grotesque', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #6B7280;
+  }
+
+  .editorial-price-value {
+    font-family: 'Brandon Grotesque', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #111827;
+  }
+
+  .editorial-price-unit {
+    font-family: 'Brandon Grotesque', sans-serif;
+    font-size: 0.85rem;
+    color: #6B7280;
+  }
+
+  .editorial-action-wrap {
+    margin-top: 0.5rem;
+  }
+
+  .editorial-book-btn {
+    display: inline-block;
+    background-color: #000000;
+    color: #FFFFFF;
+    border: 1px solid #000000;
+    padding: 0.95rem 2.25rem;
+    font-family: 'Brandon Grotesque', Cabin, Josefin Sans, sans-serif;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  .editorial-book-btn:hover {
+    background-color: #E82E72;
+    border-color: #E82E72;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(232, 46, 114, 0.3);
+  }
+
+  /* 5. Image Multi-Photo Slider inside the Media Col */
+  .editorial-slider-box {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+    background-color: #F3F4F6;
+  }
+
+  .slider-slides-track {
+    width: 100%;
+    height: 100%;
+    position: relative;
+  }
+
+  .slider-slide {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.4s ease, transform 0.4s ease;
+    transform: scale(1.02);
+  }
+
+  .slider-slide.is-active {
+    opacity: 1;
+    visibility: visible;
+    transform: scale(1);
+    z-index: 1;
+  }
+
+  .slider-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+  }
+
+  .slider-controls {
+    position: absolute;
+    bottom: 24px;
+    right: 24px;
+    z-index: 10;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 999px;
+    padding: 6px 14px;
+    color: #FFFFFF;
+  }
+
+  .slider-arrow {
+    background: transparent;
+    border: none;
+    color: #FFFFFF;
+    cursor: pointer;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background 0.2s ease, transform 0.15s ease;
+  }
+
+  .slider-arrow:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: scale(1.1);
+  }
+
+  .slider-counter {
+    font-family: 'Brandon Grotesque', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    padding: 0 4px;
+  }
+
+  /* 6. Bottom Navigation White Bar */
+  .interface-bottom-bar {
+    background: #FAFAFA;
+    border-top: 1px solid #E5E7EB;
+    padding: 2.5rem 3rem;
+  }
+
+  .bottom-bar-inner {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .bottom-charter-text h4 {
+    font-family: 'Brandon Grotesque', sans-serif;
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #111827;
+    margin: 0 0 0.25rem;
+  }
+
+  .bottom-charter-text p {
+    font-size: 0.92rem;
+    color: #6B7280;
+    margin: 0;
+  }
+
+  /* ============================================================== */
+  /* MODAL STYLES */
+  /* ============================================================== */
+  .spotlight-modal-backdrop, .spotlight-gallery-lightbox {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(8px);
+    z-index: 999999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+  }
+
+  .spotlight-modal-dialog {
+    background: #111419;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    width: 100%;
+    max-width: 620px;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 2.5rem 2rem;
+    position: relative;
+    color: #FFFFFF;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.85);
+  }
+
+  .modal-close-btn, .lightbox-close {
+    position: absolute;
+    top: 1rem;
+    right: 1.25rem;
+    background: transparent;
+    border: none;
+    color: #9CA3AF;
+    font-size: 2rem;
+    cursor: pointer;
+    line-height: 1;
+    transition: color 0.2s ease;
+  }
+
+  .modal-close-btn:hover, .lightbox-close:hover {
+    color: #EF4444;
+  }
+
+  .modal-header {
+    margin-bottom: 1.5rem;
+  }
+
+  .modal-badge {
+    display: inline-block;
+    background: rgba(245, 158, 11, 0.15);
+    color: #FBBF24;
+    border: 1px solid rgba(245, 158, 11, 0.35);
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 0.25rem 0.65rem;
+    border-radius: 999px;
+    margin-bottom: 0.4rem;
+  }
+
+  .modal-title {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: #FFFFFF;
+    margin: 0 0 0.3rem;
+  }
+
+  .modal-subtitle {
+    font-size: 0.82rem;
+    color: #9CA3AF;
+    margin: 0;
+    line-height: 1.45;
+  }
+
+  .spotlight-booking-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .form-row-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .form-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #D1D5DB;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .form-input, .form-select, .form-textarea {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 4px;
+    padding: 0.6rem 0.85rem;
+    color: #FFFFFF;
+    font-family: inherit;
+    font-size: 0.85rem;
+    outline: none;
+    transition: border-color 0.2s ease;
+  }
+
+  .form-input:focus, .form-select:focus, .form-textarea:focus {
+    border-color: #F59E0B;
+  }
+
+  .form-select option {
+    background: #181E26;
+    color: #FFFFFF;
+  }
+
+  .modal-actions-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+  }
+
+  .btn-submit-whatsapp {
+    background: #25D366;
+    color: #FFFFFF;
+    border: none;
+    padding: 0.85rem 1rem;
+    border-radius: 4px;
+    font-family: inherit;
+    font-size: 0.88rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: background 0.2s ease;
+  }
+
+  .btn-submit-whatsapp:hover {
+    background: #1EBE5B;
+  }
+
+  .btn-submit-online {
+    background: #E82E72;
+    color: #FFFFFF;
+    border: none;
+    padding: 0.85rem 1rem;
+    border-radius: 4px;
+    font-family: inherit;
+    font-size: 0.88rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+
+  .btn-submit-online:hover {
+    background: #D81B60;
+  }
+
+  /* Lightbox */
+  .lightbox-dialog {
+    background: #111419;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    width: 100%;
+    max-width: 800px;
+    padding: 2rem;
+    position: relative;
+    color: #FFFFFF;
+  }
+
+  .lightbox-badge {
+    color: #F59E0B;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  .lightbox-title {
+    font-size: 1.2rem;
+    margin: 0.2rem 0 1rem;
+  }
+
+  .lightbox-img-container {
+    width: 100%;
+    height: 420px;
+    background: #000;
+    border-radius: 4px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+  }
+
+  .lightbox-img-container img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+  }
+
+  .lightbox-thumbs {
+    display: flex;
+    gap: 0.5rem;
+    overflow-x: auto;
+  }
+
+  .lightbox-thumb {
+    width: 70px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 3px;
+    cursor: pointer;
+    opacity: 0.6;
+    border: 1px solid transparent;
+    transition: all 0.2s ease;
+  }
+
+  .lightbox-thumb.active, .lightbox-thumb:hover {
+    opacity: 1;
+    border-color: #F59E0B;
+  }
+
+  /* Responsive Queries */
+  @media (max-width: 1100px) {
+    .tiles-grid--5 {
+      grid-template-columns: repeat(3, 1fr);
+    }
+    .tiles-grid--4 {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .editorial-room-row:not(.is-reversed) .editorial-text-col,
+    .editorial-room-row.is-reversed .editorial-text-col {
+      padding: 3rem;
+    }
+  }
+
+  @media (max-width: 960px) {
+    .editorial-room-row, .editorial-room-row.is-reversed {
+      flex-direction: column !important;
+      min-height: auto;
+    }
+    .editorial-room-row .editorial-media-col {
+      flex: 0 0 100% !important;
+      width: 100% !important;
+      height: 380px !important;
+      order: 1 !important;
+    }
+    .editorial-room-row .editorial-text-col {
+      flex: 0 0 100% !important;
+      width: 100% !important;
+      padding: 2.5rem 1.5rem !important;
+      justify-content: flex-start !important;
+      order: 2 !important;
+    }
+    .interface-top-bar {
+      padding: 0.75rem 1.25rem;
+    }
+    .interface-bar-inner {
+      flex-wrap: wrap;
+    }
+    .editorial-room-title {
+      font-size: 2.2rem;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .tiles-grid--5, .tiles-grid--4, .tiles-grid--2 {
+      grid-template-columns: 1fr;
+    }
+    .form-row-2, .modal-actions-grid {
+      grid-template-columns: 1fr;
+    }
+    .lightbox-img-container {
+      height: 260px;
+    }
+    .property-headline {
+      font-size: 2.25rem;
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // 1. Tab Switching (By Traveller, Most Popular, By Month, In The Spotlight)
+    const tabBtns = document.querySelectorAll('.js-tab-btn');
+    const tabPanels = document.querySelectorAll('.tab-panel');
+
+    tabBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const target = btn.getAttribute('data-tab-target');
+        tabBtns.forEach(b => b.classList.remove('is-active'));
+        tabPanels.forEach(p => p.classList.remove('is-active'));
+
+        btn.classList.add('is-active');
+        const activePanel = document.getElementById(`tab-${target}`);
+        if (activePanel) activePanel.classList.add('is-active');
+      });
+    });
+
+    // 1.1 Multi-Photo Room Slider Controller
+    const roomSliders = document.querySelectorAll('.editorial-slider-box');
+    roomSliders.forEach(slider => {
+      const slides = slider.querySelectorAll('.slider-slide');
+      const counter = slider.querySelector('.js-room-slider-counter');
+      const prevBtn = slider.querySelector('.js-room-slider-prev');
+      const nextBtn = slider.querySelector('.js-room-slider-next');
+
+      if (slides.length <= 1) return;
+      let activeIndex = 0;
+
+      function updateSlide(idx: number) {
+        if (idx < 0) idx = slides.length - 1;
+        if (idx >= slides.length) idx = 0;
+        activeIndex = idx;
+
+        slides.forEach((s, i) => {
+          if (i === activeIndex) {
+            s.classList.add('is-active');
+          } else {
+            s.classList.remove('is-active');
+          }
+        });
+
+        if (counter) {
+          counter.textContent = `${activeIndex + 1} / ${slides.length}`;
+        }
+      }
+
+      if (prevBtn) {
+        prevBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          updateSlide(activeIndex - 1);
+        });
+      }
+
+      if (nextBtn) {
+        nextBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          updateSlide(activeIndex + 1);
+        });
+      }
+    });
+
+    // 2. Spotlight Dedicated Property Room Interface Logic
+    const propertyInterface = document.getElementById('spotlight-property-interface');
+    const openInterfaceBtns = document.querySelectorAll('.js-open-property-interface');
+    const closeInterfaceBtns = document.querySelectorAll('.js-close-property-interface');
+    const interfacePills = document.querySelectorAll('.js-interface-switch');
+    const interfaceViews = document.querySelectorAll('.interface-content-view');
+    const interfaceBadge = document.getElementById('interface-prop-badge');
+    const interfaceTitle = document.getElementById('interface-prop-title');
+
+    function openPropertyInterface(propertyKey: string) {
+      if (!propertyInterface) return;
+      propertyInterface.style.display = 'block';
+      propertyInterface.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+
+      const headerEl = document.getElementById('main-header');
+      if (headerEl) {
+        headerEl.classList.add('header--scrolled-white');
+        headerEl.classList.remove('header--hidden');
+      }
+
+      switchInterfaceProperty(propertyKey);
+      propertyInterface.scrollTop = 0;
+    }
+
+    function closePropertyInterface() {
+      if (!propertyInterface) return;
+      propertyInterface.style.display = 'none';
+      propertyInterface.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      const headerEl = document.getElementById('main-header');
+      if (headerEl) {
+        headerEl.classList.remove('header--scrolled-white');
+        headerEl.classList.remove('header--hidden');
+      }
+    }
+
+    function switchInterfaceProperty(propertyKey: string) {
+      // Toggle views with explicit display manipulation for reliability
+      interfaceViews.forEach(v => {
+        const el = v as HTMLElement;
+        if (v.id === `interface-view-${propertyKey}`) {
+          v.classList.add('is-active');
+          el.style.display = 'block';
+        } else {
+          v.classList.remove('is-active');
+          el.style.display = 'none';
+        }
+      });
+
+      // Toggle pills
+      interfacePills.forEach(pill => {
+        if (pill.getAttribute('data-switch') === propertyKey) {
+          pill.classList.add('is-active');
+        } else {
+          pill.classList.remove('is-active');
+        }
+      });
+
+      // Update titles
+      const isResort = propertyKey === 'resort';
+      if (interfaceBadge) {
+        interfaceBadge.innerText = isResort ? '🌴 সেন্ট মার্টিন বিচ রিসোর্ট' : '🚤 টাঙ্গুয়ার হাওড় হাউসবোট';
+      }
+      if (interfaceTitle) {
+        interfaceTitle.innerText = isResort ? 'কটেজ ও রুমসমূহ' : 'রুম ও কেবিনসমূহ';
+      }
+
+      // Update booking modal property dropdown
+      const propSelect = document.getElementById('modal-property-select') as HTMLSelectElement | null;
+      if (propSelect) {
+        propSelect.value = propertyKey;
+        populateRoomsForProperty(propertyKey);
+      }
+    }
+
+    openInterfaceBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const target = btn.getAttribute('data-property-target') || 'houseboat';
+        openPropertyInterface(target);
+      });
+    });
+
+    closeInterfaceBtns.forEach(btn => {
+      btn.addEventListener('click', closePropertyInterface);
+    });
+
+    if (propertyInterface) {
+      let lastOverlayScrollY = 0;
+      propertyInterface.addEventListener('scroll', () => {
+        const currentY = propertyInterface.scrollTop;
+        const diff = currentY - lastOverlayScrollY;
+        const headerEl = document.getElementById('main-header');
+        if (!headerEl) return;
+
+        if (currentY <= 25) {
+          headerEl.classList.remove('header--hidden');
+          headerEl.classList.add('header--scrolled-white');
+        } else if (diff > 6 && currentY > 70) {
+          headerEl.classList.add('header--hidden');
+        } else if (diff < -6) {
+          headerEl.classList.remove('header--hidden');
+          headerEl.classList.add('header--scrolled-white');
+        }
+        lastOverlayScrollY = currentY;
+      }, { passive: true });
+    }
+
+    interfacePills.forEach(pill => {
+      pill.addEventListener('click', () => {
+        const target = pill.getAttribute('data-switch') || 'houseboat';
+        switchInterfaceProperty(target);
+        if (propertyInterface) propertyInterface.scrollTop = 0;
+      });
+    });
+
+    // 3. Dynamic Room Population in Booking Modal
+    const houseboatRooms = [
+      { name: "জলতরঙ্গ (Joltorongo) — মাস্টার লেক ভিউ স্যুট", price: "৳ ১২,০০০/রাত" },
+      { name: "জলকুটির (Jolkutir) — প্রিমিয়াম ব্যালকনি কেবিন", price: "৳ ৯,৫০০/রাত" },
+      { name: "মেঘবরণ (Meghboron) — ফ্যামিলি লাক্সারি স্যুট", price: "৳ ১৪,০০০/রাত" },
+      { name: "জলজোছনা (Joljochona) — ডিলাক্স টুইন কেবিন", price: "৳ ৮,৫০০/রাত" },
+      { name: "🌟 সম্পূর্ণ হাউসবোট (Full Charter)", price: "৳ ৪৫,০০০/রাত" }
+    ];
+
+    const resortRooms = [
+      { name: "প্রবাল কুটির (Probal Kutir) — মাস্টার ওশানফ্রন্ট ভিলা", price: "৳ ৯,৫০০/রাত" },
+      { name: "নীল দিগন্ত (Neel Digonto) — ডিলাক্স কাপল কটেজ", price: "৳ ৭,৫০০/রাত" },
+      { name: "দ্বীপ ছায়া (Dwip Chhaya) — ফ্যামিলি বিচফ্রন্ট স্যুট", price: "৳ ১১,০০০/রাত" },
+      { name: "কোকোনাট গ্রোভ (Coconut Grove) — ডিলাক্স টুইন রুম", price: "৳ ৬,০০০/রাত" },
+      { name: "🌟 সম্পূর্ণ রিসোর্ট কটেজ গ্রুপ বুকিং", price: "৳ ৫০,০০০/রাত" }
+    ];
+
+    const roomSelect = document.getElementById('modal-room-select') as HTMLSelectElement | null;
+    const propSelect = document.getElementById('modal-property-select') as HTMLSelectElement | null;
+
+    function populateRoomsForProperty(prop: string, selectedRoomName?: string) {
+      if (!roomSelect) return;
+      const list = prop === 'resort' ? resortRooms : houseboatRooms;
+      roomSelect.innerHTML = list.map(r => `
+        <option value="${r.name}" ${selectedRoomName && selectedRoomName.includes(r.name.split(' ')[0]) ? 'selected' : ''}>
+          ${r.name} (${r.price})
+        </option>
+      `).join('');
+    }
+
+    if (propSelect) {
+      propSelect.addEventListener('change', (e) => {
+        const val = (e.target as HTMLSelectElement).value;
+        populateRoomsForProperty(val);
+      });
+    }
+
+    populateRoomsForProperty('houseboat');
+
+    // 4. Booking Modal Trigger & Logic
+    const bookingModal = document.getElementById('spotlight-booking-modal');
+    const modalClose = document.getElementById('spotlight-modal-close');
+    const openModalBtns = document.querySelectorAll('.js-open-booking-modal');
+    const modalTitle = document.getElementById('modal-selected-room-title');
+    const modalBadge = document.getElementById('modal-property-badge');
+    const checkinInput = document.getElementById('modal-checkin-date') as HTMLInputElement | null;
+    const checkoutInput = document.getElementById('modal-checkout-date') as HTMLInputElement | null;
+    const bookingForm = document.getElementById('spotlight-booking-form');
+    const formStatus = document.getElementById('modal-form-status');
+    const whatsappBtn = document.getElementById('modal-btn-whatsapp');
+
+    // Default dates
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const dayAfter = new Date(today);
+    dayAfter.setDate(dayAfter.getDate() + 2);
+
+    const formatDate = (d: Date) => d.toISOString().split('T')[0];
+    if (checkinInput) checkinInput.value = formatDate(tomorrow);
+    if (checkoutInput) checkoutInput.value = formatDate(dayAfter);
+
+    openModalBtns.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const propName = btn.getAttribute('data-property-name') || 'টাঙ্গুয়ার হাওড় নিজস্ব হাউসবোট';
+        const roomName = btn.getAttribute('data-room-name') || 'কেবিন নির্বাচন';
+        const isResort = propName.includes('সেন্ট মার্টিন') || roomName.includes('কটেজ') || roomName.includes('ভিলা');
+
+        if (modalTitle) modalTitle.innerText = `${roomName}`;
+        if (modalBadge) modalBadge.innerText = isResort ? '🌴 সেন্ট মার্টিন বিচ রিসোর্ট' : '🚤 টাঙ্গুয়ার হাওড় হাউসবোট';
+
+        const propertyKey = isResort ? 'resort' : 'houseboat';
+        if (propSelect) propSelect.value = propertyKey;
+        populateRoomsForProperty(propertyKey, roomName);
+
+        if (bookingModal) {
+          bookingModal.style.display = 'flex';
+          document.body.style.overflow = 'hidden';
+        }
+      });
+    });
+
+    if (modalClose && bookingModal) {
+      modalClose.addEventListener('click', () => {
+        bookingModal.style.display = 'none';
+        document.body.style.overflow = '';
+      });
+    }
+
+    if (bookingModal) {
+      bookingModal.addEventListener('click', (e) => {
+        if (e.target === bookingModal) {
+          bookingModal.style.display = 'none';
+          document.body.style.overflow = '';
+        }
+      });
+    }
+
+    // Direct WhatsApp Submission
+    if (whatsappBtn) {
+      whatsappBtn.addEventListener('click', () => {
+        const guestName = (document.getElementById('modal-guest-name') as HTMLInputElement)?.value.trim() || '';
+        const guestPhone = (document.getElementById('modal-guest-phone') as HTMLInputElement)?.value.trim() || '';
+        const selectedProp = propSelect?.value === 'resort' ? 'সেন্ট মার্টিন পার্সোনাল বিচ রিসোর্ট' : 'টাঙ্গুয়ার হাওড় লাক্সারি হাউসবোট';
+        const selectedRoom = roomSelect?.value || 'রুম নির্বাচন';
+        const checkin = checkinInput?.value || '';
+        const checkout = checkoutInput?.value || '';
+        const guestCount = (document.getElementById('modal-guest-count') as HTMLSelectElement)?.value || '২ জন';
+        const foodPref = (document.getElementById('modal-food-pref') as HTMLSelectElement)?.value || '';
+        const guestNote = (document.getElementById('modal-guest-note') as HTMLTextAreaElement)?.value.trim() || '';
+
+        if (!guestName || !guestPhone) {
+          alert('দয়া করে আপনার নাম এবং মোবাইল নম্বরটি লিখুন।');
+          return;
+        }
+
+        const rawPhone = bookingModal?.getAttribute('data-whatsapp-number') || '+8801700000000';
+        const cleanPhone = rawPhone.replace(/\D/g, '');
+
+        const message = `🌟 *বন্ডু ট্রাভেল ইন দ্য স্পটলাইট বুকিং রিকোয়েস্ট*
+━━━━━━━━━━━━━━━━━━━━
+🏨 *প্রপার্টি:* ${selectedProp}
+🛏️ *কেবিন / রুম:* ${selectedRoom}
+👤 *গেস্টের নাম:* ${guestName}
+📞 *মোবাইল:* ${guestPhone}
+📅 *তারিখ:* ${checkin} থেকে ${checkout}
+👥 *অতিথি:* ${guestCount}
+🍽️ *খাবার:* ${foodPref}
+${guestNote ? `📝 *নোট:* ${guestNote}\n` : ''}━━━━━━━━━━━━━━━━━━━━
+দয়া করে দ্রুত অ্যাভেইলেবিলিটি ও বুকিং কনফার্মেশন প্রসেস জানাবেন। ধন্যবাদ!`;
+
+        const waUrl = `https://wa.me/${cleanPhone || '8801700000000'}?text=${encodeURIComponent(message)}`;
+        window.open(waUrl, '_blank');
+      });
+    }
+
+    // Online Database Booking Submit
+    if (bookingForm) {
+      bookingForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const guestName = (document.getElementById('modal-guest-name') as HTMLInputElement)?.value.trim() || '';
+        const guestPhone = (document.getElementById('modal-guest-phone') as HTMLInputElement)?.value.trim() || '';
+        const selectedProp = propSelect?.value === 'resort' ? 'সেন্ট মার্টিন পার্সোনাল বিচ রিসোর্ট' : 'টাঙ্গুয়ার হাওড় লাক্সারি হাউসবোট';
+        const selectedRoom = roomSelect?.value || 'স্পটলাইট রুম';
+        const checkin = checkinInput?.value || '';
+        const checkout = checkoutInput?.value || '';
+        const guestCount = (document.getElementById('modal-guest-count') as HTMLSelectElement)?.value || '২ জন';
+        const foodPref = (document.getElementById('modal-food-pref') as HTMLSelectElement)?.value || '';
+        const guestNote = (document.getElementById('modal-guest-note') as HTMLTextAreaElement)?.value.trim() || '';
+
+        if (!guestName || !guestPhone) {
+          alert('দয়া করে নাম ও মোবাইল নম্বর পূরণ করুন।');
+          return;
+        }
+
+        if (formStatus) {
+          formStatus.style.display = 'block';
+          formStatus.style.background = 'rgba(245, 158, 11, 0.2)';
+          formStatus.style.color = '#FBBF24';
+          formStatus.innerText = '⏳ আপনার বুকিং রিকোয়েস্ট জমা হচ্ছে...';
+        }
+
+        try {
+          const res = await fetch('/api/bookings/create', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              customerName: guestName,
+              phone: guestPhone,
+              tourTitle: `[স্পটলাইট] ${selectedProp} — ${selectedRoom}`,
+              country: 'BANGLADESH',
+              travelDate: `${checkin} থেকে ${checkout}`,
+              travelers: parseInt(guestCount) || 2,
+              travelerType: foodPref,
+              totalPrice: 10000,
+              bookingMoneyPaid: 0,
+              paymentMethod: 'Spotlight Property Request',
+              notes: guestNote
+            })
+          });
+
+          const data = await res.json();
+          if (data.success || res.ok) {
+            if (formStatus) {
+              formStatus.style.background = 'rgba(16, 185, 129, 0.25)';
+              formStatus.style.color = '#34D399';
+              formStatus.innerText = '✅ আপনার বুকিং রিকোয়েস্ট সফলভাবে জমা হয়েছে! শীঘ্রই আমাদের প্রতিনিধি আপনার সাথে যোগাযোগ করবেন।';
+            }
+            setTimeout(() => {
+              if (bookingModal) {
+                bookingModal.style.display = 'none';
+                document.body.style.overflow = '';
+              }
+              if (formStatus) formStatus.style.display = 'none';
+              bookingForm.reset();
+            }, 3000);
+          } else {
+            throw new Error(data.error || 'রিকোয়েস্ট পাঠানো সম্ভব হয়নি');
+          }
+        } catch (err: any) {
+          if (formStatus) {
+            formStatus.style.background = 'rgba(239, 68, 68, 0.25)';
+            formStatus.style.color = '#F87171';
+            formStatus.innerText = `❌ এরর: ${err.message || 'সমস্যা হয়েছে। দয়া করে WhatsApp-এ যোগাযোগ করুন।'}`;
+          }
+        }
+      });
+    }
+
+    // 5. Lightbox Preview
+    const galleryModal = document.getElementById('spotlight-gallery-modal');
+    const lightboxClose = document.getElementById('lightbox-close');
+    const lightboxTitle = document.getElementById('lightbox-title');
+    const lightboxImg = document.getElementById('lightbox-img') as HTMLImageElement | null;
+    const lightboxThumbs = document.getElementById('lightbox-thumbs');
+
+    const previewBtns = document.querySelectorAll('.js-preview-gallery');
+    previewBtns.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const title = btn.getAttribute('data-title') || 'রুম ছবি';
+        const rawImgs = btn.getAttribute('data-images') || '[]';
+        let images: string[] = [];
+        try { images = JSON.parse(rawImgs); } catch (e) { images = []; }
+
+        if (lightboxTitle) lightboxTitle.innerText = `${title} — ফটো গ্যালারি`;
+        if (lightboxImg && images.length > 0) lightboxImg.src = images[0];
+
+        if (lightboxThumbs) {
+          lightboxThumbs.innerHTML = images.map((src, i) => `
+            <img src="${src}" class="lightbox-thumb ${i === 0 ? 'active' : ''}" data-src="${src}" alt="thumb">
+          `).join('');
+
+          const thumbEls = lightboxThumbs.querySelectorAll('.lightbox-thumb');
+          thumbEls.forEach(thumb => {
+            thumb.addEventListener('click', () => {
+              thumbEls.forEach(t => t.classList.remove('active'));
+              thumb.classList.add('active');
+              if (lightboxImg) lightboxImg.src = thumb.getAttribute('data-src') || '';
+            });
+          });
+        }
+
+        if (galleryModal) {
+          galleryModal.style.display = 'flex';
+          document.body.style.overflow = 'hidden';
+        }
+      });
+    });
+
+    if (lightboxClose && galleryModal) {
+      lightboxClose.addEventListener('click', () => {
+        galleryModal.style.display = 'none';
+        document.body.style.overflow = '';
+      });
+    }
+
+    if (galleryModal) {
+      galleryModal.addEventListener('click', (e) => {
+        if (e.target === galleryModal) {
+          galleryModal.style.display = 'none';
+          document.body.style.overflow = '';
+        }
+      });
+    }
+
+    // ESC Key to close any active modal or property room interface
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        if (galleryModal && galleryModal.style.display === 'flex') {
+          galleryModal.style.display = 'none';
+          document.body.style.overflow = '';
+          return;
+        }
+        if (bookingModal && bookingModal.style.display === 'flex') {
+          bookingModal.style.display = 'none';
+          document.body.style.overflow = '';
+          return;
+        }
+        if (propertyInterface && propertyInterface.style.display === 'block') {
+          closePropertyInterface();
+        }
+      }
+    });
+  });
+</script>

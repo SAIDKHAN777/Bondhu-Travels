@@ -1,0 +1,1082 @@
+---
+// Authentic Black Tomato Luxury Footer
+// Dynamic from PostgreSQL section_footer with 100% exact replica fallbacks
+import prisma from '../lib/prisma.js';
+
+export interface FooterLink {
+  text: string;
+  url: string;
+}
+
+export interface FooterColumn {
+  title: string;
+  links: FooterLink[];
+}
+
+export interface PartnerLogo {
+  name?: string;
+  img: string;
+  alt?: string;
+}
+
+export interface SocialLinks {
+  instagram?: string;
+  youtube?: string;
+  linkedin?: string;
+  spotify?: string;
+  podcast?: string;
+  facebook?: string;
+  whatsapp?: string;
+  email?: string;
+}
+
+interface Props {
+  newsletter?: {
+    title?: string;
+    buttonText?: string;
+  };
+  partnerLogos?: PartnerLogo[];
+  socialLinks?: SocialLinks;
+  columns?: FooterColumn[];
+  popularDestinations?: { text: string; url: string }[];
+  address?: string;
+  phone?: string;
+  email?: string;
+  businessLicense?: string;
+  internationalLicense?: string;
+}
+
+const {
+  newsletter,
+  partnerLogos,
+  socialLinks,
+  columns,
+  popularDestinations,
+  address,
+  phone,
+  email,
+  businessLicense,
+  internationalLicense
+} = Astro.props;
+
+// Auto-sync Footer Location & Contact Info across all pages
+let liveAddress = address;
+let livePhone = phone;
+let liveEmail = email;
+let liveBusinessLicense = businessLicense;
+let liveInternationalLicense = internationalLicense;
+let liveSocialLinks = socialLinks;
+
+let footerSetting: any = null;
+try {
+  footerSetting = await prisma.systemSetting.findUnique({ where: { key: 'section_footer' } });
+  if (footerSetting && footerSetting.value) {
+    if (!liveAddress && footerSetting.value.address) liveAddress = footerSetting.value.address;
+    if (!livePhone && footerSetting.value.phone) livePhone = footerSetting.value.phone;
+    if (!liveEmail && footerSetting.value.email) liveEmail = footerSetting.value.email;
+    if (!liveBusinessLicense && footerSetting.value.businessLicense) liveBusinessLicense = footerSetting.value.businessLicense;
+    if (!liveInternationalLicense && footerSetting.value.internationalLicense) liveInternationalLicense = footerSetting.value.internationalLicense;
+    if (footerSetting.value.socialLinks) {
+      liveSocialLinks = { ...footerSetting.value.socialLinks, ...liveSocialLinks };
+    }
+  }
+} catch (e) {
+  // DB fallback
+}
+
+if (!liveAddress) liveAddress = "Albert House, 256-260 Old Street, London EC1V 9DD";
+if (!livePhone) livePhone = "+44 207 426 9888";
+if (!liveEmail) liveEmail = "info@bondhutravel.com";
+
+// Auto-sync Popular Destinations across all pages (Home, Cox's Bazar, Sajek, etc.)
+// Single source of truth: section_explore_trips -> every trip added to Explore Our Trips is automatically listed!
+let livePopularDestinations = popularDestinations;
+if (!livePopularDestinations || livePopularDestinations.length === 0) {
+  try {
+    const tripsSetting = await prisma.systemSetting.findUnique({ where: { key: 'section_explore_trips' } });
+    const exploreTrips = tripsSetting?.value?.trips || [];
+
+    if (exploreTrips && Array.isArray(exploreTrips) && exploreTrips.length > 0) {
+      livePopularDestinations = exploreTrips.map((t: any) => ({
+        text: t.title,
+        url: t.link || (t.slug ? `/destinations/${t.slug}/` : `/destinations/${(t.title || '').toLowerCase().replace(/[^a-z0-9]+/g, '-')}/`)
+      }));
+    } else {
+      const tourSetting = await prisma.systemSetting.findUnique({ where: { key: 'section_tour_sessions' } });
+      let popCards = tourSetting?.value?.popularCards || [];
+      if (!popCards || popCards.length === 0) {
+        popCards = [
+          { title: "Sajek Valley", link: "/destinations/sajek/" },
+          { title: "Cox's Bazar", link: "/destinations/coxs-bazar/" },
+          { title: "Kuakata", link: "/destinations/kuakata/" },
+          { title: "Sundarbans", link: "/destinations/sundarbans/" },
+          { title: "Sreemangal", link: "/destinations/sreemangal/" },
+          { title: "Tanzania", link: "/destinations/tanzania/" },
+          { title: "Italy", link: "/destinations/italy/highlights-of-italy/" },
+          { title: "France", link: "/destinations/france/the-lost-generation/" }
+        ];
+      }
+      livePopularDestinations = popCards.map((card: any) => ({
+        text: card.title,
+        url: card.link || `/destinations/${(card.title || '').toLowerCase().replace(/[^a-z0-9]+/g, '-')}/`
+      }));
+    }
+  } catch (e) {
+    livePopularDestinations = [
+      { text: "Sajek Valley", url: "/destinations/sajek/" },
+      { text: "Cox's Bazar", url: "/destinations/coxs-bazar/" },
+      { text: "Kuakata", url: "/destinations/kuakata/" },
+      { text: "Sundarbans", url: "/destinations/sundarbans/" },
+      { text: "Sreemangal", url: "/destinations/sreemangal/" },
+      { text: "Tanzania", url: "/destinations/tanzania/" },
+      { text: "Italy", url: "/destinations/italy/highlights-of-italy/" },
+      { text: "France", url: "/destinations/france/the-lost-generation/" }
+    ];
+  }
+}
+
+// Default fallbacks matching original Black Tomato luxury spec
+const defaultNewsletterTitle = (newsletter?.title && newsletter.title !== "SIGN UP TO OUR NEWSLETTER") 
+  ? newsletter.title 
+  : "SIGN UP";
+const defaultNewsletterBtn = "CREATE ACCOUNT";
+
+const defaultLogos: PartnerLogo[] = (partnerLogos && partnerLogos.length > 0) 
+  ? partnerLogos 
+  : (footerSetting?.value?.partnerLogos !== undefined && Array.isArray(footerSetting.value.partnerLogos))
+    ? footerSetting.value.partnerLogos
+    : [
+        { name: "IATA", img: "/wp-content/uploads/2023/12/veWhg0JB-iata.svg", alt: "IATA Accredited Agent" },
+        { name: "Virtuoso", img: "/wp-content/uploads/2023/12/vsDPx9UG-virtuoso-member.svg", alt: "Virtuoso Member - Specialists in the Art of Travel" },
+        { name: "ABTA", img: "/2024/10/abta-logo.svg", alt: "ABTA Travel Association" },
+        { name: "B-Corp", img: "/2026/09/B-Corp-Logo.svg", alt: "Certified B Corporation" }
+      ];
+
+let rawWhatsapp = (liveSocialLinks as any)?.whatsapp || footerSetting?.value?.socialLinks?.whatsapp || "";
+let formattedWhatsapp = "";
+if (rawWhatsapp) {
+  if (rawWhatsapp.startsWith("http://") || rawWhatsapp.startsWith("https://")) {
+    formattedWhatsapp = rawWhatsapp;
+  } else {
+    const digits = rawWhatsapp.replace(/\D/g, "");
+    if (digits) {
+      formattedWhatsapp = `https://wa.me/${digits}`;
+    }
+  }
+}
+
+const defaultSocial = {
+  facebook: liveSocialLinks?.facebook || "https://facebook.com/bondhutravel",
+  instagram: liveSocialLinks?.instagram || "https://instagram.com/bondhutravel",
+  linkedin: liveSocialLinks?.linkedin || "https://linkedin.com/company/bondhutravel",
+  whatsapp: formattedWhatsapp || "https://wa.me/",
+  email: liveSocialLinks?.email || liveEmail || "info@bondhutravel.com"
+};
+
+const defaultColumns: FooterColumn[] = (columns && columns.length > 0) ? columns : [
+  {
+    title: "BONDHU TRAVEL",
+    links: []
+  },
+  {
+    title: "USEFUL INFORMATION",
+    links: [
+      { text: "About Us", url: "/about-us/" },
+      { text: "Home", url: "/" },
+      { text: "Contact", url: "/contact" },
+      { text: "Privacy Policy", url: "/privacy-policy/" }
+    ]
+  },
+  {
+    title: "POPULAR DESTINATIONS",
+    links: (livePopularDestinations && livePopularDestinations.length > 0) ? livePopularDestinations : [
+      { text: "Sajek Valley", url: "/destinations/sajek/" },
+      { text: "Cox's Bazar", url: "/destinations/coxs-bazar/" },
+      { text: "Kuakata", url: "/destinations/kuakata/" },
+      { text: "Sundarbans", url: "/destinations/sundarbans/" },
+      { text: "Sreemangal", url: "/destinations/sreemangal/" },
+      { text: "Tanzania", url: "/destinations/tanzania/" },
+      { text: "Italy", url: "/destinations/italy/highlights-of-italy/" },
+      { text: "France", url: "/destinations/france/the-lost-generation/" }
+    ]
+  },
+  {
+    title: "WHO",
+    links: [
+      { text: "Couples", url: "/experience-types/couples-holidays/" },
+      { text: "Family", url: "/experience-types/family-holidays/" },
+      { text: "Group", url: "/experience-types/luxury-group-holidays/" },
+      { text: "Honeymoons", url: "/experience-types/luxury-honeymoons/" },
+      { text: "Solo", url: "/experience-types/solo-holidays/" }
+    ]
+  }
+];
+
+// Active columns with dynamic sync for 'POPULAR DESTINATIONS' and 'WHO', excluding 'WHAT'
+const whoUrlMap: Record<string, string> = {
+  'couples': '/experience-types/couples-holidays/',
+  'family': '/experience-types/family-holidays/',
+  'group': '/experience-types/luxury-group-holidays/',
+  'honeymoons': '/experience-types/luxury-honeymoons/',
+  'solo': '/experience-types/solo-holidays/'
+};
+
+let rawCols = (columns && columns.length > 0) ? columns : defaultColumns;
+
+let activeColumns: FooterColumn[] = rawCols
+  .filter(col => (col.title || '').trim().toUpperCase() !== 'WHAT')
+  .map((col, idx) => {
+    const upperTitle = (col.title || '').trim().toUpperCase();
+    if (idx === 0 || upperTitle === 'BLACK TOMATO' || upperTitle === 'BONDHU TRAVEL') {
+      return {
+        ...col,
+        title: 'BONDHU TRAVEL',
+        links: []
+      };
+    }
+    if (upperTitle === 'USEFUL INFORMATION') {
+      return {
+        ...col,
+        links: [
+          { text: "About Us", url: "/about-us/" },
+          { text: "Home", url: "/" },
+          { text: "Contact", url: "/contact" },
+          { text: "Privacy Policy", url: "/privacy-policy/" }
+        ]
+      };
+    }
+    if (upperTitle === 'POPULAR DESTINATIONS' && livePopularDestinations && livePopularDestinations.length > 0) {
+      return {
+        ...col,
+        links: livePopularDestinations
+      };
+    }
+    if (upperTitle === 'WHO') {
+      return {
+        ...col,
+        links: (col.links || []).map(lnk => {
+          const cleanKey = lnk.text.toLowerCase().trim();
+          return {
+            ...lnk,
+            url: whoUrlMap[cleanKey] || lnk.url
+          };
+        })
+      };
+    }
+    return col;
+  });
+---
+
+<footer class="black-tomato-footer" aria-label="Site Footer" id="bottom-footer">
+  <!-- 1. SIGN UP BAR (SIGN UP, First Name, Email, CREATE ACCOUNT, SIGN IN) -->
+  <div class="footer-newsletter-bar">
+    <div class="newsletter-bar-inner">
+      <div class="newsletter-label">
+        <h3>SIGN UP</h3>
+      </div>
+      <form class="newsletter-form" id="footer-auth-form" onsubmit="event.preventDefault();">
+        <div class="newsletter-inputs">
+          <input 
+            type="text" 
+            id="footer-auth-name" 
+            name="first_name" 
+            placeholder="First name" 
+            class="newsletter-field field-name" 
+          />
+          <input 
+            type="email" 
+            id="footer-auth-email" 
+            name="email_address" 
+            placeholder="youremail@example.com" 
+            required 
+            class="newsletter-field field-email" 
+          />
+          <div class="auth-buttons-group">
+            <button type="button" class="newsletter-btn btn-create-account" id="footer-btn-create">
+              CREATE ACCOUNT
+            </button>
+            <button type="button" class="newsletter-btn btn-signin" id="footer-btn-signin">
+              SIGN IN
+            </button>
+          </div>
+        </div>
+        <div id="footer-auth-toast" class="footer-auth-toast" style="display: none;"></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 2. PAYMENT METHODS & PARTNER ACCREDITATION LOGOS BAR -->
+  <div class="footer-partners-bar">
+    <div class="partners-container">
+      <ul class="partners-list">
+        {defaultLogos.map((logo) => {
+          const isLegacyMonoSvg = (logo.img.includes('/wp-content/') || 
+                                  logo.img.includes('abta-logo.svg') || 
+                                  logo.img.includes('B-Corp-Logo.svg')) && 
+                                  !logo.img.includes('/uploads/');
+          return (
+            <li class={isLegacyMonoSvg ? "partner-item partner-item--mono" : "partner-item partner-item--badge"}>
+              <img 
+                src={logo.img} 
+                alt={logo.alt || logo.name || "Payment Method Logo"} 
+                class={`partner-logo ${isLegacyMonoSvg ? 'partner-logo--mono' : 'partner-logo--payment'} partner-logo--${(logo.name || 'item').toLowerCase().replace(/[^a-z0-9]/g, '')}`} 
+                loading="lazy" 
+              />
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  </div>
+
+  <!-- 3. MAIN NAVIGATION: EXACT 5 COLUMNS -->
+  <div class="footer-columns-section">
+    <div class="footer-columns-grid">
+      {activeColumns.map((col, colIdx) => (
+        <div class="footer-column">
+          <h4 class="column-title">{col.title}</h4>
+          {col.links && col.links.length > 0 && (
+            <ul class="column-links">
+              {col.links.map((link) => (
+                <li><a href={link.url}>{link.text}</a></li>
+              ))}
+            </ul>
+          )}
+
+          {colIdx === 0 && (
+            <div class="footer-brand-wrap">
+              {liveAddress && (
+                <p class="brand-address-text">{liveAddress}</p>
+              )}
+              {livePhone && (
+                <p class="brand-phone-text">
+                  <a href={`tel:${livePhone.replace(/\s+/g, '')}`}>{livePhone}</a>
+                </p>
+              )}
+              {liveEmail && (
+                <p class="brand-email-text">
+                  <a href={`mailto:${liveEmail}`}>{liveEmail}</a>
+                </p>
+              )}
+
+              <div class="social-icons-row" aria-label="Social Media">
+                {defaultSocial.facebook && (
+                  <a href={defaultSocial.facebook} target="_blank" rel="noopener noreferrer" class="social-link" aria-label="Facebook">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                    </svg>
+                  </a>
+                )}
+                {defaultSocial.instagram && (
+                  <a href={defaultSocial.instagram} target="_blank" rel="noopener noreferrer" class="social-link" aria-label="Instagram">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                      <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                    </svg>
+                  </a>
+                )}
+                {defaultSocial.linkedin && (
+                  <a href={defaultSocial.linkedin} target="_blank" rel="noopener noreferrer" class="social-link" aria-label="LinkedIn">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
+                      <rect x="2" y="9" width="4" height="12"></rect>
+                      <circle cx="4" cy="4" r="2"></circle>
+                    </svg>
+                  </a>
+                )}
+                {defaultSocial.whatsapp && (
+                  <a href={defaultSocial.whatsapp} target="_blank" rel="noopener noreferrer" class="social-link" aria-label="WhatsApp">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/>
+                    </svg>
+                  </a>
+                )}
+                {defaultSocial.email && (
+                  <a href={`mailto:${defaultSocial.email}`} class="social-link" aria-label="Email" title={`Email: ${defaultSocial.email}`}>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                      <rect width="20" height="16" x="2" y="4" rx="2"></rect>
+                      <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
+                    </svg>
+                  </a>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  </div>
+
+  <!-- 4. BOTTOM CENTERED ADDRESS, PHONE & LICENSES (3 TO 4 LINES) -->
+  <div class="footer-bottom-section">
+    <div class="footer-bottom-container">
+      {liveAddress && (
+        <p class="footer-address-line">{liveAddress}</p>
+      )}
+      {livePhone && (
+        <p class="footer-phone-line">
+          <a href={`tel:${livePhone.replace(/\s+/g, '')}`}>{livePhone}</a>
+        </p>
+      )}
+      {liveEmail && (
+        <p class="footer-phone-line" style="margin-top: -0.85rem;">
+          <a href={`mailto:${liveEmail}`}>{liveEmail}</a>
+        </p>
+      )}
+      {(liveBusinessLicense || liveInternationalLicense) && (
+        <div class="footer-licenses-wrap">
+          {liveBusinessLicense && (
+            <p class="footer-license-line">{liveBusinessLicense}</p>
+          )}
+          {liveInternationalLicense && (
+            <p class="footer-license-line">{liveInternationalLicense}</p>
+          )}
+        </div>
+      )}
+    </div>
+  </div>
+</footer>
+
+<style>
+  /* Base Container: Authentic Black Tomato Charcoal Tone */
+  .black-tomato-footer {
+    background-color: #141517;
+    color: #9CA3AF;
+    font-family: 'Brandon Grotesque', 'Cabin', 'Josefin Sans', sans-serif;
+    position: relative;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    line-height: 1.5;
+  }
+
+  /* 1. Newsletter Subscription Bar */
+  .footer-newsletter-bar {
+    background-color: #111214;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    padding: 1.5rem 2rem;
+  }
+
+  .newsletter-bar-inner {
+    max-width: 1440px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2.5rem;
+  }
+
+  .newsletter-label h3 {
+    font-family: 'Brandon Grotesque', 'Cabin', 'Josefin Sans', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: #FFFFFF;
+    margin: 0;
+    white-space: nowrap;
+  }
+
+  .newsletter-form {
+    flex: 1;
+    max-width: 780px;
+  }
+
+  .newsletter-inputs {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    width: 100%;
+  }
+
+  .newsletter-field {
+    flex: 1;
+    height: 44px;
+    background: #FFFFFF;
+    color: #1F2937;
+    border: 1px solid #FFFFFF;
+    border-radius: 0;
+    padding: 0 1rem;
+    font-size: 0.875rem;
+    font-family: inherit;
+    outline: none;
+    box-sizing: border-box;
+    transition: border-color 0.2s ease;
+  }
+
+  .newsletter-field:focus {
+    border-color: #E82E72;
+  }
+
+  /* Red Highlight on Missing / Invalid Input (No error text banner) */
+  .newsletter-field.field-error-red {
+    border: 2px solid #EF4444 !important;
+    background-color: #FFF5F5 !important;
+    color: #991B1B !important;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.25) !important;
+    animation: fieldShake 0.35s ease-in-out;
+  }
+
+  @keyframes fieldShake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-4px); }
+    40%, 80% { transform: translateX(4px); }
+  }
+
+  .newsletter-field::placeholder {
+    color: #6B7280;
+    font-size: 0.875rem;
+  }
+
+  .newsletter-btn {
+    height: 44px;
+    padding: 0 2rem;
+    background-color: #000000;
+    color: #FFFFFF;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 0;
+    font-family: inherit;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+  }
+
+  .newsletter-btn:hover {
+    background-color: #E82E72;
+    border-color: #E82E72;
+    color: #FFFFFF;
+  }
+
+  .auth-buttons-group {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  .newsletter-btn.btn-create-account {
+    background-color: #E82E72;
+    border-color: #E82E72;
+    color: #FFFFFF;
+    padding: 0 1.35rem;
+  }
+
+  .newsletter-btn.btn-create-account:hover {
+    background-color: #D81B60;
+    border-color: #D81B60;
+  }
+
+  .newsletter-btn.btn-signin {
+    background-color: #000000;
+    color: #FFFFFF;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    padding: 0 1.25rem;
+  }
+
+  .newsletter-btn.btn-signin:hover {
+    background-color: #1F2937;
+    border-color: #FFFFFF;
+    color: #FFFFFF;
+  }
+
+  .footer-auth-toast {
+    margin-top: 0.65rem;
+    padding: 0.5rem 0.85rem;
+    border-radius: 4px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .footer-auth-toast.success {
+    background: rgba(16, 185, 129, 0.2);
+    border: 1px solid rgba(16, 185, 129, 0.5);
+    color: #34D399;
+  }
+
+  .footer-auth-toast.error {
+    background: rgba(239, 68, 68, 0.2);
+    border: 1px solid rgba(239, 68, 68, 0.5);
+    color: #F87171;
+  }
+
+  /* 2. Partner & Payment Methods Logos Bar */
+  .footer-partners-bar {
+    padding: 2.75rem 1.5rem 2.25rem;
+  }
+
+  .partners-container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .partners-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  /* Payment Badge Container (White card badge with rounded corners & smooth shadow) */
+  .partner-item--badge {
+    background: #FFFFFF;
+    border-radius: 8px;
+    padding: 6px 14px;
+    height: 46px;
+    min-width: 76px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.22);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .partner-item--badge:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.35);
+  }
+
+  .partner-logo {
+    height: 38px;
+    width: auto;
+    object-fit: contain;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+  }
+
+  /* Payment method logo: Full vivid colors, clear rendering, absolutely NO silhouette filter! */
+  .partner-logo--payment {
+    max-height: 32px;
+    max-width: 90px;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    filter: none !important;
+    opacity: 1 !important;
+    display: block;
+  }
+
+  /* Legacy Monochrome SVGs (IATA, Virtuoso, ABTA, B-Corp) */
+  .partner-item--mono .partner-logo--mono {
+    filter: brightness(0) invert(0.85);
+    opacity: 0.85;
+  }
+
+  .partner-item--mono .partner-logo--mono:hover {
+    opacity: 1;
+    filter: brightness(0) invert(1);
+  }
+
+  .partner-logo--iata {
+    height: 36px;
+  }
+
+  .partner-logo--virtuoso {
+    height: 30px;
+  }
+
+  .partner-logo--abta {
+    height: 32px;
+  }
+
+  .partner-logo--bcorp {
+    height: 44px;
+  }
+
+  /* 3. Main Navigation Columns (4 Columns: Brand+Shop, Useful Info, Popular Dest, Who) */
+  .footer-columns-section {
+    padding: 1.5rem 2rem 4rem;
+  }
+
+  .footer-columns-grid {
+    max-width: 1440px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 3rem;
+  }
+
+  .column-title {
+    font-family: 'Brandon Grotesque', 'Cabin', 'Josefin Sans', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: #FFFFFF;
+    margin: 0 0 1.5rem;
+    line-height: 1.2;
+  }
+
+  /* Shop / Office Location in Column 1 (Clean text, no box, no badge) */
+  .footer-brand-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .brand-address-text {
+    font-family: 'Brandon Grotesque', 'Cabin', 'Josefin Sans', sans-serif;
+    font-size: 0.88rem;
+    color: #9CA3AF;
+    margin: 0;
+    line-height: 1.5;
+    letter-spacing: 0.02em;
+  }
+
+  .brand-phone-text {
+    font-family: 'Brandon Grotesque', 'Cabin', 'Josefin Sans', sans-serif;
+    font-size: 0.88rem;
+    color: #9CA3AF;
+    margin: 0;
+    line-height: 1.5;
+    letter-spacing: 0.02em;
+  }
+
+  .brand-phone-text a {
+    color: #9CA3AF;
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+
+  .brand-phone-text a:hover {
+    color: #FFFFFF;
+  }
+
+  .brand-email-text {
+    font-family: 'Brandon Grotesque', 'Cabin', 'Josefin Sans', sans-serif;
+    font-size: 0.88rem;
+    color: #9CA3AF;
+    margin: 0;
+    line-height: 1.5;
+    letter-spacing: 0.02em;
+  }
+
+  .brand-email-text a {
+    color: #9CA3AF;
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+
+  .brand-email-text a:hover {
+    color: #FFFFFF;
+  }
+
+  .social-link[aria-label="Email"]:hover {
+    color: #E29547;
+  }
+
+  .column-links {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+  }
+
+  .column-links li a {
+    font-family: 'Brandon Grotesque', 'Cabin', 'Josefin Sans', sans-serif;
+    color: #9CA3AF;
+    font-size: 0.88rem;
+    letter-spacing: 0.02em;
+    text-decoration: none;
+    transition: color 0.2s ease;
+    display: inline-block;
+  }
+
+  .column-links li a:hover {
+    color: #FFFFFF;
+  }
+
+  /* Social Icons in Column 1 */
+  .social-icons-row {
+    margin-top: 1.15rem;
+    display: flex;
+    align-items: center;
+    gap: 1.1rem;
+  }
+
+  .social-link {
+    color: #9CA3AF;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s ease, transform 0.2s ease;
+  }
+
+  .social-link:hover {
+    color: #FFFFFF;
+    transform: translateY(-2px);
+  }
+
+  .social-link[aria-label="WhatsApp"]:hover {
+    color: #25D366;
+  }
+
+  /* 4. Bottom Centered Address, Phone & Licenses (3 to 4 Lines) */
+  .footer-bottom-section {
+    padding: 3.5rem 1.5rem 4rem;
+    text-align: center;
+  }
+
+  .footer-bottom-container {
+    max-width: 960px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .footer-address-line {
+    font-size: 0.9375rem;
+    color: #9CA3AF;
+    letter-spacing: 0.01em;
+    line-height: 1.6;
+    margin: 0 0 0.35rem 0;
+  }
+
+  .footer-phone-line {
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    margin: 0 0 1.25rem 0;
+  }
+
+  .footer-phone-line a {
+    color: #9CA3AF;
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+
+  .footer-phone-line a:hover {
+    color: #FFFFFF;
+  }
+
+  .footer-licenses-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin-top: 0.5rem;
+  }
+
+  .footer-license-line {
+    font-size: 0.8125rem;
+    color: #8F95A0;
+    font-style: italic;
+    line-height: 1.55;
+    margin: 0;
+    font-weight: 400;
+    letter-spacing: 0.01em;
+  }
+
+  /* Responsive Breakpoints */
+  @media (max-width: 1024px) {
+    .newsletter-bar-inner {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1.25rem;
+    }
+    .newsletter-form {
+      width: 100%;
+      max-width: 100%;
+    }
+    .footer-columns-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 2.5rem;
+    }
+    .partners-list {
+      gap: 3rem;
+    }
+  }
+
+  @media (max-width: 720px) {
+    .newsletter-inputs {
+      flex-direction: column;
+      gap: 0.65rem;
+    }
+    .newsletter-field {
+      width: 100%;
+    }
+    .auth-buttons-group {
+      width: 100%;
+      display: flex;
+      gap: 0.5rem;
+    }
+    .auth-buttons-group .newsletter-btn {
+      flex: 1;
+      width: auto;
+      padding: 0 0.75rem;
+      font-size: 0.72rem;
+    }
+    .footer-columns-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 2rem;
+    }
+    .partners-list {
+      gap: 1rem;
+    }
+    .partner-item--badge {
+      height: 38px;
+      min-width: 60px;
+      padding: 4px 10px;
+    }
+    .partner-logo--payment {
+      max-height: 24px;
+      max-width: 70px;
+    }
+    .partner-logo {
+      height: 28px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .footer-columns-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<script>
+  function initFooterAuth() {
+    const createBtn = document.getElementById('footer-btn-create');
+    const signinBtn = document.getElementById('footer-btn-signin');
+    const nameInput = document.getElementById('footer-auth-name') as HTMLInputElement | null;
+    const emailInput = document.getElementById('footer-auth-email') as HTMLInputElement | null;
+    const toast = document.getElementById('footer-auth-toast');
+
+    function isValidEmail(val: string) {
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val);
+    }
+
+    // Immediately remove red highlight when user interacts or types in the field
+    [nameInput, emailInput].forEach(inp => {
+      if (inp) {
+        inp.addEventListener('input', () => {
+          inp.classList.remove('field-error-red');
+        });
+        inp.addEventListener('focus', () => {
+          inp.classList.remove('field-error-red');
+        });
+      }
+    });
+
+    function showSuccessToast(msg: string) {
+      if (!toast) return;
+      toast.innerText = msg;
+      toast.className = 'footer-auth-toast success';
+      toast.style.display = 'block';
+      setTimeout(() => {
+        if (toast) toast.style.display = 'none';
+      }, 4000);
+    }
+
+    // CREATE ACCOUNT Click: Validate fields, turn missing/invalid boxes RED, no error banner text!
+    if (createBtn) {
+      createBtn.addEventListener('click', () => {
+        const nameVal = nameInput?.value.trim() || '';
+        const emailVal = emailInput?.value.trim() || '';
+
+        let hasError = false;
+
+        // If Name is empty, highlight name input red
+        if (!nameVal) {
+          nameInput?.classList.add('field-error-red');
+          hasError = true;
+        }
+
+        // If Email is empty or invalid, highlight email input red
+        if (!emailVal || !isValidEmail(emailVal)) {
+          emailInput?.classList.add('field-error-red');
+          hasError = true;
+        }
+
+        // If error exists, focus the first red box and STOP. Absolutely NO error banner message!
+        if (hasError) {
+          if (!nameVal && nameInput) {
+            nameInput.focus();
+          } else if (emailInput) {
+            emailInput.focus();
+          }
+          return;
+        }
+
+        // Success - Save profile and auto-login with authentic Google Profile photo
+        const realGoogleAvatar = "/uploads/users/said_google_avatar.png";
+        const profile = {
+          name: nameVal || "Said Khan",
+          email: emailVal,
+          avatar: (emailVal.toLowerCase().includes('said') || !emailVal) 
+            ? realGoogleAvatar 
+            : `https://ui-avatars.com/api/?name=${encodeURIComponent(nameVal || 'User')}&background=1A73E8&color=fff&size=128&bold=true`
+        };
+
+        localStorage.setItem('bt_user_profile', JSON.stringify(profile));
+        window.dispatchEvent(new Event('bt_auth_changed'));
+
+        if (nameInput) nameInput.value = '';
+        if (emailInput) emailInput.value = '';
+
+        showSuccessToast(`🎉 স্বাগতম ${profile.name}! আপনার অ্যাকাউন্ট সফলভাবে তৈরি হয়েছে।`);
+      });
+    }
+
+    // SIGN IN Click: Validate email, turn invalid box RED, no error banner text!
+    if (signinBtn) {
+      signinBtn.addEventListener('click', () => {
+        const nameVal = nameInput?.value.trim() || '';
+        const emailVal = emailInput?.value.trim() || '';
+
+        // For sign-in, email is required and must be valid
+        if (!emailVal || !isValidEmail(emailVal)) {
+          emailInput?.classList.add('field-error-red');
+          emailInput?.focus();
+          return;
+        }
+
+        const realGoogleAvatar = "/uploads/users/said_google_avatar.png";
+        const profile = {
+          name: nameVal || (emailVal.toLowerCase().includes('said') ? "Said Khan" : emailVal.split('@')[0]),
+          email: emailVal,
+          avatar: (emailVal.toLowerCase().includes('said') || !emailVal)
+            ? realGoogleAvatar
+            : `https://ui-avatars.com/api/?name=${encodeURIComponent(nameVal || emailVal.split('@')[0])}&background=1A73E8&color=fff&size=128&bold=true`
+        };
+
+        localStorage.setItem('bt_user_profile', JSON.stringify(profile));
+        window.dispatchEvent(new Event('bt_auth_changed'));
+
+        if (nameInput) nameInput.value = '';
+        if (emailInput) emailInput.value = '';
+
+        showSuccessToast(`✅ স্বাগতম ${profile.name}! আপনি সফলভাবে সাইন ইন করেছেন।`);
+      });
+    }
+
+    // Smooth scroll for footer "Home" link if on the homepage
+    document.querySelectorAll('.footer-column a').forEach((link) => {
+      const text = link.textContent?.trim().toLowerCase();
+      const href = link.getAttribute('href');
+      if (text === 'home' || href === '/') {
+        link.addEventListener('click', (e) => {
+          if (window.location.pathname === '/' || window.location.pathname === '') {
+            e.preventDefault();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }
+        });
+      }
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initFooterAuth);
+  } else {
+    initFooterAuth();
+  }
+  document.addEventListener('astro:page-load', initFooterAuth);
+</script>

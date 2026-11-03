@@ -1,0 +1,1066 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import prisma from '../../lib/prisma.js';
+import { DEFAULT_SCHEDULED_TOURS } from '../../lib/scheduledToursData';
+
+export const prerender = false;
+
+// Master Tour Schedule Database
+let masterScheduledTours = DEFAULT_SCHEDULED_TOURS;
+try {
+  const setting = await prisma.systemSetting.findUnique({
+    where: { key: "section_tour_schedule" }
+  });
+  if (setting && setting.value && setting.value.tours) {
+    masterScheduledTours = setting.value.tours;
+  }
+} catch (e) {
+  // DB fallback
+}
+---
+
+<BaseLayout 
+  title="REGULAR SCHEDULED TOURS | Bondhu Travel"
+  description="Explore scheduled departures with guaranteed weekly departures."
+  theme="light"
+>
+  <Header />
+
+  <main class="clean-schedule-page">
+    <div class="schedule-page-container">
+      
+      <!-- VIEW A: THE FULL CALENDAR (60% White Rule, All English) -->
+      <div id="schedule-view-calendar" class="schedule-view-active">
+        
+        <!-- Pure Clean Headline -->
+        <header class="schedule-header-center">
+          <h1 class="schedule-main-title">REGULAR SCHEDULED TOURS</h1>
+        </header>
+
+        <!-- Month Navigation Bar -->
+        <div class="month-nav-bar">
+          <div class="month-selector-group">
+            <button type="button" class="month-nav-arrow" id="cal-prev-month" aria-label="Previous Month">◀</button>
+            <span class="current-month-display" id="cal-current-month-text">NOVEMBER 2026</span>
+            <button type="button" class="month-nav-arrow" id="cal-next-month" aria-label="Next Month">▶</button>
+          </div>
+          
+          <div class="quick-month-pills">
+            <button type="button" class="quick-month-btn active" data-month="10" data-year="2026">NOVEMBER</button>
+            <button type="button" class="quick-month-btn" data-month="11" data-year="2026">DECEMBER</button>
+            <button type="button" class="quick-month-btn" data-month="0" data-year="2027">JANUARY</button>
+          </div>
+        </div>
+
+        <!-- Authentic Table Calendar Grid Wrapper (Desk/Table Calendar Aesthetic) -->
+        <div class="cal-calendar-table-wrapper">
+          <!-- 7 Days of Week Header (Saturday to Friday - All Days Uniform) -->
+          <div class="cal-weekdays-row">
+            <div class="weekday-col">SAT</div>
+            <div class="weekday-col">SUN</div>
+            <div class="weekday-col">MON</div>
+            <div class="weekday-col">TUE</div>
+            <div class="weekday-col">WED</div>
+            <div class="weekday-col">THU</div>
+            <div class="weekday-col">FRI</div>
+          </div>
+
+          <!-- Dynamic Calendar Grid Days (Every day has its own distinct boxed cell) -->
+          <div class="cal-days-grid" id="cal-days-grid-container">
+            <!-- Rendered dynamically by JavaScript -->
+          </div>
+        </div>
+
+      </div>
+
+      <!-- VIEW B: SPECIFIC DATE TOUR COLLECTION (Explore Our Trips Visual Grid) -->
+      <div id="schedule-view-date-details" class="schedule-view-hidden" style="display: none;">
+        
+        <div class="date-details-top-bar">
+          <button type="button" class="btn-back-to-cal" id="btn-back-to-calendar">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="19" y1="12" x2="5" y2="12"></line>
+              <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+            <span>BACK TO CALENDAR</span>
+          </button>
+
+          <div class="date-details-title-box">
+            <span class="date-subtag-pill">DEPARTURE COLLECTION</span>
+            <h2 class="date-main-heading" id="selected-date-heading">FRIDAY, 14 NOVEMBER 2026</h2>
+          </div>
+        </div>
+
+        <!-- Explore Our Trips Style 4-Column Responsive Grid -->
+        <div class="explore-trips-grid date-trips-grid" id="date-tours-list-container">
+          <!-- Dynamically populated via JS -->
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+
+  <Footer />
+</BaseLayout>
+
+<style is:global>
+  /* ------------------------------------------------------------- */
+  /* 1. CLEAN WHITE FULL PAGE INTERFACE (60% White Rule)           */
+  /* ------------------------------------------------------------- */
+  .clean-schedule-page {
+    background-color: #FFFFFF;
+    color: #111827;
+    min-height: 100vh;
+    padding-top: 130px;
+    padding-bottom: 7rem;
+    font-family: 'Cabin', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hind Siliguri", "Noto Sans Bengali", sans-serif;
+  }
+
+  .schedule-page-container {
+    max-width: 1380px;
+    margin: 0 auto;
+    padding: 0 clamp(1.5rem, 4vw, 4rem);
+  }
+
+  /* Top Navigation */
+  .schedule-top-nav {
+    margin-bottom: 1.5rem;
+  }
+
+  .btn-back-home {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    background: #F8FAFC;
+    border: 1px solid #E2E8F0;
+    color: #1E293B;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 0.6rem 1.15rem;
+    border-radius: 4px;
+    text-decoration: none;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  }
+
+  .btn-back-home:hover {
+    background: #000000;
+    color: #FFFFFF;
+    border-color: #000000;
+    transform: translateX(-4px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  .btn-back-home svg {
+    transition: transform 0.25s ease;
+  }
+
+  .btn-back-home:hover svg {
+    transform: translateX(-2px);
+  }
+
+  /* ------------------------------------------------------------- */
+  /* 2. PURE CLEAN HEADLINE                                        */
+  /* ------------------------------------------------------------- */
+  .schedule-header-center {
+    text-align: center;
+    max-width: 900px;
+    margin: 0 auto 3rem auto;
+  }
+
+  .schedule-main-title {
+    font-family: 'AlternateGotNo1D', 'Alternate Gothic', 'League Gothic', sans-serif;
+    font-size: clamp(2.75rem, 5vw, 4.2rem);
+    font-weight: 400;
+    letter-spacing: 0.05em;
+    line-height: 1;
+    text-transform: uppercase;
+    color: #000000;
+    margin: 0;
+  }
+
+  /* ------------------------------------------------------------- */
+  /* 3. MONTH NAVIGATION BAR                                       */
+  /* ------------------------------------------------------------- */
+  .month-nav-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    background: #F8FAFC;
+    padding: 0.85rem 1.25rem;
+    border-radius: 6px;
+    border: 1px solid #E2E8F0;
+  }
+
+  .month-selector-group {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .month-nav-arrow {
+    background: #FFFFFF;
+    border: 1px solid #CBD5E1;
+    color: #0F172A;
+    width: 32px;
+    height: 32px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: all 0.2s;
+  }
+
+  .month-nav-arrow:hover {
+    background: #000000;
+    color: #FFFFFF;
+    border-color: #000000;
+  }
+
+  .current-month-display {
+    font-family: 'AlternateGotNo1D', 'Alternate Gothic', sans-serif;
+    font-size: 1.6rem;
+    font-weight: 400;
+    color: #000000;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .quick-month-pills {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .quick-month-btn {
+    background: #FFFFFF;
+    border: 1px solid #CBD5E1;
+    color: #475569;
+    padding: 0.45rem 1rem;
+    border-radius: 4px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+  }
+
+  .quick-month-btn:hover, .quick-month-btn.active {
+    background: #000000;
+    border-color: #000000;
+    color: #FFFFFF;
+  }
+
+  /* ------------------------------------------------------------- */
+  /* 4. AUTHENTIC 7-COLUMN TABLE CALENDAR (DESK CALENDAR BOXES)    */
+  /* ------------------------------------------------------------- */
+  .cal-calendar-table-wrapper {
+    background: #FFFFFF;
+    border: 2px solid #CBD5E1;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.06);
+  }
+
+  .cal-weekdays-row {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    background: #F8FAFC;
+    border-bottom: 2px solid #CBD5E1;
+    margin: 0;
+  }
+
+  .weekday-col {
+    text-align: center;
+    padding: 0.95rem 0.5rem;
+    font-size: 0.85rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: #1E293B;
+    border-right: 1.5px solid #CBD5E1;
+    background: #F8FAFC;
+  }
+
+  .weekday-col:last-child {
+    border-right: none;
+  }
+
+  .cal-days-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    background: #CBD5E1; /* Creates crisp 1.5px border lines between every day box */
+    gap: 1.5px;
+    margin: 0;
+  }
+
+  .cal-day-cell {
+    background: #FFFFFF;
+    min-height: 114px;
+    height: 114px;
+    max-height: 114px;
+    box-sizing: border-box;
+    position: relative;
+    overflow: hidden;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .cal-day-cell.cal-day-empty {
+    background: #F8FAFC;
+    pointer-events: none;
+  }
+
+  /* Regular day box: Date number clearly centered in the box */
+  .cal-day-cell.cal-day-regular {
+    background: #FFFFFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: default;
+  }
+
+  .cal-day-cell.cal-day-regular:hover {
+    background: #F1F5F9;
+  }
+
+  .cal-day-number-center {
+    font-family: "Cabin", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #1E293B;
+    line-height: 1;
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s ease;
+  }
+
+  .cal-day-cell.cal-day-regular:hover .cal-day-number-center {
+    color: #000000;
+    transform: scale(1.18);
+  }
+
+  /* Tour day box: Highlighted luxury card with round balls and badge */
+  .cal-day-cell.cal-day-has-tour {
+    background: #FFFDF7;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 10px 12px;
+    border: 2px solid #E29547;
+    position: relative;
+    z-index: 2;
+    box-shadow: 0 2px 8px rgba(226, 149, 71, 0.15);
+  }
+
+  .cal-day-cell.cal-day-has-tour:hover {
+    background: #FFF9ED;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(226, 149, 71, 0.35);
+    z-index: 5;
+  }
+
+  .cal-day-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .cal-day-cell.cal-day-has-tour .cal-day-number {
+    color: #0F172A;
+    font-size: 1.15rem;
+    font-weight: 800;
+  }
+
+  .cal-tour-status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  .cal-tour-status-dot.available {
+    background: #10B981;
+    box-shadow: 0 0 6px rgba(16, 185, 129, 0.6);
+  }
+
+  .cal-tour-status-dot.filling {
+    background: #F59E0B;
+    box-shadow: 0 0 6px rgba(245, 158, 11, 0.6);
+  }
+
+  .cal-tour-status-dot.soldout {
+    background: #EF4444;
+  }
+
+  /* Tour Circular Balls Cluster */
+  .cal-day-balls-cluster {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    width: 100%;
+    margin-top: auto;
+  }
+
+  .cal-balls-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .tour-circular-ball {
+    width: 26px !important;
+    height: 26px !important;
+    min-width: 26px !important;
+    min-height: 26px !important;
+    max-width: 26px !important;
+    max-height: 26px !important;
+    border-radius: 50% !important;
+    border: 2px solid #D97706 !important;
+    object-fit: cover !important;
+    display: inline-block !important;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.25);
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .cal-day-cell:hover .tour-circular-ball {
+    transform: scale(1.2);
+  }
+
+  .tour-ball-more {
+    width: 24px;
+    height: 24px;
+    border-radius: 50% !important;
+    background: #000000;
+    color: #FFFFFF;
+    font-size: 0.68rem;
+    font-weight: 800;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1.5px solid #FFFFFF;
+  }
+
+  .cal-tour-micro-badge {
+    font-size: 0.72rem;
+    color: #B45309;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* ------------------------------------------------------------- */
+  /* 5. VIEW B: EXPLORE OUR TRIPS STYLE GRID FOR SPECIFIC DATE     */
+  /* ------------------------------------------------------------- */
+  .date-details-top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 2rem;
+    border-bottom: 1.5px solid #E2E8F0;
+    margin-bottom: 3rem;
+    flex-wrap: wrap;
+    gap: 1.25rem;
+  }
+
+  .btn-back-to-cal {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    background: #FFFFFF;
+    border: 1.5px solid #CBD5E1;
+    color: #1E293B;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 0.7rem 1.35rem;
+    border-radius: 4px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  }
+
+  .btn-back-to-cal:hover {
+    background: #000000;
+    color: #FFFFFF;
+    border-color: #000000;
+    transform: translateX(-4px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  .btn-back-to-cal svg {
+    transition: transform 0.25s ease;
+  }
+
+  .btn-back-to-cal:hover svg {
+    transform: translateX(-2px);
+  }
+
+  .date-details-title-box {
+    text-align: right;
+  }
+
+  .date-subtag-pill {
+    font-size: 0.72rem;
+    color: #D97706;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 0.35rem;
+  }
+
+  .date-main-heading {
+    font-family: "AlternateGotNo1D", "Alternate Gothic", "League Gothic", sans-serif;
+    font-size: 2.25rem;
+    color: #000000;
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .date-trips-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(360px, 420px));
+    gap: 2.5rem;
+    justify-content: flex-start;
+  }
+
+  /* Trip Card - Taller, elongated luxury vertical format */
+  .cal-detail-trip-card {
+    height: 640px;
+    min-height: 640px;
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 2.5rem 2rem 2rem 2rem;
+    box-shadow: 0 14px 36px rgba(0, 0, 0, 0.35);
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s ease;
+    cursor: pointer;
+  }
+
+  .cal-detail-trip-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.65);
+  }
+
+  .trip-card-full-link {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 3;
+    cursor: pointer;
+    text-decoration: none;
+    outline: none;
+  }
+
+  .trip-badges-top-row {
+    position: absolute;
+    top: 1.5rem;
+    left: 1.5rem;
+    right: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 4;
+  }
+
+  .trip-status-top-pill {
+    background: rgba(14, 18, 26, 0.85);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    font-size: 0.72rem;
+    font-weight: 800;
+    padding: 0.35rem 0.8rem;
+    border-radius: 999px;
+    color: #FFFFFF;
+    letter-spacing: 0.05em;
+  }
+
+  .trip-status-top-pill.available {
+    border-color: rgba(16, 185, 129, 0.6);
+    color: #34D399;
+  }
+
+  .trip-status-top-pill.filling {
+    border-color: rgba(245, 158, 11, 0.6);
+    color: #FBBF24;
+  }
+
+  .trip-status-top-pill.soldout {
+    border-color: rgba(239, 68, 68, 0.6);
+    color: #F87171;
+  }
+
+  .trip-nights-badge {
+    color: #FFFFFF;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9);
+  }
+
+  .trip-gradient-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.08) 40%, rgba(10, 12, 16, 0.88) 72%, rgba(6, 8, 12, 0.98) 95%);
+    z-index: 1;
+    pointer-events: none;
+    transition: background 0.3s ease;
+  }
+
+  .cal-detail-trip-card:hover .trip-gradient-overlay {
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.2) 35%, rgba(8, 10, 15, 0.94) 70%, rgba(4, 6, 10, 0.99) 95%);
+  }
+
+  .trip-card-content {
+    position: relative;
+    z-index: 4;
+    pointer-events: none;
+    width: 100%;
+  }
+
+  .trip-card-content a,
+  .trip-card-content .btn-book-action {
+    pointer-events: auto;
+  }
+
+  .trip-card-title {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #FFFFFF;
+    line-height: 1.35;
+    text-transform: uppercase;
+    margin: 0 0 0.35rem 0;
+    letter-spacing: 0.04em;
+  }
+
+  .trip-country {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #D1D5DB;
+    margin-bottom: 0.85rem;
+  }
+
+  .trip-card-desc {
+    font-size: 0.78rem;
+    line-height: 1.45;
+    color: #CBD5E1;
+    margin-bottom: 1.25rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    opacity: 0.92;
+  }
+
+  .trip-card-bottom-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 0.75rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+  }
+
+  .trip-price-badge {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .trip-price-label {
+    font-size: 0.65rem;
+    color: #9CA3AF;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .trip-price-val {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: #FFFFFF;
+    letter-spacing: 0.02em;
+  }
+
+  .btn-book-action {
+    background: #FFFFFF;
+    color: #000000;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 0.65rem 1.25rem;
+    border-radius: 2px;
+    text-decoration: none;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  .cal-detail-trip-card:hover .btn-book-action {
+    background: #E29547;
+    color: #000000;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(226, 149, 71, 0.4);
+  }
+
+  /* ------------------------------------------------------------- */
+  /* RESPONSIVE LAYOUTS                                            */
+  /* ------------------------------------------------------------- */
+  @media (max-width: 1200px) {
+    .date-trips-grid {
+      grid-template-columns: repeat(auto-fit, minmax(320px, 380px));
+      gap: 1.5rem;
+    }
+  }
+
+  @media (max-width: 860px) {
+    .clean-schedule-page {
+      padding-top: 100px;
+    }
+
+    .cal-day-cell {
+      min-height: 85px;
+      height: 85px;
+      padding: 6px 8px;
+    }
+
+    .date-trips-grid {
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.25rem;
+    }
+  }
+
+  @media (max-width: 540px) {
+    .cal-day-cell {
+      min-height: 68px;
+      height: 68px;
+      padding: 4px;
+    }
+
+    .cal-day-number {
+      font-size: 0.85rem;
+    }
+
+    .tour-circular-ball {
+      width: 18px !important;
+      height: 18px !important;
+      min-width: 18px !important;
+      min-height: 18px !important;
+    }
+
+    .date-trips-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .cal-detail-trip-card {
+      height: 480px;
+      min-height: 480px;
+    }
+  }
+</style>
+
+<script is:inline define:vars={{ SCHEDULED_TOURS_DATA: masterScheduledTours }}>
+  // Month State
+  let currentYear = 2026;
+  let currentMonth = 10; // November (0-indexed: 10 = Nov)
+
+  const MONTH_NAMES_EN = [
+    "JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE",
+    "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"
+  ];
+
+  function renderCalendar() {
+    const monthTextEl = document.getElementById('cal-current-month-text');
+    const gridEl = document.getElementById('cal-days-grid-container');
+    if (!monthTextEl || !gridEl) return;
+
+    monthTextEl.textContent = `${MONTH_NAMES_EN[currentMonth]} ${currentYear}`;
+
+    // Update Quick Month Pills
+    document.querySelectorAll('.quick-month-btn').forEach(btn => {
+      const m = parseInt(btn.getAttribute('data-month') || '10', 10);
+      const y = parseInt(btn.getAttribute('data-year') || '2026', 10);
+      if (m === currentMonth && y === currentYear) {
+        btn.classList.add('active');
+      } else {
+        btn.classList.remove('active');
+      }
+    });
+
+    // Saturday as 1st col, Friday as 7th col
+    const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+    const leadingBlanks = (firstDay + 1) % 7;
+    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+
+    let html = '';
+
+    // Leading Blanks
+    for (let i = 0; i < leadingBlanks; i++) {
+      html += '<div class="cal-day-cell cal-day-empty"></div>';
+    }
+
+    // Days 1 to daysInMonth
+    for (let d = 1; d <= daysInMonth; d++) {
+      const dayStr = d < 10 ? `0${d}` : `${d}`;
+      const monthStr = (currentMonth + 1) < 10 ? `0${currentMonth + 1}` : `${currentMonth + 1}`;
+      const dateKey = `${currentYear}-${monthStr}-${dayStr}`;
+
+      const toursOnDate = SCHEDULED_TOURS_DATA[dateKey];
+      const hasTours = Array.isArray(toursOnDate) && toursOnDate.length > 0;
+
+      if (hasTours) {
+        let statusClass = 'available';
+        if (toursOnDate.some(t => t.status === 'soldout')) statusClass = 'soldout';
+        if (toursOnDate.some(t => t.status === 'filling')) statusClass = 'filling';
+
+        const visibleTours = toursOnDate.slice(0, 3);
+        const ballsHtml = visibleTours.map((t) => `
+          <img 
+            src="${t.img}" 
+            alt="${t.destination}" 
+            class="tour-circular-ball" 
+            title="${t.destination}: ${t.title}"
+            style="width: 24px !important; height: 24px !important; min-width: 24px !important; min-height: 24px !important; max-width: 24px !important; max-height: 24px !important; border-radius: 50% !important; border: 2px solid #D97706 !important; object-fit: cover !important; display: inline-block !important; margin: 0 1px;"
+          />
+        `).join('');
+
+        const moreBadge = toursOnDate.length > 3 
+          ? `<span class="tour-ball-more">+${toursOnDate.length - 3}</span>` 
+          : '';
+
+        html += `
+          <div 
+            class="cal-day-cell cal-day-has-tour is-tour-date" 
+            data-date-key="${dateKey}"
+            role="button"
+            tabindex="0"
+            title="Click to view ${toursOnDate.length} departure tours"
+          >
+            <div class="cal-day-header-row">
+              <span class="cal-day-number">${d}</span>
+              <span class="cal-tour-status-dot ${statusClass}"></span>
+            </div>
+
+            <div class="cal-day-balls-cluster">
+              <div class="cal-balls-row">
+                ${ballsHtml}
+                ${moreBadge}
+              </div>
+              <span class="cal-tour-micro-badge">${toursOnDate.length} TOURS ➔</span>
+            </div>
+          </div>
+        `;
+      } else {
+        html += `
+          <div class="cal-day-cell cal-day-regular">
+            <span class="cal-day-number-center">${d}</span>
+          </div>
+        `;
+      }
+    }
+
+    // Trailing Blanks to complete 7 columns
+    const totalCells = leadingBlanks + daysInMonth;
+    const trailingBlanks = (7 - (totalCells % 7)) % 7;
+    for (let i = 0; i < trailingBlanks; i++) {
+      html += '<div class="cal-day-cell cal-day-empty"></div>';
+    }
+
+    gridEl.innerHTML = html;
+
+    // Attach click listeners
+    gridEl.querySelectorAll('.cal-day-cell.is-tour-date').forEach(cell => {
+      cell.addEventListener('click', () => {
+        const dateKey = cell.getAttribute('data-date-key');
+        if (dateKey) openDateScheduleDetails(dateKey);
+      });
+      cell.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          const dateKey = cell.getAttribute('data-date-key');
+          if (dateKey) openDateScheduleDetails(dateKey);
+        }
+      });
+    });
+  }
+
+  function openDateScheduleDetails(dateKey) {
+    const tours = SCHEDULED_TOURS_DATA[dateKey];
+    if (!tours || tours.length === 0) return;
+
+    const headingEl = document.getElementById('selected-date-heading');
+    const containerEl = document.getElementById('date-tours-list-container');
+    const calView = document.getElementById('schedule-view-calendar');
+    const detailsView = document.getElementById('schedule-view-date-details');
+    if (!headingEl || !containerEl || !calView || !detailsView) return;
+
+    const parts = dateKey.split('-');
+    const y = parseInt(parts[0], 10);
+    const m = parseInt(parts[1], 10) - 1;
+    const d = parseInt(parts[2], 10);
+    const dateObj = new Date(y, m, d);
+
+    const dayNameEN = ["SUNDAY", "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"][dateObj.getDay()];
+    headingEl.textContent = `${dayNameEN}, ${d} ${MONTH_NAMES_EN[m]} ${y}`;
+
+    // Render Explore Our Trips cards
+    containerEl.innerHTML = tours.map(tour => {
+      let statusClass = 'available';
+      if (tour.status === 'filling') statusClass = 'filling';
+      if (tour.status === 'soldout') statusClass = 'soldout';
+
+      const bookingUrl = `/tour-schedule/book/?tour=${encodeURIComponent(tour.title)}&date=${encodeURIComponent(dateKey)}&destination=${encodeURIComponent(tour.destination)}`;
+      const cardBg = tour.img || tour.heroImage || '/uploads/images/obintehasan_pindown_io_1793483591-mvwxtycm.jpg';
+      const cardDesc = tour.desc || tour.overviewLead || '';
+      const cardDuration = tour.duration || tour.howLong || '3 NIGHTS';
+
+      return `
+        <article 
+          class="cal-detail-trip-card" 
+          style="background-image: url('${cardBg}');"
+          role="article"
+          tabindex="0"
+          aria-label="${tour.title} - ${tour.destination}"
+        >
+          <a 
+            href="${bookingUrl}" 
+            class="trip-card-full-link" 
+            aria-label="Book tour: ${tour.title}"
+            tabindex="-1"
+          ></a>
+
+          <div class="trip-badges-top-row">
+            <span class="trip-nights-badge">${cardDuration}</span>
+            <span class="trip-status-top-pill ${statusClass}">
+              ● ${tour.seats || 'AVAILABLE'}
+            </span>
+          </div>
+
+          <div class="trip-gradient-overlay"></div>
+
+          <div class="trip-card-content">
+            <h3 class="trip-card-title">
+              <a href="${bookingUrl}" style="color: inherit; text-decoration: none;">
+                ${tour.title}
+              </a>
+            </h3>
+
+            <span class="trip-country">${tour.destination} • DEPARTURE: ${tour.time || '6:00 AM'}</span>
+
+            <p class="trip-card-desc">${cardDesc}</p>
+
+            <div class="trip-card-bottom-row">
+              <div class="trip-price-badge">
+                <span class="trip-price-label">Price per person</span>
+                <span class="trip-price-val">${tour.price}</span>
+              </div>
+
+              ${tour.status !== 'soldout' ? `
+                <a href="${bookingUrl}" class="btn-book-action">
+                  BOOK TOUR ➔
+                </a>
+              ` : `
+                <span style="font-size: 0.72rem; font-weight: 800; color: #EF4444; background: rgba(239, 68, 68, 0.15); padding: 0.4rem 0.8rem; border-radius: 2px;">
+                  SOLD OUT
+                </span>
+              `}
+            </div>
+          </div>
+        </article>
+      `;
+    }).join('');
+
+    calView.style.display = 'none';
+    detailsView.style.display = 'block';
+    
+    // Hide top navigation so user has ONLY "BACK TO CALENDAR" button on this view
+    const topNav = document.getElementById('schedule-top-nav-bar');
+    if (topNav) topNav.style.display = 'none';
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function backToCalendar() {
+    const calView = document.getElementById('schedule-view-calendar');
+    const detailsView = document.getElementById('schedule-view-date-details');
+    if (calView && detailsView) {
+      detailsView.style.display = 'none';
+      calView.style.display = 'block';
+
+      // Restore top navigation button (BACK to Craft Your Trip)
+      const topNav = document.getElementById('schedule-top-nav-bar');
+      if (topNav) topNav.style.display = 'block';
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    renderCalendar();
+
+    // Month Navigation
+    const prevBtn = document.getElementById('cal-prev-month');
+    const nextBtn = document.getElementById('cal-next-month');
+    const backToCalBtn = document.getElementById('btn-back-to-calendar');
+
+    if (prevBtn) {
+      prevBtn.addEventListener('click', () => {
+        currentMonth--;
+        if (currentMonth < 0) {
+          currentMonth = 11;
+          currentYear--;
+        }
+        renderCalendar();
+      });
+    }
+
+    if (nextBtn) {
+      nextBtn.addEventListener('click', () => {
+        currentMonth++;
+        if (currentMonth > 11) {
+          currentMonth = 0;
+          currentYear++;
+        }
+        renderCalendar();
+      });
+    }
+
+    document.querySelectorAll('.quick-month-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        currentMonth = parseInt(btn.getAttribute('data-month') || '10', 10);
+        currentYear = parseInt(btn.getAttribute('data-year') || '2026', 10);
+        renderCalendar();
+      });
+    });
+
+    if (backToCalBtn) {
+      backToCalBtn.addEventListener('click', backToCalendar);
+    }
+  });
+</script>

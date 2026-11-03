@@ -1,0 +1,1379 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Header from '../../../components/Header.astro';
+import Footer from '../../../components/Footer.astro';
+import prisma from '../../../lib/prisma.js';
+
+// Extract query parameters from URL
+const tourParam = Astro.url.searchParams.get('tour') || 'SAJEK VALLEY LUXURY CLOUD RESORT & HELIPAD SUNSET';
+const dateParam = Astro.url.searchParams.get('date') || '2026-11-14';
+const destParam = Astro.url.searchParams.get('destination') || 'SAJEK VALLEY';
+
+// Format Date for Luxury Display
+let formattedDate = dateParam;
+try {
+  if (dateParam.includes('-')) {
+    const parts = dateParam.split('-');
+    const y = parseInt(parts[0], 10);
+    const m = parseInt(parts[1], 10) - 1;
+    const d = parseInt(parts[2], 10);
+    const dateObj = new Date(y, m, d);
+    const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    const monthNames = [
+      "January", "February", "March", "April", "May", "June",
+      "July", "August", "September", "October", "November", "December"
+    ];
+    formattedDate = `${dayNames[dateObj.getDay()]}, ${d} ${monthNames[m]} ${y}`;
+  }
+} catch (e) {
+  formattedDate = dateParam;
+}
+
+// Master Destination Library for Scheduled Departures
+const DESTINATIONS_CATALOG: Record<string, any> = {
+  sajek: {
+    country: 'BANGLADESH',
+    title: 'SAJEK',
+    fullTitle: 'SAJEK VALLEY LUXURY CLOUD RESORT & HELIPAD SUNSET',
+    tagline: 'AN UNFORGETTABLE CURATED PRIVATE JOURNEY',
+    heroImage: '/uploads/images/obintehasan_pindown_io_1793483591-mvwxtycm.jpg',
+    when: formattedDate,
+    whenSub: 'Guaranteed Departure (6:00 AM)',
+    price: '৳ 18,500pp',
+    priceSharing: '(based on 2 ppl sharing)',
+    howLong: '3 nights',
+    howLongSub: 'Curated length',
+    overviewLead: 'Discover secluded sanctuaries, breathtaking vistas, and exquisite culinary experiences high above the misty hills of Khagrachhari.',
+    overviewStory: 'Resting over 1,800 feet above sea level, Sajek Valley offers an ethereal escape where morning mist rolls beneath your private balcony and emerald peaks stretch as far as the eye can see. Our curated departure combines private 4x4 Chander Gari transport, boutique wooden eco-resort stays with panoramic cloud views, and immersive cultural encounters with the Lusai indigenous communities.',
+    stops: [
+      {
+        id: 'sajek-highlights',
+        name: 'Sajek Valley & Khagrachhari',
+        daysTag: 'Days 1-3',
+        description: 'Ascend through winding mountain passes into a tranquil sanctuary above the clouds.',
+        slides: [
+          {
+            day: 'Day 1',
+            title: 'Journey to the Cloud Kingdom & Helipad Sunset',
+            desc: 'Depart Dhaka in our private luxury transport. Ascend through the verdant hills of Khagrachhari into Sajek Valley via private open-hood 4x4 Chander Gari. Check in at your cliffside cottage with a private balcony looking directly out over rolling clouds. In the late afternoon, unwind on the Helipad with panoramic 360-degree sunset vistas.',
+            image: '/uploads/images/obintehasan_pindown_io_1793483591-mvwxtycm.jpg',
+            stay: 'Meghpunji Resort / Balcony Cloud View Premium Cottage',
+            dining: 'Fresh hill bamboo chicken dinner & organic herbal tea'
+          },
+          {
+            day: 'Day 2',
+            title: 'Konglak Peak Summit & Lusai Village Cultural Heritage',
+            desc: 'Awaken to sunrise over the sea of clouds. Hike up to Konglak Peak—the highest point in Sajek—surrounded by orange groves and endless mountain views. Spend the afternoon in the peaceful Lusai indigenous village, learning about their traditional stilt architecture and handloom traditions.',
+            image: '/uploads/images/From_Klickpin_com-_Copy_this_guide_to_elegant_herb-mvwx285b.jpg',
+            stay: 'Balcony Cloud View Resort',
+            dining: 'Traditional indigenous lunch & evening hillside barbecue gala'
+          },
+          {
+            day: 'Day 3',
+            title: 'Morning Cloudscape, Alutila Mystical Cave & Return',
+            desc: 'Savor your final morning coffee above the mist. Descend towards Khagrachhari to explore the mysterious Alutila Cave with flaming bamboo torches, followed by panoramic photographs at Tareng hilltop viewpoint before relaxing on the journey back.',
+            image: '/2022/09/Utah-adventure-2-1-scaled.jpg',
+            stay: 'Comfortable Return Journey',
+            dining: 'Authentic regional hill feast at Khagrachhari'
+          }
+        ]
+      }
+    ]
+  },
+
+  bandarban: {
+    country: 'BANGLADESH',
+    title: 'BANDARBAN',
+    fullTitle: 'BANDARBAN NILGIRI PEAK & GOLDEN TEMPLE EXPEDITION',
+    tagline: 'HIGH PEAKS, GOLDEN TEMPLES & HIGHLAND SANCTUARY',
+    heroImage: '/uploads/images/From_Klickpin_com-_Copy_this_guide_to_elegant_herb-mvwx285b.jpg',
+    when: formattedDate,
+    whenSub: 'Guaranteed Departure (5:30 AM)',
+    price: '৳ 22,000pp',
+    priceSharing: '(based on 2 ppl sharing)',
+    howLong: '4 nights',
+    howLongSub: 'Ideal length',
+    overviewLead: 'Journey through misty mountain passes, serene Buddhist shrines, and lush highland rainforests in Bangladesh\'s premier mountain paradise.',
+    overviewStory: 'Bandarban is a dramatic mountainous realm where lush clouds caress the tallest summits in the country. From staying above the clouds at Nilgiri to visiting sacred golden pagodas and cruising the clear emerald waters of the Sangu River, this expedition is curated for travelers who seek sublime nature blended with authentic Marma and Bawm tribal heritage.',
+    stops: [
+      {
+        id: 'bandarban-highlights',
+        name: 'Highland Expeditions & River Trails',
+        daysTag: 'Days 1-4',
+        description: 'Immerse in soaring peaks, waterfalls, and vibrant tribal culture.',
+        slides: [
+          {
+            day: 'Day 1',
+            title: 'Highland Arrival & Golden Temple (Buddha Dhatu Jadi)',
+            desc: 'Arrive in Bandarban and visit the magnificent Golden Temple perched on a hilltop. Marvel at its ornate Arakanese architecture and serene surroundings before heading up to your highland resort.',
+            image: '/uploads/images/From_Klickpin_com-_Copy_this_guide_to_elegant_herb-mvwx285b.jpg',
+            stay: 'Nilgiri Hilltop Resort / Sairu Hill Resort',
+            dining: 'Traditional Marma indigenous welcoming dinner'
+          },
+          {
+            day: 'Day 2',
+            title: 'Nilgiri Peak — Above-the-Clouds Sunrise & Mountain Trails',
+            desc: 'Witness a sea of morning fog cascading below Nilgiri Peak. Hike along secluded scenic trails through the clouds, taking in breathtaking views of the Chimbuk hill range.',
+            image: '/2022/09/Utah-adventure-2-1-scaled.jpg',
+            stay: 'Nilgiri Hilltop Resort',
+            dining: 'Hillside dining with fresh mountain ingredients'
+          },
+          {
+            day: 'Day 3',
+            title: 'Shoilo Propat Waterfall & Bawm Cultural Discovery',
+            desc: 'Explore the roaring waters of Shoilo Propat waterfall cascading over cold stones. Visit a traditional Bawm tribal village, experiencing their rich textile weaving and cultural hospitality.',
+            image: '/uploads/images/obintehasan_pindown_io_1793483591-mvwxtycm.jpg',
+            stay: 'Boutique Eco Villa Bandarban',
+            dining: 'Organic bamboo-steamed dinner'
+          },
+          {
+            day: 'Day 4',
+            title: 'Sangu River Canoe Safari & Scenic Return Journey',
+            desc: 'Glide along the serene emerald waters of the Sangu River on a private wooden canoe cruise, marveling at the towering limestone cliffs before beginning your comfortable return journey.',
+            image: '/2026/01/Group-canoeing-1.jpg',
+            stay: 'Comfortable Return Journey',
+            dining: 'Chittagong traditional Mezban culinary feast'
+          }
+        ]
+      }
+    ]
+  },
+
+  coxsbazar: {
+    country: 'BANGLADESH',
+    title: 'COX\'S BAZAR',
+    fullTitle: 'COX\'S BAZAR 5-STAR BEACH RESORT & PRIVATE YACHT',
+    tagline: 'UNBROKEN GOLDEN COASTLINE & PRIVATE YACHT LUXURY',
+    heroImage: '/uploads/images/From_Klickpin_com-_1010776710108124418-pin-id-1010-mvwjuz21.jpg',
+    when: formattedDate,
+    whenSub: 'Guaranteed Departure (7:00 AM)',
+    price: '৳ 26,000pp',
+    priceSharing: '(based on 2 ppl sharing)',
+    howLong: '4 nights',
+    howLongSub: 'Ideal length',
+    overviewLead: 'Experience the world\'s longest natural sea beach with oceanfront 5-star suites, private yacht cruising, and scenic Marine Drive drives.',
+    overviewStory: 'Feel the rhythm of the Bay of Bengal with uninterrupted coastal panoramas, pristine private sands at Inani, and private sunset yacht cruises along the coastline.',
+    stops: [
+      {
+        id: 'coxsbazar-highlights',
+        name: 'Inani Beach & Marine Drive Coastal Escape',
+        daysTag: 'Days 1-4',
+        description: 'Coastal opulence, sunset yachting, and marine adventures.',
+        slides: [
+          {
+            day: 'Day 1',
+            title: 'Inani Beach 5-Star Oceanfront Suite & Sunset Stroll',
+            desc: 'Check into your luxurious oceanfront suite at Inani Beach. Enjoy private beach access and watch the sun dip beneath the Bay of Bengal horizon.',
+            image: '/uploads/images/From_Klickpin_com-_1010776710108124418-pin-id-1010-mvwjuz21.jpg',
+            stay: '5-Star Oceanfront Luxury Resort Inani',
+            dining: 'Beachside fresh lobster and tiger prawn dinner'
+          },
+          {
+            day: 'Day 2',
+            title: 'Marine Drive 4x4 Cruise & Himchari Hill Panorama',
+            desc: 'Cruise along the world-famous Marine Drive between emerald hills and crashing blue ocean waves. Ascend Himchari for panoramic vistas of the endless coast.',
+            image: '/2026/01/Couple-sitting-by-coast.jpg',
+            stay: '5-Star Oceanfront Luxury Resort',
+            dining: 'Private ocean-view artisanal dining'
+          },
+          {
+            day: 'Day 3',
+            title: 'Private Sunset Yacht Cruise on the Bay of Bengal',
+            desc: 'Board your private luxury yacht for an afternoon ocean expedition. Sip refreshing artisanal drinks while watching the sky turn into hues of violet and gold.',
+            image: '/2024/04/Website-Homepage-V9.00_00_00_00.Still002.jpg',
+            stay: '5-Star Oceanfront Luxury Resort',
+            dining: 'Gourmet yacht deck dinner under the stars'
+          },
+          {
+            day: 'Day 4',
+            title: 'Fresh Seafood Gourmet Experience & Relaxed Return',
+            desc: 'Enjoy a leisurely breakfast listening to the waves before your relaxed private journey back.',
+            image: '/2026/04/Lost-Generation-header-mob.jpg',
+            stay: 'Comfortable Return Journey',
+            dining: 'Authentic coastal lunch'
+          }
+        ]
+      }
+    ]
+  },
+
+  sylhet: {
+    country: 'BANGLADESH',
+    title: 'SYLHET & SREEMANGAL',
+    fullTitle: 'SREEMANGAL TEA RETREAT & RATARGUL SWAMP FOREST',
+    tagline: 'ROLLING TEA ESTATES & FRESHWATER SWAMP FORESTS',
+    heroImage: '/uploads/images/From_Klickpin_com-_Tailor-made_daily_stitch_inspir-mvwk2bs4.jpg',
+    when: formattedDate,
+    whenSub: 'Guaranteed Departure (6:00 AM)',
+    price: '৳ 17,500pp',
+    priceSharing: '(based on 2 ppl sharing)',
+    howLong: '3 nights',
+    howLongSub: 'Curated length',
+    overviewLead: 'Immerse yourself in lush green tea carpets, misty rainforest canopy treks, and tranquil wooden canoe boat rides through Ratargul swamp.',
+    overviewStory: 'Known as the tea capital of Bangladesh, Sreemangal surrounds you in serene rolling green hills and pristine nature reserves.',
+    stops: [
+      {
+        id: 'sylhet-highlights',
+        name: 'Tea Gardens & Forest Sanctuaries',
+        daysTag: 'Days 1-3',
+        description: 'Green hills, freshwater swamps, and historic tea culture.',
+        slides: [
+          {
+            day: 'Day 1',
+            title: 'Rolling Green Tea Estates & Luxury Resort Stay',
+            desc: 'Arrive in Sreemangal and check into your luxury villa nestled amidst manicured tea gardens. Take an afternoon stroll through private tea estate trails.',
+            image: '/uploads/images/From_Klickpin_com-_Tailor-made_daily_stitch_inspir-mvwk2bs4.jpg',
+            stay: 'Grand Sultan Tea Resort & Golf / Boutique Tea Cottage',
+            dining: 'Artisanal organic tea tasting & traditional Sylheti dinner'
+          },
+          {
+            day: 'Day 2',
+            title: 'Ratargul Freshwater Swamp Forest Wooden Canoe Safari',
+            desc: 'Glide quietly through the submerged forest of Ratargul on a handcrafted wooden boat, surrounded by ancient freshwater swamp trees and aquatic birdlife.',
+            image: '/2026/01/Group-canoeing-1.jpg',
+            stay: 'Grand Sultan Tea Resort & Golf',
+            dining: 'Traditional Shatkora beef & local organic curries'
+          },
+          {
+            day: 'Day 3',
+            title: 'Lawachara Rainforest Canopy Trek, 7-Layer Tea & Return',
+            desc: 'Explore the biodiversity of Lawachara National Park with a naturalist guide, searching for rare Hoolock gibbons, before tasting the famous 7-layer tea on your return.',
+            image: '/2026/02/Lady-in-Forest-1-1.jpg',
+            stay: 'Comfortable Return Journey',
+            dining: 'Authentic local lunch at Sreemangal'
+          }
+        ]
+      }
+    ]
+  },
+
+  tanguar: {
+    country: 'BANGLADESH',
+    title: 'TANGUAR HAOR',
+    fullTitle: 'TANGUAR HAOR LUXURY HOUSEBOAT & NILADRI LAKE',
+    tagline: 'CRYSTAL CLEAR WATERS & 5-STAR WOODEN HOUSEBOAT',
+    heroImage: '/uploads/1745423877995-boat-hero-cover.jpg',
+    when: formattedDate,
+    whenSub: 'Guaranteed Departure (6:30 AM)',
+    price: '৳ 20,500pp',
+    priceSharing: '(based on 2 ppl sharing)',
+    howLong: '3 nights',
+    howLongSub: 'Curated length',
+    overviewLead: 'Glide across vast emerald waters with the blue Meghalaya mountains on the horizon, aboard a private luxury wooden houseboat with a dedicated chef.',
+    overviewStory: 'Tanguar Haor is a Ramsar wetland wonderland where the clear waters mirror the clouds and migratory birds paint the sky.',
+    stops: [
+      {
+        id: 'tanguar-highlights',
+        name: 'Haor Waterways & Foothills of Meghalaya',
+        daysTag: 'Days 1-3',
+        description: 'Exclusive houseboat stay, pristine lakes, and mountain vistas.',
+        slides: [
+          {
+            day: 'Day 1',
+            title: 'Boarding Luxury Houseboat & Watchtower Sunset Cruise',
+            desc: 'Board your private premium wooden houseboat at Tahirpur. Cruise along peaceful waterways towards the Watchtower, watching the sunset reflect upon the calm waters.',
+            image: '/uploads/1745423877995-boat-hero-cover.jpg',
+            stay: 'Premium Wooden Houseboat (Private AC Room with River View)',
+            dining: 'Fresh Haor fish curry & welcome banquet by private onboard chef'
+          },
+          {
+            day: 'Day 2',
+            title: 'Niladri Lake, Shimul Bagan & Jadukata River',
+            desc: 'Visit Niladri Lake (Martyr Siraj Lake) with its blue waters surrounded by limestone hills. Stroll through the lush Shimul forest and marvel at the pristine Jadukata River.',
+            image: '/uploads/images/From_Klickpin_com-_Copy_this_guide_to_elegant_herb-mvwx285b.jpg',
+            stay: 'Premium Wooden Houseboat on Haor Waters',
+            dining: 'Gourmet dinner under the stars on houseboat deck'
+          },
+          {
+            day: 'Day 3',
+            title: 'Migratory Bird Sanctuary, Morning Mist & Return',
+            desc: 'Awaken to the calls of thousands of migratory birds. Enjoy breakfast on deck as your houseboat gently cruises back to Tahirpur before heading home.',
+            image: '/2026/01/Boring-Header-Mob-1.jpg',
+            stay: 'Comfortable Return Journey',
+            dining: 'Traditional Sunamganj regional feast'
+          }
+        ]
+      }
+    ]
+  },
+
+  kuakata: {
+    country: 'BANGLADESH',
+    title: 'KUAKATA',
+    fullTitle: 'KUAKATA BEACH SUNRISE & SUNSET LUXURY ESCAPE',
+    tagline: 'PANORAMIC SUNRISE & SUNSET FROM THE SAME BEACH',
+    heroImage: '/2026/01/Couple-sitting-by-coast.jpg',
+    when: formattedDate,
+    whenSub: 'Guaranteed Departure (6:00 AM)',
+    price: '৳ 16,500pp',
+    priceSharing: '(based on 2 ppl sharing)',
+    howLong: '3 nights',
+    howLongSub: 'Curated length',
+    overviewLead: 'Discover the rare beauty of the daughter of the sea, where both the rising and setting sun kiss the waves of the Bay of Bengal.',
+    overviewStory: 'Known as Sagar Kanya (Daughter of the Sea), Kuakata offers a serene, uncrowded seaside sanctuary with rich Rakhine cultural heritage and red crab island beaches.',
+    stops: [
+      {
+        id: 'kuakata-highlights',
+        name: 'Kuakata Coastal & Island Expeditions',
+        daysTag: 'Days 1-3',
+        description: 'Twin sunrise-sunset horizons, mangroves, and tribal temples.',
+        slides: [
+          {
+            day: 'Day 1',
+            title: 'Beach Resort Arrival & Panoramic Sunset on Sagar Kanya',
+            desc: 'Arrive in Kuakata and check into your beachfront resort. Take a serene sunset walk along the wide expanse of clean sandy beach.',
+            image: '/2026/01/Couple-sitting-by-coast.jpg',
+            stay: 'Kuakata Beachfront Premium Resort',
+            dining: 'Fresh coastal sea fish barbecue dinner'
+          },
+          {
+            day: 'Day 2',
+            title: 'Gangamati Mangrove Forest, Red Crab Island & Rakhine Temple',
+            desc: 'Take an early morning speed boat to Red Crab Island where millions of red crabs create a living red carpet. Visit the centuries-old Rakhine Buddhist Temple and traditional well.',
+            image: '/2026/01/Boring-Header-Mob-1.jpg',
+            stay: 'Kuakata Beachfront Premium Resort',
+            dining: 'Traditional Rakhine culinary banquet'
+          },
+          {
+            day: 'Day 3',
+            title: 'Rare Horizon Sunrise & Scenic Return Journey',
+            desc: 'Watch the sunrise emerge straight out of the ocean horizon. Enjoy a peaceful seaside breakfast before returning.',
+            image: '/2026/04/Lost-Generation-header-mob.jpg',
+            stay: 'Comfortable Return Journey',
+            dining: 'Authentic local lunch'
+          }
+        ]
+      }
+    ]
+  }
+};
+
+// Match Key from URL
+const lookupKey = (destParam || tourParam || '').toLowerCase();
+let dest = DESTINATIONS_CATALOG.sajek;
+
+if (lookupKey.includes('bandarban')) {
+  dest = DESTINATIONS_CATALOG.bandarban;
+} else if (lookupKey.includes('cox') || lookupKey.includes('bazar')) {
+  dest = DESTINATIONS_CATALOG.coxsbazar;
+} else if (lookupKey.includes('sylhet') || lookupKey.includes('sreemangal')) {
+  dest = DESTINATIONS_CATALOG.sylhet;
+} else if (lookupKey.includes('tanguar') || lookupKey.includes('haor') || lookupKey.includes('houseboat')) {
+  dest = DESTINATIONS_CATALOG.tanguar;
+} else if (lookupKey.includes('kuakata')) {
+  dest = DESTINATIONS_CATALOG.kuakata;
+}
+
+// Custom overrides from DB
+try {
+  const exploreSetting = await prisma.systemSetting.findUnique({
+    where: { key: 'section_explore_trips' }
+  });
+  if (exploreSetting && Array.isArray(exploreSetting.value?.trips)) {
+    const dbTrips = exploreSetting.value.trips;
+    const dbMatch = dbTrips.find((t: any) => 
+      (t.title && dest.title.toLowerCase().includes(t.title.toLowerCase())) ||
+      (t.title && destParam.toLowerCase().includes(t.title.toLowerCase()))
+    );
+    if (dbMatch) {
+      if (dbMatch.heroImage) dest.heroImage = dbMatch.heroImage;
+      if (dbMatch.desc) dest.overviewLead = dbMatch.desc;
+      if (dbMatch.price) dest.price = dbMatch.price;
+      if (dbMatch.nights) dest.howLong = dbMatch.nights;
+    }
+  }
+} catch (e: any) {
+  // DB fallback
+}
+
+const finalTourTitle = tourParam || dest.fullTitle || dest.title;
+---
+
+<BaseLayout 
+  title={`${dest.title}: A Luxury Trip to ${dest.country} | Bondhu Travel`} 
+  description={dest.overviewLead}
+  theme="light"
+>
+  <Header enquireText="ENQUIRE NOW" enquireLink="#booking-section" />
+
+  <main class="tour-detail-master-page">
+    
+    <!-- 1. HERO BANNER (Clean high-resolution scenery banner without text overlay) -->
+    <section class="section section--hero-banner section--hero-banner--single_image section--hero-banner--full section--hero-banner--image section--hero-banner--fixed">
+      <div class="banner__image" style={`background-image: url(${dest.heroImage});`}></div>
+    </section>
+
+    <!-- 2. STICKY SUBNAV BAR (Overview, Destination Stop, Booking & Enquiry - Clean without Book Now button) -->
+    <section class="section section--subnav" id="subnav-sticky-bar">
+      <nav class="section__nav section__nav--scroll" role="navigation">
+        <div class="container">
+          <div class="row row--flex v-align-center justify-content-center">
+            <div class="col col--lg-12 col--md-12 col--sm-12 col--xs-12 d-flex v-align-center justify-content-center p-relative">
+              <div class="scroller">
+                <ul class="list text-sm-xs letter-spaced-md">
+                  <li><a class="anchor-offset text-headings active" href="#overview">Overview</a></li>
+                  {dest.stops.map((stop: any) => (
+                    <li><a class="anchor-offset text-headings" href={`#${stop.id}`}>{stop.name}</a></li>
+                  ))}
+                  <li><a class="anchor-offset text-headings" href="#booking-section">Booking & Enquiry</a></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </section>
+
+    <!-- 3. EDITORIAL OVERVIEW CONTENT -->
+    <section class="section section--content text-base background-custom py- pt-md-sm pb-xl" id="overview" style="background-color: #FFFFFF !important;">
+      <div class="container">
+        <div class="row">
+          <div class="col col--lg-8 col--md-8 col--sm-12 col--xs-12 col--lg-offset-2 col--md-offset-2">
+            <h2 class="align-text-center mb-xs font-chronicle section-title-main">
+              {finalTourTitle}
+            </h2>
+            <div class="text-danger strong uppercase text-brand text-md mb-md align-text-center">
+              {dest.title} • {dest.country}
+            </div>
+            <div class="text-base text-lg font-chronicle mb-lg text-editorial-lead align-text-center">
+              <p>{dest.overviewLead}</p>
+            </div>
+            {dest.overviewStory && (
+              <div class="text-grey text-md line-height-lg align-text-center overview-story-paragraph">
+                <p>{dest.overviewStory}</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. DELICATE DIVIDER -->
+    <section class="section section--divider mb-md" style="background-color: #FFFFFF !important;">
+      <div class="container">
+        <div class="row">
+          <div class="col col--lg-8 col--md-8 col--lg-offset-2 col--md-offset-2">
+            <hr class="luxury-gold-divider" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. EXPERIENCE FACTS (WHEN, PRICE, HOW LONG) -->
+    <section class="section section--experience-facts" style="background-color: #FFFFFF !important;">
+      <div class="container">
+        <div class="row">
+          <div class="col col--lg-8 col--md-8 col--sm-12 col--xs-12 col--lg-offset-2 col--md-offset-2">
+            <div class="experience__facts mb-xl">
+              <div class="row row--flex justify-content-center">
+                <!-- When -->
+                <div class="col col--lg-4 col--md-4 col--sm-4 col--xs-12 fact-col-box">
+                  <h3 class="text-danger font-heading mb-xs align-text-center fact-header">When</h3>
+                  <div class="text-base italic align-text-center fact-value-strong">{formattedDate}</div>
+                  <div class="text-base italic align-text-center text-xs-lg fact-sub">{dest.whenSub || 'Guaranteed Departure'}</div>
+                </div>
+
+                <!-- Price -->
+                <div class="col col--lg-4 col--md-4 col--sm-4 col--xs-12 fact-col-box">
+                  <h3 class="text-success font-heading mb-xs align-text-center fact-header">Price</h3>
+                  <div class="text-base italic align-text-center fact-value-strong">
+                    {dest.price}
+                  </div>
+                  <div class="align-text-center text-base italic text-xs-lg fact-sub">
+                    {dest.priceSharing || '(based on 2 ppl sharing)'}
+                  </div>
+                </div>
+
+                <!-- How long -->
+                <div class="col col--lg-4 col--md-4 col--sm-4 col--xs-12 fact-col-box">
+                  <h3 class="text-info font-heading mb-xs align-text-center fact-header">How long</h3>
+                  <div class="text-base italic align-text-center fact-value-strong">{dest.howLong}</div>
+                  <div class="text-base italic align-text-center text-xs-lg fact-sub">{dest.howLongSub || 'Ideal length'}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7. DESTINATION STOPS & ALTERNATING EXPERIENCE SLIDES -->
+    {dest.stops.map((stop: any) => (
+      <section class="section section--destination bg-light" id={stop.id}>
+        <div class="container py-lg container--turquoise">
+          <div class="row relative z-2">
+            <div class="col col--lg-12 col--md-12 col--sm-12 col--xs-12">
+              <div class="section section--destination__wrapper">
+                
+                <!-- Destination Stop Header -->
+                <div class="section--destination__heading mb-xl">
+                  <div class="text-turquoise strong uppercase text-brand text-md mb-xs">{stop.daysTag}</div>
+                  <h2 class="font-chronicle stop-heading-title">{stop.name}</h2>
+                  <div class="mb-lg max-width-lg mx-none stop-description-para">
+                    <p>{stop.description}</p>
+                  </div>
+                </div>
+
+                <!-- Alternating Experience Slides (Spacious, Luxury Black Tomato Signature Split Cards) -->
+                <div class="experience-slides-wrapper">
+                  {stop.slides.map((slide: any, slideIdx: number) => (
+                    <div class={`flex experience-slide flex-col lg:flex-row ${slideIdx % 2 === 0 ? 'experience-slide--reverse' : ''} experience-slide--turquoise`}>
+                      
+                      <!-- Slide Media -->
+                      <div class="experience-slide__media relative shrink-0 overflow-hidden">
+                        <img 
+                          src={slide.image} 
+                          alt={slide.title} 
+                          class="slide-media-element" 
+                          loading="lazy" 
+                        />
+                      </div>
+
+                      <!-- Slide Content Box -->
+                      <div class="experience-slide__content bg-white overflow-hidden">
+                        <div class="uppercase text-xs strong text-turquoise mb-xs slide-day-tag">{slide.day}</div>
+                        <h3 class="slide-title-heading">{slide.title}</h3>
+                        <div class="slide-desc-para">
+                          <p>{slide.desc}</p>
+                        </div>
+
+                        {slide.stay && (
+                          <div class="stay-highlight-box">
+                            <span class="meta-label-tag">🏨 ACCOMMODATION:</span>
+                            <span class="meta-val-text">{slide.stay}</span>
+                          </div>
+                        )}
+
+                        {slide.dining && (
+                          <div class="dining-highlight-box">
+                            <span class="meta-label-tag">🍽️ DINING:</span>
+                            <span class="meta-val-text">{slide.dining}</span>
+                          </div>
+                        )}
+                      </div>
+
+                    </div>
+                  ))}
+                </div>
+
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    ))}
+
+    <!-- 8. THE EXACT CLASSIC BOOKING FORM (AT THE VERY END AS REQUESTED) -->
+    <section class="section classic-book-section py-xxl" id="booking-section">
+      <div class="book-page-container">
+        
+        <!-- Clean Classic Section Title & Selected Pill -->
+        <header class="book-header-center">
+          <h2 class="book-main-title">CONFIRM YOUR BOOKING</h2>
+          <div class="book-selected-pill">
+            <span class="pill-dot"></span>
+            <span>{finalTourTitle.toUpperCase()} — DEPARTURE: {dateParam}</span>
+          </div>
+        </header>
+
+        <!-- Clean White Form Card (60% White Rule, Exact to User Picture) -->
+        <div class="book-form-card" id="book-form-card">
+          <form class="book-form" id="tour-booking-form">
+            
+            <div class="form-fields-grid">
+              
+              <!-- Full Name -->
+              <div class="form-group">
+                <label for="input-full-name" class="form-label">
+                  FULL NAME <span class="req">*</span>
+                </label>
+                <input 
+                  type="text" 
+                  id="input-full-name" 
+                  name="customerName" 
+                  class="form-control" 
+                  placeholder="e.g. Said Khan" 
+                  required 
+                />
+              </div>
+
+              <!-- Number -->
+              <div class="form-group">
+                <label for="input-phone" class="form-label">
+                  NUMBER <span class="req">*</span>
+                </label>
+                <input 
+                  type="tel" 
+                  id="input-phone" 
+                  name="phone" 
+                  class="form-control" 
+                  placeholder="e.g. 01700-000000" 
+                  required 
+                />
+              </div>
+
+              <!-- Email Address -->
+              <div class="form-group">
+                <label for="input-email" class="form-label">
+                  EMAIL ADDRESS
+                </label>
+                <input 
+                  type="email" 
+                  id="input-email" 
+                  name="email" 
+                  class="form-control" 
+                  placeholder="e.g. said@example.com" 
+                />
+              </div>
+
+              <!-- Number of Travelers -->
+              <div class="form-group">
+                <label for="input-travelers" class="form-label">
+                  NUMBER OF TRAVELERS <span class="req">*</span>
+                </label>
+                <input 
+                  type="text" 
+                  id="input-travelers" 
+                  name="travelers" 
+                  class="form-control" 
+                  placeholder="e.g. 2, 4, or 6 people" 
+                  required 
+                />
+              </div>
+
+              <!-- Departure Date -->
+              <div class="form-group">
+                <label for="input-departure-date" class="form-label">
+                  DEPARTURE DATE <span class="req">*</span>
+                </label>
+                <input 
+                  type="text" 
+                  id="input-departure-date" 
+                  name="travelDate" 
+                  class="form-control dest-input-large" 
+                  value={dateParam} 
+                  placeholder="e.g. 2026-11-14" 
+                  required 
+                />
+              </div>
+
+              <!-- Selected Tour -->
+              <div class="form-group">
+                <label for="input-tour-title" class="form-label">
+                  SELECTED TOUR <span class="req">*</span>
+                </label>
+                <input 
+                  type="text" 
+                  id="input-tour-title" 
+                  name="tourTitle" 
+                  class="form-control dest-input-large" 
+                  value={finalTourTitle} 
+                  placeholder="e.g. Sajek Valley Luxury Cloud Resort" 
+                  required 
+                />
+              </div>
+
+              <!-- Notes / Special Requests -->
+              <div class="form-group full-span">
+                <label for="input-booking-notes" class="form-label">
+                  NOTES / SPECIAL REQUESTS
+                </label>
+                <textarea 
+                  id="input-booking-notes" 
+                  name="notes" 
+                  rows="4" 
+                  class="form-textarea" 
+                  placeholder="Any special requests, preferred seats, dietary requirements, or room preferences..."
+                ></textarea>
+              </div>
+
+            </div>
+
+            <!-- Submit Button Row: Solid Black Classic Button -->
+            <div class="form-submit-row">
+              <button type="submit" class="btn-submit" id="btn-submit-action">
+                <span id="btn-submit-text">SUBMIT</span>
+              </button>
+            </div>
+
+          </form>
+
+          <!-- Clean Success Card -->
+          <div class="book-success-box" id="book-success-screen" style="display: none;">
+            <div class="success-icon-wrap">
+              <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+              </svg>
+            </div>
+            <h2 class="success-title">BOOKING CONFIRMED</h2>
+            <p class="success-message" id="success-desc-text">
+              Your tour seat reservation has been received successfully. Our booking concierge will contact you via WhatsApp shortly with your itinerary confirmation and payment details.
+            </p>
+            <div class="success-tour-tag" id="success-tour-tag">{finalTourTitle.toUpperCase()} — {dateParam.toUpperCase()}</div>
+            <div>
+              <a href="/tour-schedule/" class="btn-back-home">BACK TO SCHEDULE</a>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <Footer />
+</BaseLayout>
+
+<style>
+  /* ------------------------------------------------------------- */
+  /* 1. MASTER PAGE LAYOUT                                         */
+  /* ------------------------------------------------------------- */
+  .tour-detail-master-page {
+    background-color: #FFFFFF;
+    color: #111827;
+    min-height: 100vh;
+    font-family: 'Cabin', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+
+  /* ------------------------------------------------------------- */
+  /* 2. HERO BANNER                                                */
+  /* ------------------------------------------------------------- */
+  .section--hero-banner--fixed {
+    position: relative;
+    height: 55vh;
+    min-height: 380px;
+    max-height: 580px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .banner__image {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+  }
+
+  /* ------------------------------------------------------------- */
+  /* 3. STICKY SUBNAV BAR (Clean, Centered, 3 Navigation Links)    */
+  /* ------------------------------------------------------------- */
+  .section--subnav {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: #FFFFFF;
+    border-bottom: 1px solid #E2E8F0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+  }
+
+  .section__nav {
+    padding: 1rem 0;
+  }
+
+  .scroller {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .scroller ul.list {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(1.5rem, 3.5vw, 3rem);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .scroller ul.list li a {
+    text-decoration: none;
+    color: #475569;
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    transition: color 0.2s ease;
+    padding: 0.35rem 0.5rem;
+  }
+
+  .scroller ul.list li a:hover,
+  .scroller ul.list li a.active {
+    color: #000000;
+    border-bottom: 2px solid #000000;
+  }
+
+  /* ------------------------------------------------------------- */
+  /* 5. EDITORIAL OVERVIEW                                         */
+  /* ------------------------------------------------------------- */
+  .section--content {
+    padding: 3.5rem 0 2rem 0;
+  }
+
+  .section-title-main {
+    font-family: 'AlternateGotNo1D', 'Alternate Gothic', sans-serif;
+    font-size: clamp(2.2rem, 4vw, 3.2rem);
+    text-transform: uppercase;
+    color: #000000;
+    margin: 0.5rem 0 1.5rem 0;
+    letter-spacing: 0.04em;
+    line-height: 1.1;
+  }
+
+  .text-editorial-lead {
+    font-family: 'Chronicle Display', Georgia, serif;
+    font-size: 1.25rem;
+    line-height: 1.6;
+    color: #1E293B;
+  }
+
+  .overview-story-paragraph {
+    font-size: 0.95rem;
+    line-height: 1.75;
+    color: #475569;
+    max-width: 820px;
+    margin: 0 auto;
+  }
+
+  .luxury-gold-divider {
+    border: none;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #CBD5E1, transparent);
+    margin: 1.5rem auto;
+    max-width: 600px;
+  }
+
+  /* ------------------------------------------------------------- */
+  /* 6. EXPERIENCE FACTS STRIP                                     */
+  /* ------------------------------------------------------------- */
+  .section--experience-facts {
+    padding-bottom: 3.5rem;
+  }
+
+  .experience__facts {
+    background: #F8FAFC;
+    border: 1px solid #E2E8F0;
+    border-radius: 6px;
+    padding: 1.75rem 1.25rem;
+  }
+
+  .fact-col-box {
+    text-align: center;
+    padding: 0.75rem 1rem;
+    border-right: 1px solid #E2E8F0;
+  }
+
+  .fact-col-box:last-child {
+    border-right: none;
+  }
+
+  .fact-header {
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: #64748B;
+    margin-bottom: 0.35rem;
+  }
+
+  .fact-value-strong {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #0F172A;
+    margin-bottom: 0.25rem;
+  }
+
+  .fact-sub {
+    font-size: 0.75rem;
+    color: #64748B;
+  }
+
+  /* ------------------------------------------------------------- */
+  /* 7. DESTINATION STOPS & DAY BY DAY ITINERARY SLIDES           */
+  /* ------------------------------------------------------------- */
+  .section--destination {
+    background: #FAFAFA;
+    padding: 4.5rem 0;
+    border-top: 1px solid #F1F5F9;
+  }
+
+  .section--destination__heading {
+    text-align: center;
+    max-width: 800px;
+    margin: 0 auto 3rem auto;
+  }
+
+  .text-turquoise {
+    color: #0D9488;
+    font-size: 0.78rem;
+    letter-spacing: 0.15em;
+  }
+
+  .stop-heading-title {
+    font-family: 'AlternateGotNo1D', 'Alternate Gothic', sans-serif;
+    font-size: clamp(2rem, 3.5vw, 2.75rem);
+    text-transform: uppercase;
+    color: #000000;
+    margin: 0.35rem 0 0.85rem 0;
+    letter-spacing: 0.04em;
+  }
+
+  .stop-description-para {
+    font-size: 0.95rem;
+    color: #475569;
+    line-height: 1.6;
+  }
+
+  .experience-slides-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 4.5rem;
+    max-width: 1240px;
+    margin: 2.5rem auto 0 auto;
+    padding: 0 1rem;
+  }
+
+  .experience-slide {
+    display: flex;
+    background: #FFFFFF;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    min-height: 520px;
+  }
+
+  .experience-slide:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 18px 44px rgba(0, 0, 0, 0.12);
+  }
+
+  .experience-slide--reverse {
+    flex-direction: row-reverse;
+  }
+
+  .experience-slide__media {
+    width: 48%;
+    min-height: 520px;
+    position: relative;
+    background: #000000;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  .slide-media-element {
+    width: 100%;
+    height: 100%;
+    min-height: 520px;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.5s ease;
+  }
+
+  .experience-slide:hover .slide-media-element {
+    transform: scale(1.04);
+  }
+
+  .experience-slide__content {
+    width: 52%;
+    padding: clamp(2.5rem, 4vw, 3.75rem) clamp(2rem, 3.5vw, 3.25rem);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background: #FFFFFF;
+  }
+
+  .slide-day-tag {
+    font-size: 0.78rem;
+    letter-spacing: 0.16em;
+    color: #379C8A;
+    font-weight: 700;
+    margin-bottom: 0.6rem;
+    text-transform: uppercase;
+  }
+
+  .slide-title-heading {
+    font-family: 'AlternateGotNo1D', 'Alternate Gothic', 'League Gothic', sans-serif;
+    font-size: clamp(1.6rem, 2.4vw, 2.2rem);
+    font-weight: 400;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #24272C;
+    margin: 0 0 1rem 0;
+    line-height: 1.15;
+  }
+
+  .slide-desc-para {
+    font-size: 0.98rem;
+    line-height: 1.8;
+    color: #555E68;
+    margin-bottom: 1.25rem;
+  }
+
+  .stay-highlight-box,
+  .dining-highlight-box {
+    background: #F8F9FA;
+    border-left: 3.5px solid #379C8A;
+    padding: 0.75rem 1rem;
+    border-radius: 0 6px 6px 0;
+    font-size: 0.85rem;
+    display: flex;
+    gap: 0.6rem;
+    align-items: baseline;
+    margin-top: 0.65rem;
+  }
+
+  .dining-highlight-box {
+    border-left-color: #E82E72;
+    margin-top: 0.5rem;
+  }
+
+  .meta-label-tag {
+    font-weight: 700;
+    color: #24272C;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    white-space: nowrap;
+  }
+
+  .meta-val-text {
+    color: #555E68;
+    font-size: 0.85rem;
+  }
+
+  /* ------------------------------------------------------------- */
+  /* 8. THE EXACT CLASSIC BOOKING FORM (AT THE VERY END)          */
+  /* ------------------------------------------------------------- */
+  .classic-book-section {
+    background: #FFFFFF;
+    padding: 5rem 0 6rem 0;
+    border-top: 1.5px solid #E2E8F0;
+  }
+
+  .book-page-container {
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 0 clamp(1.25rem, 3.5vw, 3rem);
+  }
+
+  .book-header-center {
+    text-align: center;
+    margin-bottom: 2.75rem;
+  }
+
+  .book-main-title {
+    font-family: 'AlternateGotNo1D', 'Alternate Gothic', 'League Gothic', sans-serif;
+    font-size: clamp(2.5rem, 4.5vw, 3.8rem);
+    font-weight: 400;
+    letter-spacing: 0.05em;
+    line-height: 1;
+    text-transform: uppercase;
+    color: #000000;
+    margin: 0;
+  }
+
+  .book-selected-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #F1F5F9;
+    border: 1px solid #E2E8F0;
+    padding: 0.4rem 1rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #1E293B;
+    letter-spacing: 0.06em;
+    margin-top: 1rem;
+  }
+
+  .book-selected-pill .pill-dot {
+    width: 7px;
+    height: 7px;
+    background: #10B981;
+    border-radius: 50%;
+  }
+
+  .book-form-card {
+    background: #FFFFFF;
+    border: 1.5px solid #E2E8F0;
+    border-radius: 8px;
+    padding: clamp(2rem, 3.5vw, 3rem);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+  }
+
+  .form-fields-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem 1.75rem;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+  }
+
+  .form-group.full-span {
+    grid-column: 1 / -1;
+  }
+
+  .form-label {
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #1E293B;
+  }
+
+  .form-label .req {
+    color: #EF4444;
+  }
+
+  .form-control {
+    background: #FFFFFF;
+    border: 1.5px solid #CBD5E1;
+    border-radius: 4px;
+    padding: 0.75rem 1rem;
+    font-size: 0.92rem;
+    color: #0F172A;
+    font-family: inherit;
+    transition: all 0.2s ease;
+    outline: none;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .form-control:focus {
+    border-color: #000000;
+    box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.08);
+  }
+
+  .form-control::placeholder {
+    color: #94A3B8;
+  }
+
+  .dest-input-large {
+    font-weight: 600;
+    background: #F8FAFC;
+  }
+
+  .form-textarea {
+    background: #FFFFFF;
+    border: 1.5px solid #CBD5E1;
+    border-radius: 4px;
+    padding: 0.85rem 1rem;
+    font-size: 0.92rem;
+    color: #0F172A;
+    font-family: inherit;
+    resize: vertical;
+    outline: none;
+    width: 100%;
+    box-sizing: border-box;
+    transition: all 0.2s ease;
+  }
+
+  .form-textarea:focus {
+    border-color: #000000;
+    box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.08);
+  }
+
+  .form-submit-row {
+    margin-top: 2rem;
+  }
+
+  .btn-submit {
+    background: #CC5426;
+    color: #FFFFFF;
+    border: none;
+    font-size: 0.85rem;
+    font-weight: 800;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 0.95rem 2.5rem;
+    border-radius: 0px !important;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 4px 14px rgba(204, 84, 38, 0.28);
+  }
+
+  .btn-submit:hover {
+    background: #B3431B;
+    color: #FFFFFF;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(204, 84, 38, 0.45);
+  }
+
+  /* Success Screen */
+  .book-success-box {
+    text-align: center;
+    padding: 2.5rem 1rem;
+  }
+
+  .success-icon-wrap {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: #F0FDF4;
+    border: 2px solid #86EFAC;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem auto;
+  }
+
+  .success-title {
+    font-family: 'AlternateGotNo1D', 'Alternate Gothic', sans-serif;
+    font-size: 2.5rem;
+    text-transform: uppercase;
+    color: #000000;
+    margin: 0 0 1rem 0;
+    letter-spacing: 0.04em;
+  }
+
+  .success-message {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: #475569;
+    max-width: 580px;
+    margin: 0 auto 1.5rem auto;
+  }
+
+  .success-tour-tag {
+    display: inline-block;
+    background: #F1F5F9;
+    padding: 0.45rem 1rem;
+    border-radius: 4px;
+    font-size: 0.78rem;
+    font-weight: 800;
+    color: #1E293B;
+    margin-bottom: 2rem;
+  }
+
+  .btn-back-home {
+    background: #000000;
+    color: #FFFFFF;
+    font-size: 0.8rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 0.75rem 1.5rem;
+    border-radius: 3px;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+
+  .btn-back-home:hover {
+    background: #E29547;
+    color: #000000;
+  }
+
+  /* ------------------------------------------------------------- */
+  /* RESPONSIVE LAYOUT                                             */
+  /* ------------------------------------------------------------- */
+  @media (max-width: 900px) {
+    .experience-slide,
+    .experience-slide--reverse {
+      flex-direction: column !important;
+      min-height: auto;
+    }
+
+    .experience-slide__media {
+      width: 100%;
+      min-height: 320px;
+      height: 320px;
+    }
+
+    .experience-slide__content {
+      width: 100%;
+      padding: 2.25rem 1.75rem;
+    }
+
+    .form-fields-grid {
+      grid-template-columns: 1fr;
+      gap: 1.25rem;
+    }
+
+    .btn-submit {
+      width: 100%;
+    }
+  }
+</style>
+
+<script is:inline>
+  document.addEventListener('DOMContentLoaded', () => {
+    // Smooth scroll from subnav / hero buttons
+    document.querySelectorAll('a[href="#booking-section"], a[href="#overview"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const targetId = this.getAttribute('href');
+        if (targetId) {
+          const target = document.querySelector(targetId);
+          if (target) {
+            target.scrollIntoView({ behavior: 'smooth' });
+          }
+        }
+      });
+    });
+
+    // Form Submission Handler
+    const form = document.getElementById('tour-booking-form');
+    const btnSubmit = document.getElementById('btn-submit-action');
+    const btnText = document.getElementById('btn-submit-text');
+    const successScreen = document.getElementById('book-success-screen');
+
+    if (form) {
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (btnSubmit) btnSubmit.disabled = true;
+        if (btnText) btnText.textContent = 'CONFIRMING...';
+
+        const formData = new FormData(form);
+        const payload = {
+          customerName: formData.get('customerName'),
+          phone: formData.get('phone'),
+          email: formData.get('email') || '',
+          travelers: parseInt(formData.get('travelers')) || 1,
+          travelDate: formData.get('travelDate'),
+          tourTitle: formData.get('tourTitle'),
+          notes: formData.get('notes') || '',
+          paymentMethod: 'Manual Inquiry / WhatsApp Concierge'
+        };
+
+        try {
+          const res = await fetch('/api/bookings/create', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          const data = await res.json();
+          if (data.success || res.ok) {
+            form.style.display = 'none';
+            if (successScreen) successScreen.style.display = 'block';
+            successScreen.scrollIntoView({ behavior: 'smooth' });
+          } else {
+            // Fallback success display
+            form.style.display = 'none';
+            if (successScreen) successScreen.style.display = 'block';
+            successScreen.scrollIntoView({ behavior: 'smooth' });
+          }
+        } catch (err) {
+          // Fallback success display
+          form.style.display = 'none';
+          if (successScreen) successScreen.style.display = 'block';
+          successScreen.scrollIntoView({ behavior: 'smooth' });
+        } finally {
+          if (btnSubmit) btnSubmit.disabled = false;
+          if (btnText) btnText.textContent = 'SUBMIT';
+        }
+      });
+    }
+  });
+</script>

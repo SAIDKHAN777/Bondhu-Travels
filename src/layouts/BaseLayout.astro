@@ -1,0 +1,169 @@
+---
+interface Props {
+  title?: string;
+  description?: string;
+  bodyClass?: string;
+  theme?: 'dark' | 'light';
+}
+
+const {
+  title = "Luxury Travel & Bespoke Holidays | Black Tomato",
+  description = "Award-winning luxury travel planners crafting bespoke holidays worldwide since 2005. Personalised itineraries, expert guides, and no planning fees. Enquire today.",
+  bodyClass = "home new_2023 page-home-2022",
+  theme = "dark"
+} = Astro.props;
+---
+
+<!DOCTYPE html>
+<html lang="en" class={theme === 'light' ? 'theme-light' : 'theme-dark'}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+
+    <!-- Preload Luxury Typography -->
+    <link rel="preload" as="font" href="/wp-content/themes/blacktomato/fonts/AlternateGotNo1DRegular.woff2" type="font/woff2" crossorigin="anonymous" />
+    <link rel="preload" as="font" href="/wp-content/themes/blacktomato/fonts/ChronicleDisplay-Roman.woff2" type="font/woff2" crossorigin="anonymous" />
+    <link rel="preload" as="font" href="/wp-content/themes/blacktomato/fonts/brandon-regular-webfont.woff2" type="font/woff2" crossorigin="anonymous" />
+    <link rel="preload" as="font" href="/wp-content/themes/blacktomato/fonts/brandon-bold-webfont.woff2" type="font/woff2" crossorigin="anonymous" />
+
+    <!-- Google Web Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alex+Brush&family=Cabin:wght@400;500;700&family=Josefin+Sans:wght@400;600;700&family=League+Gothic&family=Playfair+Display:ital,wght@0,400;0,600;1,400;1,700&display=swap" />
+
+    <!-- Original Black Tomato Luxury Stylesheets -->
+    <link rel="stylesheet" href="/wp-content/themes/blacktomato/dist/css/base.css?v=1792511556" />
+    <link rel="stylesheet" href="/wp-content/themes/blacktomato/dist/css/current.css?v=1792511556" />
+
+    <!-- Google Identity Services (GIS) Official OAuth SDK -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+    <!-- Modern Astro Performance & 60fps GPU Styles -->
+    <style is:global>
+      @font-face {
+        font-family: 'AlternateGotNo1D';
+        src: url('/wp-content/themes/blacktomato/fonts/AlternateGotNo1DRegular.woff2') format('woff2');
+        font-weight: 400;
+        font-style: normal;
+        font-display: swap;
+      }
+
+      @font-face {
+        font-family: 'Alternate Gothic';
+        src: url('/wp-content/themes/blacktomato/fonts/AlternateGotNo1DRegular.woff2') format('woff2');
+        font-weight: 400;
+        font-style: normal;
+        font-display: swap;
+      }
+
+      @font-face {
+        font-family: 'Chronicle Display';
+        src: url('/wp-content/themes/blacktomato/fonts/ChronicleDisplay-Roman.woff2') format('woff2');
+        font-weight: normal;
+        font-style: normal;
+        font-display: swap;
+      }
+
+      @font-face {
+        font-family: 'Brandon Grotesque';
+        src: url('/wp-content/themes/blacktomato/fonts/brandon-regular-webfont.woff2') format('woff2');
+        font-weight: 400;
+        font-style: normal;
+        font-display: swap;
+      }
+
+      @font-face {
+        font-family: 'Brandon Grotesque';
+        src: url('/wp-content/themes/blacktomato/fonts/brandon-medium-webfont.woff2') format('woff2');
+        font-weight: 500;
+        font-style: normal;
+        font-display: swap;
+      }
+
+      @font-face {
+        font-family: 'Brandon Grotesque';
+        src: url('/wp-content/themes/blacktomato/fonts/brandon-bold-webfont.woff2') format('woff2');
+        font-weight: 700;
+        font-style: normal;
+        font-display: swap;
+      }
+      
+      html {
+        scroll-behavior: smooth;
+        text-rendering: optimizeLegibility;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        background-color: #0c1015;
+      }
+
+      body {
+        background-color: #0c1015;
+        color: #f1f5f9;
+        overflow-x: hidden;
+        margin: 0;
+        padding: 0;
+      }
+
+      html.theme-light,
+      html.theme-light body,
+      body.theme-light {
+        background-color: #FFFFFF !important;
+        color: #24272C !important;
+      }
+
+      /* 60fps Hardware Accelerated Video Compositing */
+      video {
+        transform: translateZ(0);
+        -webkit-transform: translateZ(0);
+        backface-visibility: hidden;
+      }
+
+      /* Clean modern scrollbar */
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #070a0e;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 4px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #E82E72;
+      }
+
+      /* Global Luxury Button Hover Effects & Micro-interactions */
+      button, .btn, a.btn, .nav-contact-btn, .btn--pink, .btn-confirm-submit, .search-tag-pill, .floating-enquire-pill, .btn-ticket-print, .btn-ticket-close {
+        transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), 
+                    box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1), 
+                    background-color 0.2s ease, 
+                    border-color 0.2s ease, 
+                    color 0.2s ease !important;
+      }
+
+      .btn:hover, a.btn:hover, .btn--pink:hover, .btn-confirm-submit:hover, .btn-ticket-print:hover {
+        transform: translateY(-2px);
+      }
+
+      .btn:active, a.btn:active, .btn--pink:active, .btn-confirm-submit:active, .btn-ticket-print:active {
+        transform: translateY(0) scale(0.985);
+      }
+
+      .btn--pink:hover, .btn-confirm-submit:hover {
+        box-shadow: 0 12px 30px rgba(232, 46, 114, 0.42) !important;
+      }
+
+      .nav-contact-btn:hover {
+        box-shadow: 0 8px 24px rgba(232, 46, 114, 0.5) !important;
+      }
+    </style>
+  </head>
+  <body class={`${bodyClass} ${theme === 'light' ? 'theme-light' : 'theme-dark'}`}>
+    <slot />
+  </body>
+</html>

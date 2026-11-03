@@ -1,0 +1,300 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import prisma from '../../lib/prisma.js';
+
+let headerConfig: any = null;
+let footerConfig: any = null;
+let privacyConfig: any = null;
+
+try {
+  const headerSetting = await prisma.systemSetting.findUnique({ where: { key: 'section_header' } });
+  if (headerSetting && headerSetting.value) {
+    headerConfig = headerSetting.value;
+  }
+  const footerSetting = await prisma.systemSetting.findUnique({ where: { key: 'section_footer' } });
+  if (footerSetting && footerSetting.value) {
+    footerConfig = footerSetting.value;
+  }
+  const privacySetting = await prisma.systemSetting.findUnique({ where: { key: 'section_privacy_policy' } });
+  if (privacySetting && privacySetting.value) {
+    privacyConfig = privacySetting.value;
+  }
+} catch (e: any) {
+  console.warn('[Privacy Policy Page] DB fallback active:', e.message);
+}
+
+const displayPhone = footerConfig?.phone || headerConfig?.phone || "+44 207 426 9888";
+const displayEmail = footerConfig?.email || "info@bondhutravel.com";
+const displayAddress = footerConfig?.address || "Albert House, 256-260 Old Street, London EC1V 9DD";
+
+const lastUpdatedText = privacyConfig?.lastUpdated || "Last updated: November 2026";
+const policyTitle = privacyConfig?.title || "PRIVACY POLICY";
+
+interface PolicySection {
+  title: string;
+  text?: string;
+  list?: Array<{ label?: string; desc: string }>;
+}
+
+const defaultSections: PolicySection[] = [
+  {
+    title: "1. Introduction & Overview",
+    text: "Bondhu Travel is dedicated to curating world-class luxury journeys while maintaining the highest standards of discretion, confidentiality, and data privacy. This Privacy Policy details how we collect, handle, utilize, and protect your personal data when you interact with our website, book bespoke itineraries, or correspond with our travel designers."
+  },
+  {
+    title: "2. Information We Collect",
+    text: "To tailor and execute exceptional travel itineraries, we may collect the following personal details:",
+    list: [
+      { label: "Contact Information", desc: "Full name, email address, telephone number, and residential city." },
+      { label: "Travel Preferences", desc: "Desired destinations, departure dates, group size, special dietary or lodging preferences, and tailored requests." },
+      { label: "Authentication Details", desc: "Basic profile credentials (such as verified name, email address, and profile picture) when you authenticate securely using Google Identity Services." },
+      { label: "Technical & Analytical Data", desc: "IP address, device specifications, browser environment, and anonymized browsing behavior to optimize site reliability." }
+    ]
+  },
+  {
+    title: "3. How We Use Your Information",
+    text: "Your information is processed strictly for legitimate hospitality and travel management purposes:",
+    list: [
+      { desc: "Confirming bespoke tour bookings, reservations, and private itineraries." },
+      { desc: "Direct communication with our travel concierges regarding tour schedules and updates." },
+      { desc: "Securing your customer profile and facilitating frictionless single-click booking management." },
+      { desc: "Continuously elevating user experience, service quality, and platform performance." }
+    ]
+  },
+  {
+    title: "4. Data Protection & Security",
+    text: "Bondhu Travel employs rigorous industry-standard encryption protocols and secure server architectures. We adhere to Google Identity Services security guidelines and never store unencrypted sensitive passwords on our servers. Under no circumstances do we sell, lease, or distribute your personal information to third parties for independent commercial marketing."
+  },
+  {
+    title: "5. Contact & Data Subject Rights",
+    text: "You maintain full rights to review, rectify, or request the deletion of your personal data held within our records. To submit a data request or inquire regarding your privacy, please contact our data governance team directly:"
+  }
+];
+
+const policySections: PolicySection[] = (privacyConfig?.sections && Array.isArray(privacyConfig.sections) && privacyConfig.sections.length > 0)
+  ? privacyConfig.sections
+  : defaultSections;
+---
+
+<BaseLayout 
+  title="Privacy Policy | Bondhu Travel"
+  description="Our commitment to safeguarding your privacy and personal data. Learn how Bondhu Travel collects, protects, and handles your information."
+  theme="light"
+>
+  <Header 
+    phone={displayPhone}
+    enquireText="ENQUIRE NOW"
+    enquireLink="/make-an-enquiry/"
+  />
+
+  <main class="privacy-page-main">
+    <!-- 1. Clean Minimal Hero Title Banner (Pure White, No badges, No subtitles) -->
+    <section class="privacy-hero-section">
+      <div class="privacy-hero-container">
+        <h1 class="privacy-hero-title">{policyTitle}</h1>
+      </div>
+    </section>
+
+    <!-- 2. Policy Content Section (Pure White Background, Crisp Black Typography) -->
+    <section class="privacy-content-section">
+      <div class="privacy-container">
+        <div class="privacy-card">
+          <div class="privacy-last-updated">{lastUpdatedText}</div>
+
+          {policySections.map((sec, idx) => (
+            <div class="policy-block">
+              <h2 class="policy-heading">{sec.title}</h2>
+              {sec.text && (
+                sec.text.split('\n').map((paragraph: string) => (
+                  paragraph.trim() ? <p class="policy-text">{paragraph.trim()}</p> : null
+                ))
+              )}
+              
+              {sec.list && sec.list.length > 0 && (
+                <ul class="policy-list">
+                  {sec.list.map((item) => (
+                    <li>
+                      {item.label && <strong>{item.label}: </strong>}
+                      <span>{item.desc}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+
+              {idx === policySections.length - 1 && (
+                <div class="policy-contact-box">
+                  <p><strong>Email:</strong> <a href={`mailto:${displayEmail}`}>{displayEmail}</a></p>
+                  <p><strong>Telephone:</strong> <a href={`tel:${displayPhone.replace(/\s+/g, '')}`}>{displayPhone}</a></p>
+                  <p><strong>Address:</strong> {displayAddress}</p>
+                </div>
+              )}
+            </div>
+          ))}
+
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <Footer 
+    phone={displayPhone}
+    address={displayAddress}
+  />
+</BaseLayout>
+
+<style>
+  .privacy-page-main {
+    min-height: 100vh;
+    background: #FFFFFF !important;
+    color: #111111 !important;
+    font-family: 'Josefin Sans', 'Cabin', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+  }
+
+  /* 1. Hero Section: Pure White Minimalist Headline with Clean, Open Letter Spacing */
+  .privacy-hero-section {
+    position: relative;
+    padding: 8.5rem 1.5rem 2rem;
+    background: #FFFFFF !important;
+    text-align: center;
+    border-bottom: 1px solid #ECECEC;
+  }
+
+  .privacy-hero-container {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .privacy-hero-title {
+    font-family: 'Josefin Sans', 'Cabin', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+    font-size: clamp(2rem, 3.8vw, 3rem);
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    line-height: 1.3;
+    margin: 0;
+    color: #111111 !important;
+    text-transform: uppercase;
+  }
+
+  /* 2. Content Section */
+  .privacy-content-section {
+    padding: 3.5rem 1.5rem 6rem;
+    background: #FFFFFF !important;
+  }
+
+  .privacy-container {
+    max-width: 880px;
+    margin: 0 auto;
+  }
+
+  .privacy-card {
+    background: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-radius: 4px;
+    padding: 3.5rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+  }
+
+  @media (max-width: 640px) {
+    .privacy-hero-section {
+      padding: 7rem 1.25rem 1.75rem;
+    }
+    .privacy-card {
+      padding: 1.75rem;
+      border: none;
+      box-shadow: none;
+    }
+  }
+
+  .privacy-last-updated {
+    font-family: 'Josefin Sans', 'Cabin', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+    font-size: 0.88rem;
+    color: #71717A;
+    margin-bottom: 2.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #E5E7EB;
+    letter-spacing: 0.05em;
+  }
+
+  .policy-block {
+    margin-bottom: 2.5rem;
+  }
+
+  .policy-block:last-child {
+    margin-bottom: 0;
+  }
+
+  .policy-heading {
+    font-family: 'Josefin Sans', 'Cabin', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+    font-size: 1.18rem;
+    font-weight: 700;
+    color: #111111 !important;
+    margin-bottom: 0.85rem;
+    letter-spacing: 0.08em;
+    line-height: 1.5;
+    text-transform: uppercase;
+  }
+
+  .policy-text {
+    font-family: 'Josefin Sans', 'Cabin', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+    font-size: 0.98rem;
+    line-height: 1.85;
+    letter-spacing: 0.025em;
+    color: #374151 !important;
+    margin-bottom: 0.85rem;
+  }
+
+  .policy-list {
+    font-family: 'Josefin Sans', 'Cabin', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+    list-style: disc;
+    padding-left: 1.5rem;
+    color: #374151 !important;
+    font-size: 0.98rem;
+    line-height: 1.85;
+    letter-spacing: 0.025em;
+  }
+
+  .policy-list li {
+    margin-bottom: 0.5rem;
+  }
+
+  .policy-list strong {
+    color: #111111 !important;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+  }
+
+  .policy-contact-box {
+    margin-top: 1.5rem;
+    background: #F9FAFB;
+    border: 1px solid #E5E7EB;
+    border-left: 4px solid #CC5426;
+    padding: 1.25rem 1.5rem;
+    border-radius: 0 4px 4px 0;
+    font-family: 'Josefin Sans', 'Cabin', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+  }
+
+  .policy-contact-box p {
+    font-size: 0.95rem;
+    color: #1F2937 !important;
+    margin-bottom: 0.45rem;
+    letter-spacing: 0.02em;
+  }
+
+  .policy-contact-box p:last-child {
+    margin-bottom: 0;
+  }
+
+  .policy-contact-box a {
+    color: #CC5426;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.2s ease;
+  }
+
+  .policy-contact-box a:hover {
+    color: #B3431B;
+    text-decoration: underline;
+  }
+</style>

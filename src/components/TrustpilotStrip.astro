@@ -1,0 +1,105 @@
+---
+const reviews = [
+  {
+    quote: "Hands down it was the most amazing experience our family has ever done",
+    author: "Brett, Middle East"
+  },
+  {
+    quote: "We have explored some incredible places and had unique adventures that could have only been made possible with Black Tomato’s guidance",
+    author: "Ike and Alexa, Italy"
+  },
+  {
+    quote: "Their team thought of every minute detail. Our safari in Tanzania exceeded every wildest dream.",
+    author: "Sarah & David, UK"
+  }
+];
+---
+
+<section class="section section--testimonials section--testimonials--manual bg-white text- trustpilot-layout has-logo-underneath" id="trustpilot-strip">
+  <div class="container">
+    <div class="trustpilot-carousel-wrapper">
+      <div class="trustpilot-grid">
+        {reviews.map((item) => (
+          <div class="testimonial-box">
+            <div class="quote-icon">
+              <svg class="icon--success" width="16" height="13" viewBox="0 0 14 11" fill="#10B981" xmlns="http://www.w3.org/2000/svg">
+                <path d="M10.6117 10.44C12.0467 10.44 13.1317 9.39 13.1317 8.095C13.1317 6.8 12.0467 5.785 10.7867 5.785C10.1917 5.785 9.73673 5.96 9.70173 5.96C9.73673 3.51 11.6967 2.005 12.0817 1.69C12.3267 1.48 12.3967 1.13 12.1867 0.885L11.6617 0.395C11.4167 0.114999 11.1367 0.149999 10.8567 0.359998C9.94673 1.165 7.70673 3.3 7.70673 6.695C7.70673 9.565 9.35173 10.44 10.6117 10.44ZM3.85673 10.44C5.29173 10.44 6.37673 9.39 6.37673 8.095C6.37673 6.8 5.29173 5.785 4.03173 5.785C3.43673 5.785 3.01673 5.96 2.94673 5.96C2.98173 3.51 4.94173 2.005 5.32673 1.69C5.60673 1.48 5.64173 1.13 5.43173 0.885L4.90673 0.395C4.66173 0.114999 4.41673 0.149999 4.13673 0.359998C3.22673 1.165 0.986729 3.3 0.986729 6.695C0.986729 9.565 2.59673 10.44 3.85673 10.44Z"/>
+              </svg>
+            </div>
+            <p class="testimonial-text uppercase">"{item.quote}"</p>
+            <p class="testimonial-author text-success"><em>{item.author}</em></p>
+          </div>
+        ))}
+      </div>
+
+      <!-- Trustpilot Badge -->
+      <div class="trustpilot-rating-bar">
+        <div class="trustpilot-stars">
+          <span style="color: #00B67A; font-size: 1.25rem;">★ ★ ★ ★ ★</span>
+          <span class="trustpilot-score">TrustScore <strong>4.9</strong> | <strong>Excellent</strong></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .trustpilot-layout {
+    padding: 4rem 1.5rem 3rem;
+    background: #FFFFFF;
+    color: #1E293B;
+  }
+
+  .trustpilot-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2.5rem;
+    max-width: 1240px;
+    margin: 0 auto;
+  }
+
+  .testimonial-box {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .quote-icon {
+    margin-bottom: 1rem;
+  }
+
+  .testimonial-text {
+    font-size: 0.95rem;
+    font-weight: 700;
+    line-height: 1.6;
+    letter-spacing: 0.05em;
+    color: #0F172A;
+    margin-bottom: 0.75rem;
+  }
+
+  .testimonial-author {
+    font-size: 0.85rem;
+    color: #059669;
+  }
+
+  .trustpilot-rating-bar {
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid #E2E8F0;
+    text-align: center;
+  }
+
+  .trustpilot-score {
+    margin-left: 0.75rem;
+    font-size: 0.9rem;
+    color: #475569;
+  }
+
+  @media (max-width: 900px) {
+    .trustpilot-grid {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+  }
+</style>

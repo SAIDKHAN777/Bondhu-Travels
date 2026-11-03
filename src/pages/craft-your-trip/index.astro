@@ -1,0 +1,441 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import prisma from '../../lib/prisma.js';
+
+// Default Destination Thumbnails Collection for Craft Your Private Trip
+// Using images configured in admin session and luxury destinations
+// Pure Clean 60% White Standard (#FFFFFF)
+const defaultPrivateDestinations = [
+  {
+    id: "sajek",
+    destination: "SAJEK VALLEY",
+    badge: "3 NIGHTS",
+    country: "BANGLADESH • HILL RETREAT",
+    title: "SAJEK VALLEY LUXURY RESORT & HELIPAD SUNSET",
+    desc: "Balcony cloud view premium resort, private 4x4 Chander Gari, and sunset at Konglak Peak.",
+    img: "/uploads/images/obintehasan_pindown_io_1793483591-mvwxtycm.jpg",
+    planUrl: "/craft-your-trip/plan/?destination=Sajek+Valley"
+  },
+  {
+    id: "coxsbazar",
+    destination: "COX'S BAZAR",
+    badge: "4 NIGHTS",
+    country: "BANGLADESH • COASTAL ESCAPE",
+    title: "COX'S BAZAR 5-STAR BEACH RESORT & PRIVATE YACHT",
+    desc: "Inani Beach 5-star ocean suite, Marine Drive drive, and private yacht cruise.",
+    img: "/uploads/images/From_Klickpin_com-_1010776710108124418-pin-id-1010-mvwjuz21.jpg",
+    planUrl: "/craft-your-trip/plan/?destination=Cox%27s+Bazar"
+  },
+  {
+    id: "bandarban",
+    destination: "BANDARBAN",
+    badge: "4 NIGHTS",
+    country: "BANGLADESH • HIGHLAND SANCTUARY",
+    title: "BANDARBAN NILGIRI & GOLDEN TEMPLE EXPEDITION",
+    desc: "Over-the-clouds stay at Nilgiri Resort, Shoilo Propat waterfall, and indigenous village tour.",
+    img: "/uploads/images/From_Klickpin_com-_Copy_this_guide_to_elegant_herb-mvwx285b.jpg",
+    planUrl: "/craft-your-trip/plan/?destination=Bandarban"
+  },
+  {
+    id: "sylhet",
+    destination: "SYLHET & SREEMANGAL",
+    badge: "3 NIGHTS",
+    country: "BANGLADESH • NATURE RETREAT",
+    title: "SREEMANGAL TEA GARDENS & RATARGUL SWAMP FOREST",
+    desc: "Rolling green tea estates, Lawachara rainforest trek, and serene Ratargul boat cruise.",
+    img: "/uploads/images/From_Klickpin_com-_Tailor-made_daily_stitch_inspir-mvwk2bs4.jpg",
+    planUrl: "/craft-your-trip/plan/?destination=Sylhet+%26+Sreemangal"
+  },
+  {
+    id: "sundarbans",
+    destination: "SUNDARBANS",
+    badge: "3 NIGHTS",
+    country: "BANGLADESH • WILDLIFE EXPEDITION",
+    title: "SUNDARBANS LUXURY VESSEL & TIGER SAFARI",
+    desc: "Premium cabin cruise, expert naturalist guide, and Royal Bengal tiger tracking in the mangroves.",
+    img: "/2026/01/Boring-Header-Mob-1.jpg",
+    planUrl: "/craft-your-trip/plan/?destination=Sundarbans"
+  },
+  {
+    id: "tanguar",
+    destination: "TANGUAR HAOR",
+    badge: "3 NIGHTS",
+    country: "BANGLADESH • WATERWAYS & MOUNTAINS",
+    title: "TANGUAR HAOR LUXURY HOUSEBOAT & NILADRI LAKE",
+    desc: "5-star wooden houseboat on crystal waters, private chef, and watchtower scenic expedition.",
+    img: "/uploads/1745423877995-boat-hero-cover.jpg",
+    planUrl: "/craft-your-trip/plan/?destination=Tanguar+Haor"
+  },
+  {
+    id: "kuakata",
+    destination: "KUAKATA",
+    badge: "3 NIGHTS",
+    country: "BANGLADESH • SUNRISE & SUNSET",
+    title: "KUAKATA BEACH LUXURY RESORT & ISLAND CRUISE",
+    desc: "Panoramic sunrise and sunset views, Rakhine indigenous community, and Red Crab Island visit.",
+    img: "/2026/01/Couple-sitting-by-coast.jpg",
+    planUrl: "/craft-your-trip/plan/?destination=Kuakata"
+  },
+  {
+    id: "custom",
+    destination: "WHAT'S YOUR PLAN?",
+    badge: "BESPOKE",
+    country: "BANGLADESH • 100% CUSTOM ROUTE",
+    title: "WHAT'S YOUR PLAN? (CUSTOM BESPOKE ITINERARY)",
+    desc: "Combine multiple destinations or design your own dream route, duration, and resort preferences.",
+    img: "/2026/04/Lost-Generation-header-mob.jpg",
+    planUrl: "/craft-your-trip/plan/?destination=Custom+Plan"
+  }
+];
+
+let privateDestinations = defaultPrivateDestinations;
+
+// Dynamic fetch from Database (100% sync with Admin Studio edits)
+try {
+  const setting = await prisma.systemSetting.findUnique({
+    where: { key: 'section_craft_destinations' }
+  });
+
+  if (setting && Array.isArray(setting.value?.destinations) && setting.value.destinations.length > 0) {
+    privateDestinations = setting.value.destinations.map((d: any) => ({
+      ...d,
+      planUrl: d.planUrl || `/craft-your-trip/plan/?destination=${encodeURIComponent(d.destination || d.title || 'Custom Plan')}`
+    }));
+  }
+} catch (e: any) {
+  console.warn('[Craft Page] DB fallback active:', e.message);
+}
+---
+
+<BaseLayout 
+  title="CRAFT YOUR PRIVATE TRIP | Bondhu Travel"
+  description="Craft your tailor-made private journey with our luxury travel designers."
+  theme="light"
+>
+  <Header />
+
+  <main class="clean-craft-page">
+    <div class="craft-page-container">
+      
+      <!-- Pure Clean Section Title (Exact match to user requirement) -->
+      <header class="craft-header-center">
+        <h1 class="craft-main-title">CRAFT YOUR PRIVATE TRIP</h1>
+      </header>
+
+      <!-- Grid of Identical Explore Our Trips Thumbnails -->
+      <div class="explore-trips-grid craft-destinations-grid">
+        {privateDestinations.map((dest) => (
+          <article 
+            class="trip-card craft-dest-card"
+            style={`background-image: url(${dest.img});`}
+            role="article"
+            tabindex="0"
+            aria-label={`${dest.destination} - ${dest.title}`}
+          >
+            <!-- Full Card Clickable Overlay Link to Registration / Plan Interface -->
+            <a 
+              href={dest.planUrl} 
+              class="trip-card-full-link" 
+              aria-label={`Plan trip to ${dest.destination}`}
+            ></a>
+
+            <!-- Top Badge (Duration / Bespoke) -->
+            <span class="trip-nights-badge">{dest.badge}</span>
+            
+            <!-- Dark Gradient Overlay for optimal contrast -->
+            <div class="trip-gradient-overlay"></div>
+            
+            <!-- Card Content at Bottom -->
+            <div class="trip-card-content">
+              <h3 class="trip-card-title">
+                <a 
+                  href={dest.planUrl} 
+                  style="color: inherit; text-decoration: none;"
+                >
+                  {dest.title}
+                </a>
+              </h3>
+              <span class="trip-country">{dest.country}</span>
+              
+              <p class="trip-card-desc">{dest.desc}</p>
+              
+              <div class="trip-card-bottom-row">
+                <a href={dest.planUrl} class="btn-explore-trip">
+                  <span>PLAN</span>
+                </a>
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
+
+    </div>
+  </main>
+
+  <Footer />
+</BaseLayout>
+
+<style>
+  /* ------------------------------------------------------------- */
+  /* 1. CLEAN WHITE FULL PAGE INTERFACE (60% White Rule)           */
+  /* ------------------------------------------------------------- */
+  .clean-craft-page {
+    background-color: #FFFFFF;
+    color: #111827;
+    min-height: 100vh;
+    padding-top: 130px;
+    padding-bottom: 7rem;
+    font-family: 'Cabin', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hind Siliguri", "Noto Sans Bengali", sans-serif;
+  }
+
+  .craft-page-container {
+    max-width: 1380px;
+    margin: 0 auto;
+    padding: 0 clamp(1.5rem, 4vw, 4rem);
+  }
+
+  /* ------------------------------------------------------------- */
+  /* Top Back Button (UI/UX Ergonomics & Penpot Standards)         */
+  /* ------------------------------------------------------------- */
+  .craft-top-nav {
+    margin-bottom: 1.5rem;
+  }
+
+  .btn-back-home {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    background: #F8FAFC;
+    border: 1px solid #E2E8F0;
+    color: #1E293B;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 0.6rem 1.15rem;
+    border-radius: 4px;
+    text-decoration: none;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  }
+
+  .btn-back-home:hover {
+    background: #000000;
+    color: #FFFFFF;
+    border-color: #000000;
+    transform: translateX(-4px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  .btn-back-home svg {
+    transition: transform 0.25s ease;
+  }
+
+  .btn-back-home:hover svg {
+    transform: translateX(-2px);
+  }
+
+  /* ------------------------------------------------------------- */
+  /* 2. PURE CLEAN HEADLINE                                        */
+  /* ------------------------------------------------------------- */
+  .craft-header-center {
+    text-align: center;
+    max-width: 900px;
+    margin: 0 auto 3.5rem auto;
+  }
+
+  .craft-main-title {
+    font-family: 'AlternateGotNo1D', 'Alternate Gothic', 'League Gothic', sans-serif;
+    font-size: clamp(2.75rem, 5vw, 4.2rem);
+    font-weight: 400;
+    letter-spacing: 0.05em;
+    line-height: 1;
+    text-transform: uppercase;
+    color: #000000;
+    margin: 0;
+  }
+
+  /* ------------------------------------------------------------- */
+  /* 3. GRID OF IDENTICAL EXPLORE OUR TRIPS THUMBNAILS             */
+  /* ------------------------------------------------------------- */
+  .explore-trips-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2rem;
+    justify-content: center;
+  }
+
+  .trip-card {
+    height: 520px;
+    border-radius: 2px;
+    overflow: hidden;
+    position: relative;
+    background-size: cover;
+    background-position: center center;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 2.25rem 1.65rem;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.45);
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s ease;
+    cursor: pointer;
+  }
+
+  .trip-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.65);
+  }
+
+  .trip-card-full-link {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 4;
+    cursor: pointer;
+    text-decoration: none;
+    outline: none;
+  }
+
+  .trip-nights-badge {
+    position: absolute;
+    top: 1.25rem;
+    right: 1.25rem;
+    color: #FFFFFF;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9);
+    z-index: 3;
+    pointer-events: none;
+  }
+
+  .trip-gradient-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.2) 38%, rgba(10, 12, 16, 0.94) 86%);
+    z-index: 1;
+    transition: background 0.3s;
+    pointer-events: none;
+  }
+
+  .trip-card:hover .trip-gradient-overlay {
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.35) 35%, rgba(8, 10, 15, 0.98) 85%);
+  }
+
+  .trip-card-content {
+    position: relative;
+    z-index: 2;
+    pointer-events: none;
+    width: 100%;
+  }
+
+  .trip-card-title {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #FFFFFF;
+    line-height: 1.3;
+    text-transform: uppercase;
+    margin: 0 0 0.35rem 0;
+    letter-spacing: 0.04em;
+  }
+
+  .trip-country {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #D1D5DB;
+    margin-bottom: 0.85rem;
+  }
+
+  .trip-card-desc {
+    font-size: 0.78rem;
+    line-height: 1.45;
+    color: #CBD5E1;
+    margin-bottom: 1.25rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    opacity: 0.92;
+  }
+
+  .trip-card-bottom-row {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+  }
+
+  /* Plan Button: Exactly as User Requested */
+  .btn-explore-trip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: 1px solid #FFFFFF;
+    color: #FFFFFF;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding: 0.55rem 1.25rem;
+    border-radius: 2px;
+    text-decoration: none;
+    transition: all 0.25s ease;
+    pointer-events: auto;
+  }
+
+  .trip-card:hover .btn-explore-trip {
+    background: #FFFFFF;
+    color: #000000;
+    border-color: #FFFFFF;
+  }
+
+  /* ------------------------------------------------------------- */
+  /* RESPONSIVE LAYOUTS                                            */
+  /* ------------------------------------------------------------- */
+  @media (max-width: 1200px) {
+    .explore-trips-grid {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
+  }
+
+  @media (max-width: 860px) {
+    .clean-craft-page {
+      padding-top: 100px;
+    }
+
+    .explore-trips-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.25rem;
+    }
+
+    .trip-card {
+      height: 480px;
+      padding: 1.75rem 1.35rem;
+    }
+
+    .craft-header-center {
+      margin-bottom: 2.5rem;
+    }
+  }
+
+  @media (max-width: 540px) {
+    .explore-trips-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .trip-card {
+      height: 440px;
+    }
+  }
+</style>
+
+

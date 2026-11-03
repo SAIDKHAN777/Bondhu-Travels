@@ -1,0 +1,27 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Production build outputs
+dist/
+.astro/
+
+# Environment files and credentials (CRITICAL: Never commit secrets)
+.env
+.env.*
+!.env.example
+
+# OS and Editor junk
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*.log
+
+# SSL certificates
+ssl/
+
+# Large media files exceeding GitHub 100MB limit
+public/snowy-mountain-landscape.webm
+dist/client/snowy-mountain-landscape.webm

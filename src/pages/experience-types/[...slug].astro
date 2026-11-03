@@ -1,0 +1,424 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import prisma from '../../lib/prisma.js';
+
+const { slug } = Astro.params;
+const urlCategory = Astro.url.searchParams.get('category');
+
+// Determine traveller category from URL slug or query param
+let categoryKey = 'manual';
+const slugLower = (slug || '').toLowerCase();
+const urlCatLower = (urlCategory || '').toLowerCase();
+
+if (urlCatLower) {
+  if (urlCatLower.includes('fam')) categoryKey = 'family';
+  else if (urlCatLower.includes('sol')) categoryKey = 'solo';
+  else if (urlCatLower.includes('group')) categoryKey = 'group';
+  else if (urlCatLower.includes('honey') || urlCatLower.includes('coup')) categoryKey = 'couple';
+  else categoryKey = 'manual';
+} else if (slugLower) {
+  if (slugLower.includes('fam')) categoryKey = 'family';
+  else if (slugLower.includes('sol')) categoryKey = 'solo';
+  else if (slugLower.includes('group')) categoryKey = 'group';
+  else if (slugLower.includes('honey') || slugLower.includes('coup')) categoryKey = 'couple';
+  else categoryKey = 'manual';
+}
+
+export interface TripPackage {
+  country: string;
+  title: string;
+  nights: string;
+  when?: string;
+  desc?: string;
+  price?: string;
+  img: string;
+  link?: string;
+}
+
+const defaultExploreTrips: TripPackage[] = [
+  {
+    country: "FRANCE",
+    title: "THE LOST GENERATION",
+    nights: "12 NIGHTS",
+    img: "/2026/04/Lost-Generation-header-mob.jpg",
+    link: "/destinations/france/the-lost-generation/"
+  },
+  {
+    country: "BRAZIL",
+    title: "THE RHYTHM OF WATER",
+    nights: "8 NIGHTS",
+    img: "/2026/02/Lady-in-Forest-1-1.jpg",
+    link: "/destinations/brazil/the-rhythm-of-water/"
+  },
+  {
+    country: "ITALY",
+    title: "HIGHLIGHTS OF ITALY: A LUXURY HOLIDAY IN ROME, FLORENCE & VENICE",
+    nights: "9 NIGHTS",
+    desc: "This nine-night holiday to Rome, Florence and Venice will see you sample...",
+    price: "From £8,000 per person excl. flights",
+    img: "/2022/09/Highlights-of-Italy-scaled.jpg",
+    link: "/destinations/italy/highlights-of-italy/"
+  },
+  {
+    country: "GREECE",
+    title: "ATHENS, MYKONOS AND CRETE: A LUXURY FAMILY DISCOVERY IN GREECE",
+    nights: "11 NIGHTS",
+    desc: "Ancient ruins are the backdrop to venturesome days and peaceful evenings...",
+    price: "From £9,800 per person excl. flights",
+    img: "/2023/01/Family-island-hopping-scaled.jpg",
+    link: "/destinations/greece/family-discovery/"
+  },
+  {
+    country: "ICELAND",
+    title: "ICELAND: A LUXURY TRIP CHASING THE NORTHERN LIGHTS",
+    nights: "5 NIGHTS",
+    img: "/2022/09/Northern-Lights-Iceland-scaled.jpg",
+    link: "/destinations/iceland/"
+  },
+  {
+    country: "JAPAN",
+    title: "TOKYO & KYOTO: A JAPAN FAMILY HOLIDAY",
+    nights: "10 NIGHTS",
+    img: "/2019/09/Ninja-martial-arts-in-Tokyo.jpg",
+    link: "/destinations/japan/"
+  },
+  {
+    country: "ECUADOR",
+    title: "ECUADOR & GALÁPAGOS: A JOURNEY INTO NATURE",
+    nights: "13 NIGHTS",
+    img: "/2022/09/Ultimate-Ecuador-scaled.jpg",
+    link: "/destinations/ecuador/"
+  },
+  {
+    country: "MOROCCO",
+    title: "A JOURNEY INTO MOROCCO",
+    nights: "7 NIGHTS",
+    img: "/2024/02/Atlas-mountains-morocco-landscape.jpg",
+    link: "/destinations/morocco/"
+  },
+  {
+    country: "KENYA",
+    title: "KENYA: THE ULTIMATE FAMILY SAFARI",
+    nights: "8 NIGHTS",
+    img: "/2024/01/navigation-kenya.jpg",
+    link: "/destinations/kenya/"
+  }
+];
+
+let exploreTrips = defaultExploreTrips;
+
+// Dynamic fetch from Database (if admin edited trips)
+try {
+  const exploreSetting = await prisma.systemSetting.findUnique({
+    where: { key: 'section_explore_trips' }
+  });
+
+  if (exploreSetting && Array.isArray(exploreSetting.value?.trips) && exploreSetting.value.trips.length > 0) {
+    exploreTrips = exploreSetting.value.trips.map((t: any) => ({
+      country: t.country || 'DESTINATION',
+      title: t.title || 'Luxury Trip',
+      nights: t.nights || t.howLong || '7 NIGHTS',
+      desc: t.desc || t.overviewLead || '',
+      price: t.price || '',
+      img: t.img || t.heroImage || t.image || '/2026/04/Lost-Generation-header-mob.jpg',
+      link: t.link || (t.slug ? `/destinations/${t.slug}/` : '/destinations/')
+    }));
+  }
+} catch (e: any) {
+  console.warn('[Experience Page] DB fallback active:', e.message);
+}
+---
+
+<BaseLayout 
+  title="EXPLORE OUR TRIPS | Black Tomato"
+  description="Remarkable experiences to inspire the mind."
+  theme="light"
+>
+  <Header />
+
+  <main class="clean-explore-page">
+    <div class="explore-page-container">
+      <!-- Section Title: EXACT 100% Authentic Match to Black Tomato -->
+      <header class="explore-header-center">
+        <h1 class="explore-title">EXPLORE OUR TRIPS</h1>
+      </header>
+
+      <!-- Grid of Trip Cards in 100% Identical Visual Style to Explore Our Trips -->
+      <div class="explore-trips-grid">
+        {exploreTrips.map((card) => {
+          const bookingTargetUrl = (categoryKey && categoryKey !== 'manual')
+            ? `${card.link || '#'}?category=${categoryKey}#booking-form-card`
+            : `${card.link || '#'}?category=manual#booking-form-card`;
+
+          return (
+            <article 
+              class="trip-card" 
+              style={`background-image: url(${card.img});`}
+              data-href={bookingTargetUrl}
+              role="article"
+              tabindex="0"
+              aria-label={`${card.title} - ${card.country}`}
+            >
+              <!-- Full Card Clickable Overlay Link covering the entire event photo & card area -->
+              <a 
+                href={bookingTargetUrl} 
+                class="trip-card-full-link" 
+                aria-label={`Explore trip to ${card.title} (${card.country})`}
+                tabindex="-1"
+              ></a>
+
+              <span class="trip-nights-badge">{card.nights}</span>
+              <div class="trip-gradient-overlay"></div>
+              
+              <div class="trip-card-content">
+                <h3 class="trip-card-title">
+                  <a href={bookingTargetUrl} style="color: inherit; text-decoration: none;">
+                    {card.title}
+                  </a>
+                </h3>
+                <span class="trip-country">{card.country}</span>
+                {card.desc && (
+                  <p class="trip-card-desc">{card.desc}</p>
+                )}
+                {card.price && (
+                  <p class="trip-card-price">{card.price}</p>
+                )}
+                <a href={bookingTargetUrl} class="btn-explore-trip">
+                  EXPLORE TRIP
+                </a>
+              </div>
+            </article>
+          );
+        })}
+      </div>
+    </div>
+  </main>
+
+  <Footer />
+</BaseLayout>
+
+<style>
+  /* 1. CLEAN WHITE FULL PAGE INTERFACE */
+  .clean-explore-page {
+    background-color: #FFFFFF;
+    min-height: 100vh;
+    padding-top: 130px;
+    padding-bottom: 6rem;
+    font-family: 'Cabin', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hind Siliguri", "Noto Sans Bengali", sans-serif;
+  }
+
+  .explore-page-container {
+    max-width: 1380px;
+    margin: 0 auto;
+    padding: 0 clamp(1.5rem, 4vw, 4rem);
+  }
+
+  /* 2. SECTION TITLE */
+  .explore-header-center {
+    text-align: center;
+    margin-bottom: 3.5rem;
+  }
+
+  .explore-title {
+    font-family: 'AlternateGotNo1D', 'Alternate Gothic', 'League Gothic', sans-serif;
+    font-size: clamp(2.75rem, 5vw, 4rem);
+    font-weight: 400;
+    letter-spacing: 0.05em;
+    line-height: 1;
+    text-transform: uppercase;
+    color: #000000;
+    margin: 0;
+  }
+
+  /* 3. GRID OF IDENTICAL EXPLORE OUR TRIPS THUMBNAILS */
+  .explore-trips-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2rem;
+    justify-content: center;
+  }
+
+  /* Vertical Cards matching 100% of Black Tomato Explore Our Trips design */
+  .trip-card {
+    height: 520px;
+    border-radius: 2px;
+    overflow: hidden;
+    position: relative;
+    background-size: cover;
+    background-position: center center;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 2.25rem 1.65rem;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.45);
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s ease;
+    cursor: pointer;
+  }
+
+  .trip-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.65);
+  }
+
+  /* Full Card Clickable Overlay Link covering the entire event photo & card area */
+  .trip-card-full-link {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 4;
+    cursor: pointer;
+    text-decoration: none;
+    outline: none;
+  }
+
+  .trip-nights-badge {
+    position: absolute;
+    top: 1.25rem;
+    right: 1.25rem;
+    color: #FFFFFF;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9);
+    z-index: 3;
+    pointer-events: none;
+  }
+
+  .trip-gradient-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.15) 40%, rgba(12,14,18,0.92) 88%);
+    z-index: 1;
+    transition: background 0.3s;
+    pointer-events: none;
+  }
+
+  .trip-card:hover .trip-gradient-overlay {
+    background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.2) 35%, rgba(10,12,16,0.96) 85%);
+  }
+
+  .trip-card-content {
+    position: relative;
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  .trip-card-title {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #FFFFFF;
+    line-height: 1.3;
+    text-transform: uppercase;
+    margin-bottom: 0.35rem;
+    letter-spacing: 0.04em;
+  }
+
+  .trip-country {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #D1D5DB;
+    margin-bottom: 1.25rem;
+  }
+
+  .trip-card-desc {
+    font-size: 0.75rem;
+    line-height: 1.45;
+    color: #CBD5E1;
+    margin-bottom: 0.5rem;
+    opacity: 0.92;
+  }
+
+  .trip-card-price {
+    font-size: 0.72rem;
+    font-style: italic;
+    color: #E2E8F0;
+    margin-bottom: 1.25rem;
+    opacity: 0.9;
+  }
+
+  .btn-explore-trip {
+    display: inline-block;
+    padding: 0.65rem 1.35rem;
+    background: transparent;
+    color: #FFFFFF;
+    border: 1px solid rgba(255, 255, 255, 0.75);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    text-decoration: none;
+    border-radius: 0;
+    transition: all 0.25s ease;
+    position: relative;
+    z-index: 5;
+    pointer-events: auto;
+  }
+
+  .btn-explore-trip:hover {
+    background: #FFFFFF;
+    color: #000000;
+    border-color: #FFFFFF;
+  }
+
+  /* RESPONSIVE BREAKPOINTS */
+  @media (max-width: 1200px) {
+    .explore-trips-grid {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
+  }
+
+  @media (max-width: 860px) {
+    .explore-trips-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.25rem;
+    }
+    .clean-explore-page {
+      padding-top: 105px;
+    }
+    .trip-card {
+      height: 480px;
+    }
+  }
+
+  @media (max-width: 580px) {
+    .explore-trips-grid {
+      grid-template-columns: 1fr;
+    }
+    .trip-card {
+      height: 460px;
+    }
+  }
+</style>
+
+<script>
+  function initCardClicks() {
+    document.querySelectorAll<HTMLElement>('.explore-trips-grid .trip-card').forEach(card => {
+      card.addEventListener('click', (e) => {
+        const clickedAnchor = (e.target as HTMLElement).closest('a');
+        if (clickedAnchor && clickedAnchor.getAttribute('href') && clickedAnchor.getAttribute('href') !== '#') {
+          return;
+        }
+        const targetUrl = card.getAttribute('data-href');
+        if (targetUrl && targetUrl !== '#') {
+          window.location.href = targetUrl;
+        }
+      });
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initCardClicks);
+  } else {
+    initCardClicks();
+  }
+  document.addEventListener('astro:page-load', initCardClicks);
+</script>

@@ -1,0 +1,334 @@
+---
+// Authentic Black Tomato Editorial Stories ("WHAT WE DO AND WHY WE DO IT")
+// 100% Exact match to user screenshot (media_1793285446178_19b0d66e.png)
+
+export interface EditorialStoryItem {
+  title: string;
+  desc: string;
+  btnText: string;
+  btnLink: string;
+  img: string;
+  imgAlt?: string;
+  reverse?: boolean;
+}
+
+interface Props {
+  stories?: EditorialStoryItem[];
+}
+
+const defaultStories: EditorialStoryItem[] = [
+  {
+    title: "WHAT WE DO\nAND WHY WE DO IT",
+    desc: "Since our founding in 2005, Black Tomato has always been about crafting remarkable, tailor made trips for families, couples and private groups around the world. Tom and James – our co-founders – know this better than anyone. You can meet them in our new video.",
+    btnText: "",
+    btnLink: "",
+    img: "/2024/05/Tom-Marchant-Values-Film-scaled-1.jpg",
+    imgAlt: "Tom and James - Black Tomato co-founders",
+    reverse: false
+  },
+  {
+    title: "PURSUIT OF FEELING",
+    desc: "Travel has always been about more than just going ‘somewhere else’. For us, travel – breathless and beautiful – is about feeling somewhere else; a kind of emotional high that stays with you for the rest of your life. It’s not where you want to go; it’s how you want to feel.",
+    btnText: "",
+    btnLink: "",
+    img: "/2025/08/Left-right-Hor.jpg",
+    imgAlt: "Pursuit of Feeling Landscape",
+    reverse: true
+  },
+  {
+    title: "OUR GUIDE TO LUXURY TRAVEL",
+    desc: "We create bespoke luxury holidays for people who want more than just beautiful places. For some, luxury is hiking in peaceful solitude through a remote corner of the Namib Desert. For others, it’s the freedom of sailing the Mediterranean aboard a private yacht.",
+    btnText: "CONTINUE READING",
+    btnLink: "/about-us/",
+    img: "/2025/03/Family-hiking-in-Colorado.jpg",
+    imgAlt: "Family hiking in Colorado luxury travel",
+    reverse: false
+  }
+];
+
+const { stories: propStories } = Astro.props;
+const stories = propStories && propStories.length > 0 ? propStories : defaultStories;
+---
+
+<section class="editorial-section" id="what-we-do">
+  <!-- Subtle Top Decorative Watermarks as seen in screenshot -->
+  <div class="watermark-top-left" aria-hidden="true">
+    <svg viewBox="0 0 350 200" fill="none" xmlns="http://www.w3.org/2000/svg" class="watermark-svg">
+      <path d="M-50 140 C 50 100, 150 70, 250 85 C 310 95, 340 120, 350 135" stroke="#E6E0D6" stroke-width="2.5" fill="none" opacity="0.6"/>
+      <path d="M-80 180 C 30 130, 140 100, 240 115 C 290 125, 320 150, 335 170" stroke="#E6E0D6" stroke-width="2" fill="none" opacity="0.45"/>
+    </svg>
+  </div>
+  
+  <div class="watermark-top-right" aria-hidden="true">
+    <svg viewBox="0 0 200 120" fill="none" xmlns="http://www.w3.org/2000/svg" class="watermark-svg">
+      <line x1="80" y1="20" x2="180" y2="20" stroke="#F0EDE8" stroke-width="3" stroke-dasharray="14 8" opacity="0.7"/>
+      <line x1="100" y1="36" x2="190" y2="36" stroke="#F0EDE8" stroke-width="3" stroke-dasharray="14 8" opacity="0.5"/>
+    </svg>
+  </div>
+
+  <div class="editorial-container">
+    {stories.map((story) => (
+      <article class={`editorial-row ${story.reverse ? 'is-reversed' : ''}`}>
+        <!-- Text Column -->
+        <div class="editorial-text-col">
+          <div class="editorial-text-inner">
+            <h2 class="editorial-title">
+              {story.title.split('\n').map((line, idx) => (
+                <span>
+                  {line}
+                  {idx < story.title.split('\n').length - 1 && <br />}
+                </span>
+              ))}
+            </h2>
+            <p class="editorial-desc">{story.desc}</p>
+            {story.btnText && (
+              <div class="editorial-btn-wrapper">
+                <a href={story.btnLink || '#'} class="editorial-btn">
+                  {story.btnText}
+                </a>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <!-- Full-Bleed Media Column -->
+        <div class="editorial-media-col">
+          <div class="media-frame">
+            <img 
+              src={story.img} 
+              alt={story.imgAlt} 
+              loading="lazy" 
+              class="editorial-img"
+            />
+          </div>
+        </div>
+      </article>
+    ))}
+  </div>
+</section>
+
+<style>
+  .editorial-section {
+    background-color: #FFFFFF;
+    position: relative;
+    overflow: hidden;
+    padding: 0;
+  }
+
+  /* Decorative Watermarks */
+  .watermark-top-left {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 350px;
+    height: 200px;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .watermark-top-right {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 200px;
+    height: 120px;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .watermark-svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .editorial-container {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    gap: 0; /* Zero gap between rows so image corners meet seamlessly */
+  }
+
+  /* Full-Bleed 2-Column Split Row (Matches Black Tomato exact layout & square proportion) */
+  .editorial-row {
+    display: flex;
+    align-items: stretch;
+    width: 100%;
+    height: clamp(660px, 80vh, 760px);
+    min-height: 660px;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Row 1 & 3: Text on Left (Inset), Media on Right (Flush to viewport edge) */
+  .editorial-row:not(.is-reversed) {
+    flex-direction: row;
+  }
+
+  .editorial-row:not(.is-reversed) .editorial-text-col {
+    flex: 0 0 50%;
+    width: 50%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-end;
+    padding: clamp(3rem, 5vw, 5.5rem) clamp(3.5rem, 6vw, 6.5rem);
+    box-sizing: border-box;
+  }
+
+  .editorial-row:not(.is-reversed) .editorial-media-col {
+    flex: 0 0 50%;
+    width: 50%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Row 2: Media on Left (Flush to viewport edge), Text on Right (Inset) */
+  .editorial-row.is-reversed {
+    flex-direction: row-reverse;
+  }
+
+  .editorial-row.is-reversed .editorial-text-col {
+    flex: 0 0 50%;
+    width: 50%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    padding: clamp(3rem, 5vw, 5.5rem) clamp(3.5rem, 6vw, 6.5rem);
+    box-sizing: border-box;
+  }
+
+  .editorial-row.is-reversed .editorial-media-col {
+    flex: 0 0 50%;
+    width: 50%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  .editorial-text-inner {
+    max-width: 450px;
+    width: 100%;
+  }
+
+  .editorial-title {
+    font-family: 'AlternateGotNo1D', 'Alternate Gothic', 'League Gothic', sans-serif;
+    font-size: 45px;
+    font-size: clamp(2.3rem, 3.2vw, 2.8125rem);
+    font-weight: 400;
+    line-height: 1.05;
+    color: #000000;
+    text-transform: uppercase;
+    letter-spacing: 2.25px;
+    margin: 0 0 1.25rem;
+  }
+
+  .editorial-desc {
+    font-family: 'Brandon Grotesque', 'Cabin', 'Josefin Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 17px;
+    font-size: 1.0625rem;
+    font-weight: 400;
+    line-height: 25px;
+    letter-spacing: 0.85px;
+    color: #52575C;
+    margin: 0;
+    text-align: left;
+  }
+
+  .editorial-btn-wrapper {
+    margin-top: 2rem;
+  }
+
+  .editorial-btn {
+    display: inline-block;
+    background-color: #000000;
+    color: #FFFFFF;
+    font-family: 'AlternateGotNo1D', 'Alternate Gothic', 'League Gothic', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    text-decoration: none;
+    padding: 0.85rem 2.2rem;
+    border: none;
+    border-radius: 0;
+    transition: background-color 0.25s ease;
+    cursor: pointer;
+    line-height: 1;
+  }
+
+  .editorial-btn:hover {
+    background-color: #262626;
+    color: #FFFFFF;
+  }
+
+  /* Full-Bleed Media Frame */
+  .media-frame {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    position: relative;
+    border-radius: 0;
+  }
+
+  .editorial-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center center;
+    display: block;
+    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .media-frame:hover .editorial-img {
+    transform: scale(1.02);
+  }
+
+  @media (max-width: 768px) {
+    .editorial-row, .editorial-row.is-reversed {
+      flex-direction: column !important;
+      height: auto !important;
+      min-height: auto;
+    }
+    .editorial-text-col, .editorial-row.is-reversed .editorial-text-col {
+      flex: 1 1 100%;
+      width: 100%;
+      justify-content: center !important;
+      align-items: center !important;
+      padding: 3rem 1.5rem !important;
+    }
+    .editorial-media-col, .editorial-row.is-reversed .editorial-media-col {
+      flex: 1 1 100%;
+      width: 100%;
+      height: 380px !important;
+    }
+    .editorial-text-inner {
+      max-width: 100%;
+      text-align: center;
+    }
+    .editorial-desc {
+      text-align: center;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .editorial-title {
+      font-size: 2.15rem;
+      letter-spacing: 1.5px;
+    }
+    .editorial-desc {
+      font-size: 16px;
+      line-height: 24px;
+      letter-spacing: 0.6px;
+    }
+    .editorial-media-col, .editorial-row.is-reversed .editorial-media-col {
+      height: 290px !important;
+    }
+  }
+</style>

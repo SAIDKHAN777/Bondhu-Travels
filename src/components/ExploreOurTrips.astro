@@ -1,0 +1,777 @@
+---
+// Authentic Black Tomato "Explore Our Trips" Horizontal Carousel Section
+// 100% Exact match to user screenshot (media_1793365645552_d123f627.png)
+// Features: Pinned fixed left title, compact Alternate Gothic typography,
+// smooth drag-to-slide & edge dissolve/fade transitions.
+
+export interface TripCardItem {
+  country: string;
+  title: string;
+  nights: string;
+  desc?: string;
+  price?: string;
+  img: string;
+  link?: string;
+}
+
+interface Props {
+  trips?: TripCardItem[];
+}
+
+const defaultTripCards: TripCardItem[] = [
+  {
+    country: "FRANCE",
+    title: "THE LOST GENERATION",
+    nights: "12 NIGHTS",
+    img: "/2026/04/Lost-Generation-header-mob.jpg",
+    link: "/destinations/france/the-lost-generation/"
+  },
+  {
+    country: "BRAZIL",
+    title: "THE RHYTHM OF WATER",
+    nights: "8 NIGHTS",
+    img: "/2026/02/Lady-in-Forest-1-1.jpg",
+    link: "/destinations/brazil/the-rhythm-of-water/"
+  },
+  {
+    country: "ITALY",
+    title: "HIGHLIGHTS OF ITALY: A LUXURY HOLIDAY IN ROME, FLORENCE & VENICE",
+    nights: "9 NIGHTS",
+    desc: "This nine-night holiday to Rome, Florence and Venice will see you sample...",
+    price: "From £8,000 per person excl. flights",
+    img: "/2022/09/Highlights-of-Italy-scaled.jpg",
+    link: "/destinations/italy/highlights-of-italy/"
+  },
+  {
+    country: "GREECE",
+    title: "ATHENS, MYKONOS AND CRETE: A LUXURY FAMILY DISCOVERY IN GREECE",
+    nights: "11 NIGHTS",
+    desc: "Ancient ruins are the backdrop to venturesome days and peaceful evenings...",
+    price: "From £9,800 per person excl. flights",
+    img: "/2023/01/Family-island-hopping-scaled.jpg",
+    link: "/destinations/greece/family-discovery/"
+  },
+  {
+    country: "ICELAND",
+    title: "ICELAND: A LUXURY TRIP CHASING THE NORTHERN LIGHTS",
+    nights: "5 NIGHTS",
+    img: "/2022/09/Northern-Lights-Iceland-scaled.jpg",
+    link: "/destinations/iceland/"
+  },
+  {
+    country: "JAPAN",
+    title: "TOKYO & KYOTO: A JAPAN FAMILY HOLIDAY",
+    nights: "10 NIGHTS",
+    img: "/2019/09/Ninja-martial-arts-in-Tokyo.jpg",
+    link: "/destinations/japan/"
+  },
+  {
+    country: "ECUADOR",
+    title: "ECUADOR & GALÁPAGOS: A JOURNEY INTO NATURE",
+    nights: "13 NIGHTS",
+    img: "/2022/09/Ultimate-Ecuador-scaled.jpg",
+    link: "/destinations/ecuador/"
+  },
+  {
+    country: "MOROCCO",
+    title: "A JOURNEY INTO MOROCCO",
+    nights: "7 NIGHTS",
+    img: "/2024/02/Atlas-mountains-morocco-landscape.jpg",
+    link: "/destinations/morocco/"
+  },
+  {
+    country: "KENYA",
+    title: "KENYA: THE ULTIMATE FAMILY SAFARI",
+    nights: "8 NIGHTS",
+    img: "/2024/01/navigation-kenya.jpg",
+    link: "/destinations/kenya/"
+  }
+];
+
+const { trips: propTrips } = Astro.props;
+const tripCards = (propTrips && propTrips.length > 0) ? propTrips : defaultTripCards;
+---
+
+<section class="explore-trips-section" id="explore-our-trips">
+  <!-- Subtle Topographic Lines SVG Overlay on the left -->
+  <div class="topographic-left-bg" aria-hidden="true">
+    <svg viewBox="0 0 600 600" fill="none" xmlns="http://www.w3.org/2000/svg" class="topographic-svg">
+      <path d="M-80 320 C 60 300, 140 380, 220 370 C 300 360, 360 410, 420 440" stroke="#373B41" stroke-width="2.5" fill="none" opacity="0.6"/>
+      <path d="M-100 360 C 40 340, 120 420, 200 410 C 280 400, 340 450, 400 480" stroke="#373B41" stroke-width="2.5" fill="none" opacity="0.6"/>
+      <path d="M-120 400 C 20 380, 100 460, 180 450 C 260 440, 320 490, 380 520" stroke="#373B41" stroke-width="2.5" fill="none" opacity="0.6"/>
+      <path d="M-140 440 C 0 420, 80 500, 160 490 C 240 480, 300 530, 360 560" stroke="#373B41" stroke-width="2.5" fill="none" opacity="0.5"/>
+      <path d="M-160 480 C -20 460, 60 540, 140 530 C 220 520, 280 570, 340 600" stroke="#373B41" stroke-width="2.5" fill="none" opacity="0.5"/>
+    </svg>
+  </div>
+
+  <div class="explore-trips-container">
+    <!-- Pinned Left Header Column: FIXED in place, never shifts or scrolls into carousel -->
+    <div class="explore-pinned-left">
+      <div class="explore-pinned-inner">
+        <h2 class="explore-title">EXPLORE OUR TRIPS</h2>
+        <p class="explore-subtitle">
+          Remarkable experiences to inspire<br />the mind
+        </p>
+      </div>
+    </div>
+
+    <!-- Right Carousel Section: Smooth drag, arrow buttons, edge dissolve effects -->
+    <div class="explore-carousel-area" id="trips-carousel-area">
+      <!-- Gradient Edge Dissolve Overlays -->
+      <div class="carousel-edge-fade edge-fade-left" id="trips-fade-left" aria-hidden="true"></div>
+      <div class="carousel-edge-fade edge-fade-right" id="trips-fade-right" aria-hidden="true"></div>
+
+      <!-- Carousel Arrow Buttons -->
+      <button class="carousel-arrow-btn arrow-prev" id="trips-prev-arrow" aria-label="Previous Trips">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+      </button>
+
+      <button class="carousel-arrow-btn arrow-next" id="trips-next-arrow" aria-label="Next Trips">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="9 18 15 12 9 6"></polyline>
+        </svg>
+      </button>
+
+      <!-- Carousel Cards Rail -->
+      <div class="carousel-track" id="trips-track">
+        {tripCards.map((card) => {
+          const tripTargetLink = card.link || '#';
+          return (
+            <article 
+              class="trip-card" 
+              style={`background-image: url(${card.img || (card as any).image});`}
+              data-href={tripTargetLink}
+              role="article"
+              tabindex="0"
+              aria-label={`${card.title} - ${card.country}`}
+            >
+              <!-- Full Card Clickable Overlay Link covering the entire event photo & card area -->
+              <a 
+                href={tripTargetLink} 
+                class="trip-card-full-link" 
+                aria-label={`Explore trip to ${card.title} (${card.country})`}
+                tabindex="-1"
+              ></a>
+
+              <span class="trip-nights-badge">{card.nights}</span>
+              <div class="trip-gradient-overlay"></div>
+              <div class="trip-card-content">
+                <h3 class="trip-card-title">
+                  <a href={tripTargetLink} style="color: inherit; text-decoration: none;">
+                    {card.title}
+                  </a>
+                </h3>
+                <span class="trip-country">{card.country}</span>
+                
+                <!-- Hover Reveal Drawer: Default collapsed, slides up on mouse hover -->
+                <div class="trip-hover-details">
+                  <div class="trip-hover-inner">
+                    {card.desc && (
+                      <p class="trip-card-desc">{card.desc}</p>
+                    )}
+                    {card.price && (
+                      <p class="trip-card-price">{card.price}</p>
+                    )}
+                    <div class="trip-btn-wrap">
+                      <a href={tripTargetLink} class="btn-explore-trip">
+                        EXPLORE TRIP
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </article>
+          );
+        })}
+      </div>
+    </div>
+  </div>
+
+  <!-- Centered Compact VIEW MORE Button -->
+  <div class="explore-view-more-container">
+    <a class="btn-explore-view-more" href="/experience-types/all-trips/">
+      VIEW MORE
+    </a>
+  </div>
+</section>
+
+<style>
+  .explore-trips-section {
+    background-color: #24272C;
+    background-image: url(/2022/09/Itineraries-Home-scaled.jpg);
+    background-size: cover;
+    background-position: left center;
+    position: relative;
+    overflow: hidden;
+    padding: 4rem 0 4rem 0;
+  }
+
+  .topographic-left-bg {
+    position: absolute;
+    bottom: -50px;
+    left: -40px;
+    width: 550px;
+    height: 550px;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .topographic-svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .explore-trips-container {
+    width: 100%;
+    max-width: 100%;
+    padding-left: clamp(2rem, 5vw, 5.5rem);
+    padding-right: 0;
+    display: flex;
+    align-items: center;
+    position: relative;
+    z-index: 2;
+  }
+
+  /* Left Column: Fixed / Pinned Title & Subtitle */
+  .explore-pinned-left {
+    width: 320px;
+    min-width: 290px;
+    max-width: 330px;
+    flex-shrink: 0;
+    padding-right: 2rem;
+    position: relative;
+    z-index: 10;
+  }
+
+  .explore-pinned-inner {
+    position: relative;
+  }
+
+  /* Compact Editorial Typography matching Black Tomato Alternate Gothic */
+  .explore-title {
+    font-family: 'AlternateGotNo1D', 'Alternate Gothic', 'League Gothic', sans-serif;
+    font-size: clamp(1.85rem, 2.2vw, 2.2rem);
+    font-weight: 400;
+    line-height: 1.05;
+    color: #FFFFFF;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.85rem;
+    max-width: 250px;
+  }
+
+  .explore-subtitle {
+    font-family: Georgia, 'Playfair Display', serif;
+    font-style: italic;
+    font-size: clamp(0.9rem, 1.1vw, 1.02rem);
+    color: #C7C5BF;
+    line-height: 1.45;
+    margin: 0;
+    max-width: 240px;
+  }
+
+  /* Right Column: Carousel Track with smooth clipping & fades */
+  .explore-carousel-area {
+    flex: 1;
+    min-width: 0;
+    position: relative;
+    overflow: hidden;
+    padding: 0.75rem 0;
+  }
+
+  /* Smooth Edge Dissolve Gradients */
+  .carousel-edge-fade {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    pointer-events: none;
+    z-index: 8;
+    transition: opacity 0.35s ease;
+  }
+
+  .edge-fade-left {
+    left: 0;
+    width: 85px;
+    background: linear-gradient(to right, #24272C 20%, rgba(36, 39, 44, 0.75) 60%, transparent 100%);
+    opacity: 0; /* Hidden at initial scroll position so 1st card is 100% crisp */
+  }
+
+  .edge-fade-right {
+    right: 0;
+    width: 95px;
+    background: linear-gradient(to left, #24272C 20%, rgba(36, 39, 44, 0.75) 60%, transparent 100%);
+    opacity: 1;
+  }
+
+  .carousel-track {
+    display: flex;
+    gap: 1.25rem;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding-right: clamp(3rem, 6vw, 6rem);
+    cursor: grab;
+    user-select: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .carousel-track::-webkit-scrollbar {
+    display: none;
+  }
+
+  .carousel-track.is-dragging {
+    cursor: grabbing;
+    scroll-behavior: auto;
+    user-select: none;
+  }
+
+  /* Vertical Cards matching 100% of Black Tomato screenshot */
+  .trip-card {
+    width: 295px;
+    height: 520px;
+    flex-shrink: 0;
+    border-radius: 2px;
+    overflow: hidden;
+    position: relative;
+    background-size: cover;
+    background-position: center center;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 1.5rem 1.35rem 1.35rem 1.35rem;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.45);
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s ease;
+    cursor: pointer;
+  }
+
+  .trip-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
+  }
+
+  /* Full Card Clickable Anchor covering the entire event photo and card area */
+  .trip-card-full-link {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 4;
+    cursor: pointer;
+    text-decoration: none;
+    outline: none;
+  }
+
+  .trip-nights-badge {
+    position: absolute;
+    top: 1.25rem;
+    right: 1.25rem;
+    color: #FFFFFF;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9);
+    z-index: 3;
+    pointer-events: none;
+  }
+
+  .trip-gradient-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0) 65%, rgba(0,0,0,0.3) 80%, rgba(8,10,14,0.88) 96%);
+    z-index: 1;
+    transition: background 0.4s ease;
+    pointer-events: none;
+  }
+
+  .trip-card:hover .trip-gradient-overlay {
+    background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0) 45%, rgba(0,0,0,0.45) 65%, rgba(8,10,14,0.94) 88%, rgba(8,10,14,0.98) 100%);
+  }
+
+  .trip-card-content {
+    position: relative;
+    z-index: 2;
+    pointer-events: none;
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+  }
+
+  .trip-country {
+    display: block;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #D1D5DB;
+    margin-top: 0.25rem;
+    margin-bottom: 0;
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .trip-card-title {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #FFFFFF;
+    line-height: 1.25;
+    text-transform: uppercase;
+    margin: 0;
+    letter-spacing: 0.03em;
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /* Hover Reveal: Default State (Collapsed to 0 height, invisible, shifted down) */
+  .trip-hover-details {
+    display: grid;
+    grid-template-rows: 0fr;
+    opacity: 0;
+    transform: translateY(12px);
+    transition: grid-template-rows 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+                opacity 0.35s ease,
+                transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    pointer-events: none;
+  }
+
+  .trip-hover-inner {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    padding-top: 0.6rem;
+  }
+
+  /* Hover State: Smooth Slide-Up into view when user hovers mouse */
+  .trip-card:hover .trip-hover-details,
+  .trip-card:focus-within .trip-hover-details {
+    grid-template-rows: 1fr;
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  .trip-card-desc {
+    font-size: 0.72rem;
+    line-height: 1.35;
+    color: #CBD5E1;
+    margin: 0 0 0.35rem 0;
+    opacity: 0.92;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .trip-card-price {
+    font-size: 0.7rem;
+    font-style: italic;
+    color: #E2E8F0;
+    margin: 0 0 0.65rem 0;
+    opacity: 0.9;
+  }
+
+  .trip-btn-wrap {
+    margin-top: 0.2rem;
+  }
+
+  .btn-explore-trip {
+    display: inline-block;
+    padding: 0.48rem 1.15rem;
+    background: transparent;
+    color: #FFFFFF;
+    border: 1px solid rgba(255, 255, 255, 0.75);
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    text-decoration: none;
+    border-radius: 0;
+    transition: all 0.25s ease;
+    position: relative;
+    z-index: 5;
+    pointer-events: auto;
+  }
+
+  .btn-explore-trip:hover {
+    background: #FFFFFF;
+    color: #000000;
+    border-color: #FFFFFF;
+  }
+
+  /* Centered Compact VIEW MORE Button */
+  .explore-view-more-container {
+    text-align: center;
+    margin-top: 2.75rem;
+    position: relative;
+    z-index: 10;
+  }
+
+  .btn-explore-view-more {
+    display: inline-block;
+    padding: 0.8rem 2.5rem;
+    background: transparent;
+    color: #FFFFFF;
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    text-decoration: none;
+    border-radius: 2px;
+    transition: all 0.25s ease;
+  }
+
+  .btn-explore-view-more:hover {
+    background: #FFFFFF;
+    color: #000000;
+    border-color: #FFFFFF;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.35);
+  }
+
+  /* Circular Arrow Navigation Buttons */
+  .carousel-arrow-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: rgba(18, 22, 28, 0.65);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    color: #FFFFFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 15;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  }
+
+  .carousel-arrow-btn:hover {
+    background: rgba(10, 14, 20, 0.95);
+    border-color: rgba(255, 255, 255, 0.8);
+    transform: translateY(-50%) scale(1.08);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+  }
+
+  .carousel-arrow-btn.arrow-prev {
+    left: 1.25rem;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .carousel-arrow-btn.arrow-next {
+    right: 2rem;
+    opacity: 1;
+  }
+
+  @media (max-width: 1024px) {
+    .explore-trips-container {
+      flex-direction: column;
+      align-items: flex-start;
+      padding-left: 2rem;
+      padding-right: 2rem;
+    }
+
+    .explore-pinned-left {
+      width: 100%;
+      max-width: 100%;
+      margin-bottom: 2rem;
+      padding-right: 0;
+    }
+
+    .explore-carousel-area {
+      width: calc(100% + 4rem);
+      margin-left: -2rem;
+      margin-right: -2rem;
+      padding-left: 2rem;
+    }
+
+    .edge-fade-left {
+      left: 0;
+    }
+
+    .carousel-arrow-btn.arrow-prev {
+      left: 2.5rem;
+    }
+
+    .carousel-arrow-btn.arrow-next {
+      right: 2.5rem;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .explore-trips-section {
+      padding: 3rem 0;
+    }
+
+    .explore-trips-container {
+      padding-left: 1.25rem;
+      padding-right: 1.25rem;
+    }
+
+    .explore-carousel-area {
+      width: calc(100% + 2.5rem);
+      margin-left: -1.25rem;
+      margin-right: -1.25rem;
+      padding-left: 1.25rem;
+    }
+
+    .trip-card {
+      width: 270px;
+      height: 480px;
+      padding: 1.35rem 1.15rem;
+    }
+
+    .carousel-arrow-btn.arrow-prev {
+      left: 1.5rem;
+    }
+
+    .carousel-arrow-btn.arrow-next {
+      right: 1.5rem;
+    }
+  }
+</style>
+
+<script>
+  // High-performance Carousel with Mouse Drag & Touch Swipe & Edge Dissolve Transitions
+  function initExploreCarousel() {
+    const track = document.getElementById('trips-track');
+    const prevBtn = document.getElementById('trips-prev-arrow');
+    const nextBtn = document.getElementById('trips-next-arrow');
+    const fadeLeft = document.getElementById('trips-fade-left');
+    const fadeRight = document.getElementById('trips-fade-right');
+
+    if (!track) return;
+
+    // Update navigation arrows and edge dissolve gradients
+    const updateNavState = () => {
+      const scrollLeft = track.scrollLeft;
+      const maxScroll = track.scrollWidth - track.clientWidth - 5;
+      const isAtStart = scrollLeft <= 8;
+      const isAtEnd = scrollLeft >= maxScroll;
+
+      // Left edge fade & prev button
+      if (fadeLeft) {
+        fadeLeft.style.opacity = isAtStart ? '0' : '1';
+      }
+      if (prevBtn) {
+        prevBtn.style.opacity = isAtStart ? '0' : '1';
+        prevBtn.style.pointerEvents = isAtStart ? 'none' : 'auto';
+      }
+
+      // Right edge fade & next button
+      if (fadeRight) {
+        fadeRight.style.opacity = isAtEnd ? '0' : '1';
+      }
+      if (nextBtn) {
+        nextBtn.style.opacity = isAtEnd ? '0' : '1';
+        nextBtn.style.pointerEvents = isAtEnd ? 'none' : 'auto';
+      }
+    };
+
+    // Smooth step scroll on arrow click (1 card width + gap ≈ 315px)
+    const stepSize = 315;
+
+    if (nextBtn) {
+      nextBtn.addEventListener('click', () => {
+        track.scrollBy({ left: stepSize, behavior: 'smooth' });
+      });
+    }
+
+    if (prevBtn) {
+      prevBtn.addEventListener('click', () => {
+        track.scrollBy({ left: -stepSize, behavior: 'smooth' });
+      });
+    }
+
+    // Mouse Drag-to-Slide Support
+    let isDown = false;
+    let startX = 0;
+    let scrollStartLeft = 0;
+    let hasDragged = false;
+
+    track.addEventListener('mousedown', (e) => {
+      // Only trigger on left mouse button
+      if (e.button !== 0) return;
+      isDown = true;
+      hasDragged = false;
+      track.classList.add('is-dragging');
+      startX = e.pageX - track.offsetLeft;
+      scrollStartLeft = track.scrollLeft;
+    });
+
+    window.addEventListener('mouseup', () => {
+      if (!isDown) return;
+      isDown = false;
+      track.classList.remove('is-dragging');
+      // Delay reset so child clicks don't fire if user dragged
+      setTimeout(() => {
+        hasDragged = false;
+      }, 80);
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (!isDown) return;
+      e.preventDefault();
+      const x = e.pageX - track.offsetLeft;
+      const walk = (x - startX) * 1.35; // Responsive drag sensitivity
+      if (Math.abs(walk) > 4) {
+        hasDragged = true;
+      }
+      track.scrollLeft = scrollStartLeft - walk;
+      updateNavState();
+    });
+
+    // Prevent navigation if user dragged
+    track.addEventListener('click', (e) => {
+      if (hasDragged) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    }, true);
+
+    // Direct click handler for entire trip card (clicking photo, card body, or content)
+    const cards = track.querySelectorAll<HTMLElement>('.trip-card');
+    cards.forEach(card => {
+      card.addEventListener('click', (e) => {
+        if (hasDragged) {
+          e.preventDefault();
+          e.stopPropagation();
+          return;
+        }
+        const targetUrl = card.getAttribute('data-href');
+        if (!targetUrl || targetUrl === '#' || targetUrl.trim() === '') return;
+
+        const clickedAnchor = (e.target as HTMLElement).closest('a');
+        if (clickedAnchor && clickedAnchor.getAttribute('href') && clickedAnchor.getAttribute('href') !== '#') {
+          return;
+        }
+
+        window.location.href = targetUrl;
+      });
+    });
+
+    // Track scroll listener
+    track.addEventListener('scroll', updateNavState, { passive: true });
+    window.addEventListener('resize', updateNavState, { passive: true });
+
+    // Initial state check
+    updateNavState();
+  }
+
+  // Initialize on DOM ready and Astro page-load
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initExploreCarousel);
+  } else {
+    initExploreCarousel();
+  }
+  document.addEventListener('astro:page-load', initExploreCarousel);
+</script>
