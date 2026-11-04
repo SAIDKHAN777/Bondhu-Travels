@@ -36,11 +36,37 @@ if (propBody && propBody.trim()) {
   <div class="container">
     <div class="row">
       <div class="col col--lg-8 col--md-8 col--sm-12 col--xs-12 col--lg-offset-2 col--md-offset-2">
-        <h2 style="text-align: center;"><span class="h5">{title}</span></h2>
+        <h2 style="text-align: center;"><span class="h5 letter-title">{title}</span></h2>
         {displayParagraphs.map(p => (
-          <p style="text-align: center;" set:html={p} />
+          <p class="letter-para" style="text-align: center;" set:html={p} />
         ))}
       </div>
     </div>
   </div>
 </section>
+
+<style>
+  #letter-section {
+    background-color: #fdfcf9 !important;
+  }
+  .letter-title {
+    color: #24272c !important;
+    font-family: 'Brandon Grotesque', 'Cabin', 'Josefin Sans', sans-serif !important;
+    font-weight: 700 !important;
+    letter-spacing: 2px !important;
+    text-transform: uppercase !important;
+    display: inline-block;
+  }
+  .letter-para {
+    color: #4a5568 !important;
+    font-family: 'Brandon Grotesque', 'Cabin', -apple-system, BlinkMacSystemFont, sans-serif !important;
+    font-size: 1.0625rem !important;
+    line-height: 1.75 !important;
+    margin-bottom: 22px !important;
+  }
+  .letter-para :global(em) {
+    font-style: italic;
+    color: #1a202c !important;
+    font-weight: 600;
+  }
+</style>
