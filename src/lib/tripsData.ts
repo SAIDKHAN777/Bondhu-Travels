@@ -312,7 +312,6 @@ export const tripsDatabase: Record<string, TripDetail> = {
     title: 'Iceland: Northern Lights Odyssey',
     tagline: 'Chasing auroras across glaciers & thermal lagoons',
     heroImage: '/2022/09/Northern-Lights-Iceland-scaled.jpg',
-    heroVideo: '/luxury-travel-demo.mp4',
     when: 'Sep - Apr',
     price: 'From £5,400pp excl. flights (৳ ৬,৯০,০০০)',
     priceSharing: '(based on 2 ppl sharing)',
@@ -339,7 +338,7 @@ export const tripsDatabase: Record<string, TripDetail> = {
             day: 'Days 3-5',
             title: 'Superjeep Glacier Expeditions & Aurora Hunting',
             desc: 'Explore glowing sapphire ice caves, ride snowmobiles on icecaps, and view the Aurora Borealis with personal astronomer guides.',
-            image: '/luxury-travel-demo.mp4',
+            image: '/2022/09/Northern-Lights-Iceland-scaled.jpg',
             stay: 'Hotel Rangá — Stargazing Suite with Outdoor Hot Tubs',
             dining: 'Fresh Icelandic arctic char & hot chocolate beside open fires'
           }
@@ -465,7 +464,6 @@ export const tripsDatabase: Record<string, TripDetail> = {
     title: 'A Journey into Morocco',
     tagline: 'From Marrakech souks to Saharan starlit camps',
     heroImage: '/2024/02/Atlas-mountains-morocco-landscape.jpg',
-    heroVideo: '/luxury-travel-demo.mp4',
     when: 'Oct - May',
     price: 'From £4,500pp excl. flights (৳ ৫,৭০,০০০)',
     priceSharing: '(based on 2 ppl sharing)',
