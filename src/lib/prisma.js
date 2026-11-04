@@ -1,7 +1,4 @@
-import { createRequire } from 'module';
-const require = createRequire(import.meta.url);
-
-const { PrismaClient } = require('/home/saidkhan/Projects/travel-agency-backend/node_modules/@prisma/client');
+import { PrismaClient } from '@prisma/client';
 
 const globalForPrisma = globalThis;
 

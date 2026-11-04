@@ -7,7 +7,8 @@
     "dev": "astro dev --host 0.0.0.0 --port 3000",
     "start": "astro dev --host 0.0.0.0 --port 3000",
     "build": "astro build",
-    "preview": "astro preview --host 0.0.0.0 --port 3000"
+    "preview": "astro preview --host 0.0.0.0 --port 3000",
+    "postinstall": "prisma generate"
   },
   "keywords": [
     "travel",
@@ -19,7 +20,10 @@
   "author": "Said Khan",
   "license": "ISC",
   "dependencies": {
+    "@astrojs/netlify": "^8.2.11",
     "@astrojs/node": "^11.1.9",
-    "astro": "^7.4.4"
+    "@prisma/client": "6.4.1",
+    "astro": "^7.4.4",
+    "prisma": "6.4.1"
   }
 }

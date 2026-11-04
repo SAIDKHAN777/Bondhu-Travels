@@ -1,6 +1,9 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
+import netlify from '@astrojs/netlify';
 import node from '@astrojs/node';
+
+const isNetlify = !!process.env.NETLIFY;
 
 // https://astro.build/config
 export default defineConfig({
@@ -8,15 +11,10 @@ export default defineConfig({
     enabled: false,
   },
   output: 'server',
-  adapter: node({
-    mode: 'standalone',
-  }),
+  adapter: isNetlify ? netlify() : node({ mode: 'standalone' }),
   vite: {
     ssr: {
-      external: [
-        '@prisma/client',
-        '/home/saidkhan/Projects/travel-agency-backend/node_modules/@prisma/client'
-      ],
+      external: ['@prisma/client'],
     },
   },
   server: {

@@ -1,0 +1,899 @@
+// =====================================================================
+// Enterprise Travel Agency Backend — Prisma Schema
+// Pinned Prisma Version: 6.4.1
+// Database: PostgreSQL 15+
+// =====================================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("MIGRATION_DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------
+// Enums
+// ---------------------------------------------------------------------
+
+enum UserRole {
+  CUSTOMER
+  AGENT
+  ADMIN
+  SUPER_ADMIN
+
+  @@map("user_role")
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+  DEACTIVATED
+  PENDING_VERIFICATION
+
+  @@map("user_status")
+}
+
+enum AgentStatus {
+  ACTIVE
+  SUSPENDED
+  INACTIVE
+
+  @@map("agent_status")
+}
+
+enum BookingStatus {
+  DRAFT
+  PENDING_PAYMENT
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+
+  @@map("booking_status")
+}
+
+enum PassengerType {
+  ADULT
+  CHILD
+  INFANT
+
+  @@map("passenger_type")
+}
+
+enum InventoryLockStatus {
+  ACTIVE
+  RELEASED
+  EXPIRED
+  ACQUIRED
+
+  @@map("inventory_lock_status")
+}
+
+enum PaymentStatus {
+  PENDING
+  AUTHORIZED
+  CAPTURED
+  FAILED
+  CANCELLED
+  REFUND_REQUIRED // Deprecated in Task 6.2 ledger design; kept for historical DB compatibility but unused.
+
+  @@map("payment_status")
+}
+
+enum RefundStatus {
+  PENDING
+  PROCESSING
+  SUCCEEDED
+  FAILED
+  CANCELLED
+
+  @@map("refund_status")
+}
+
+enum WebhookEventStatus {
+  RECEIVED
+  PROCESSED
+  FAILED
+  IGNORED
+
+  @@map("webhook_event_status")
+}
+
+enum IdempotencyStatus {
+  PROCESSING
+  COMPLETED
+  FAILED
+
+  @@map("idempotency_status")
+}
+
+enum KeyStatus {
+  ACTIVE
+  RETIRED
+  REVOKED
+
+  @@map("key_status")
+}
+
+enum DeduplicationStatus {
+  IN_PROGRESS
+  COMPLETED
+  EXPIRED
+
+  @@map("deduplication_status")
+}
+
+// Phase 2 Domestic Tour Enums
+enum TourDestination {
+  SAJEK_VALLEY
+  COXS_BAZAR
+  SUNDARBANS
+  SYLHET_SREEMANGAL
+  BANDARBAN
+  RANGAMATI
+  TANGUAR_HAOR
+  SAINT_MARTINS
+  OTHER_DOMESTIC
+
+  @@map("tour_destination")
+}
+
+enum DepartureStatus {
+  SCHEDULED
+  OPEN
+  FILLING_FAST
+  SOLD_OUT
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+
+  @@map("departure_status")
+}
+
+enum TourBookingType {
+  SCHEDULED_GROUP
+  CUSTOM_PRIVATE
+  LEGACY_NON_TOUR
+
+  @@map("tour_booking_type")
+}
+
+enum CustomTourStatus {
+  SUBMITTED
+  UNDER_REVIEW
+  QUOTED
+  ACCEPTED
+  REJECTED
+  EXPIRED
+
+  @@map("custom_tour_status")
+}
+
+enum QuotationStatus {
+  DRAFT
+  SENT
+  ACCEPTED
+  REJECTED
+  REVISED
+  EXPIRED
+
+  @@map("quotation_status")
+}
+
+enum SupplierType {
+  HOTEL_RESORT
+  BUS_TRANSPORT
+  BOAT_CRUISE
+  LOCAL_GUIDE
+  PERMIT_OFFICE
+
+  @@map("supplier_type")
+}
+
+enum SupplierBookingStatus {
+  DRAFT
+  CONFIRMED
+  PAID
+  CANCELLED
+
+  @@map("supplier_booking_status")
+}
+
+enum PaymentAllocationType {
+  INITIAL_BOOKING_CREDIT
+  INITIAL_SUSPENSE_QUARANTINE
+
+  @@map("payment_allocation_type")
+}
+
+enum SupplierPaymentStatus {
+  RECORDED
+  REVERSED
+
+  @@map("supplier_payment_status")
+}
+
+// ---------------------------------------------------------------------
+// 1. User Model
+// ---------------------------------------------------------------------
+model User {
+  id              String           @id @default(uuid()) @db.Uuid
+  email           String           @unique
+  passwordHash    String           @map("password_hash")
+  role            UserRole         @default(CUSTOMER)
+  status          UserStatus       @default(PENDING_VERIFICATION)
+  emailVerifiedAt DateTime?        @map("email_verified_at") @db.Timestamptz(3)
+  lastLoginAt     DateTime?        @map("last_login_at") @db.Timestamptz(3)
+  createdAt       DateTime         @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime         @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  customerProfile CustomerProfile?
+  agentProfile    AgentProfile?
+  auditLogs       AuditLog[]
+  refreshTokens   RefreshToken[]
+
+  @@map("users")
+}
+
+// ---------------------------------------------------------------------
+// 2. CustomerProfile Model
+// ---------------------------------------------------------------------
+model CustomerProfile {
+  id          String    @id @default(uuid()) @db.Uuid
+  userId      String    @unique @map("user_id") @db.Uuid
+  firstName   String    @map("first_name")
+  lastName    String    @map("last_name")
+  phone       String?
+  dateOfBirth DateTime? @map("date_of_birth") @db.Date
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  user               User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bookings           Booking[]
+  customTourRequests CustomTourRequest[]
+
+  @@map("customer_profiles")
+}
+
+// ---------------------------------------------------------------------
+// 3. AgentProfile Model
+// ---------------------------------------------------------------------
+model AgentProfile {
+  id          String      @id @default(uuid()) @db.Uuid
+  userId      String      @unique @map("user_id") @db.Uuid
+  displayName String      @map("display_name")
+  agentCode   String      @unique @map("agent_code")
+  status      AgentStatus @default(ACTIVE)
+  createdAt   DateTime    @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime    @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  user                 User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdBookings      Booking[]
+  assignedTourRequests CustomTourRequest[]
+
+  @@map("agent_profiles")
+}
+
+// ---------------------------------------------------------------------
+// 4. Booking Model (Extended for Domestic Tours)
+// ---------------------------------------------------------------------
+model Booking {
+  id               String          @id @default(uuid()) @db.Uuid
+  bookingReference String          @unique @map("booking_reference")
+  customerId       String          @map("customer_id") @db.Uuid
+  createdByAgentId String?         @map("created_by_agent_id") @db.Uuid
+  status           BookingStatus   @default(DRAFT)
+  currency         String          @db.VarChar(3)
+  totalAmount      Decimal         @map("total_amount") @db.Decimal(12, 2)
+  createdAt        DateTime        @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt        DateTime        @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  // Phase 2 Domestic Tour Extensions
+  tourDepartureId    String?         @map("tour_departure_id") @db.Uuid
+  tourQuotationId    String?         @map("tour_quotation_id") @db.Uuid
+  bookingType        TourBookingType @default(LEGACY_NON_TOUR) @map("booking_type")
+  passengerCount     Int             @default(1) @map("passenger_count")
+  depositAmount      Decimal         @default(0) @map("deposit_amount") @db.Decimal(12, 2)
+  paidAmount         Decimal         @default(0) @map("paid_amount") @db.Decimal(12, 2)
+  outstandingBalance Decimal         @default(0) @map("outstanding_balance") @db.Decimal(12, 2)
+
+  customer         CustomerProfile   @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  agent            AgentProfile?     @relation(fields: [createdByAgentId], references: [id], onDelete: SetNull)
+  passengers       Passenger[]
+  segments         BookingSegment[]
+  inventoryLocks   InventoryLock[]
+  payments         Payment[]
+  tourDeparture    TourDeparture?    @relation(fields: [tourDepartureId], references: [id], onDelete: Restrict)
+  tourQuotation    TourQuotation?    @relation(fields: [tourQuotationId], references: [id], onDelete: Restrict)
+  supplierBookings   SupplierBooking[]
+  tourExpenses       TourExpense[]
+  paymentCaptures    PaymentCapture[]
+  paymentAllocations PaymentAllocation[]
+
+  @@index([customerId])
+  @@index([createdByAgentId])
+  @@index([status])
+  @@index([tourDepartureId])
+  @@index([tourQuotationId])
+  @@index([bookingType])
+  @@map("bookings")
+}
+
+// ---------------------------------------------------------------------
+// 5. Passenger Model (Extended for Tour Boarding)
+// ---------------------------------------------------------------------
+model Passenger {
+  id                       String        @id @default(uuid()) @db.Uuid
+  bookingId                String        @map("booking_id") @db.Uuid
+  passengerType            PassengerType @map("passenger_type")
+  firstName                String        @map("first_name")
+  lastName                 String        @map("last_name")
+  dateOfBirth              DateTime      @map("date_of_birth") @db.Date
+  documentCountry          String?       @map("document_country") @db.VarChar(3)
+  documentNumberCiphertext String?       @map("document_number_ciphertext")
+  documentKeyVersion       String?       @map("document_key_version")
+  createdAt                DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt                DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  // Phase 2 Domestic Boarding Extensions
+  phone            String?
+  emergencyContact String?       @map("emergency_contact")
+  boardingPoint    String?       @map("boarding_point")
+
+  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  @@index([bookingId])
+  @@map("passengers")
+}
+
+// ---------------------------------------------------------------------
+// 6. BookingSegment Model
+// ---------------------------------------------------------------------
+model BookingSegment {
+  id              String   @id @default(uuid()) @db.Uuid
+  bookingId       String   @map("booking_id") @db.Uuid
+  segmentIndex    Int      @map("segment_index")
+  originCode      String   @map("origin_code") @db.VarChar(10)
+  destinationCode String   @map("destination_code") @db.VarChar(10)
+  departureAt     DateTime @map("departure_at") @db.Timestamptz(3)
+  arrivalAt       DateTime @map("arrival_at") @db.Timestamptz(3)
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  @@unique([bookingId, segmentIndex], name: "uq_booking_segment_index")
+  @@index([bookingId])
+  @@map("booking_segments")
+}
+
+// ---------------------------------------------------------------------
+// 7. InventoryLock Model
+// ---------------------------------------------------------------------
+model InventoryLock {
+  id          String              @id @default(uuid()) @db.Uuid
+  bookingId   String              @map("booking_id") @db.Uuid
+  resourceKey String              @map("resource_key")
+  status      InventoryLockStatus @default(ACTIVE)
+  expiresAt   DateTime            @map("expires_at") @db.Timestamptz(3)
+  releasedAt  DateTime?           @map("released_at") @db.Timestamptz(3)
+  createdAt   DateTime            @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime            @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  // Note: Partial unique index for (booking_id WHERE status = 'ACTIVE') is
+  // implemented in custom SQL migration to permit multiple historical locks.
+  @@index([bookingId])
+  @@index([status, expiresAt])
+  @@map("inventory_locks")
+}
+
+// ---------------------------------------------------------------------
+// 8. Payment Model
+// ---------------------------------------------------------------------
+model Payment {
+  id                String        @id @default(uuid()) @db.Uuid
+  bookingId         String        @map("booking_id") @db.Uuid
+  provider          String
+  providerReference String?       @unique @map("provider_reference")
+  status            PaymentStatus @default(PENDING)
+  amount            Decimal       @db.Decimal(12, 2)
+  currency          String        @db.VarChar(3)
+  capturedAt        DateTime?     @map("captured_at") @db.Timestamptz(3)
+  createdAt         DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt         DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  booking  Booking          @relation(fields: [bookingId], references: [id], onDelete: Restrict)
+  refunds  Refund[]
+  captures PaymentCapture[]
+
+  @@index([bookingId])
+  @@index([status])
+  @@map("payments")
+}
+
+// ---------------------------------------------------------------------
+// 9. Refund Model
+// ---------------------------------------------------------------------
+model Refund {
+  id                String       @id @default(uuid()) @db.Uuid
+  paymentId         String       @map("payment_id") @db.Uuid
+  status            RefundStatus @default(PENDING)
+  amount            Decimal      @db.Decimal(12, 2)
+  currency          String       @db.VarChar(3)
+  providerReference String?      @unique @map("provider_reference")
+  idempotencyKey    String       @map("idempotency_key") @db.VarChar(255)
+  failureReason     String?      @map("failure_reason") @db.Text
+  requestedBy       String?      @map("requested_by") @db.VarChar(100)
+  processedAt       DateTime?    @map("processed_at") @db.Timestamptz(3)
+  attemptCount      Int          @default(0) @map("attempt_count")
+  lastAttemptAt     DateTime?    @map("last_attempt_at") @db.Timestamptz(3)
+  nextAttemptAt     DateTime?    @map("next_attempt_at") @db.Timestamptz(3)
+  createdAt         DateTime     @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt         DateTime     @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  payment Payment @relation(fields: [paymentId], references: [id], onDelete: Restrict)
+
+  @@unique([paymentId, idempotencyKey], map: "uq_refunds_payment_idempotency_key")
+  @@index([paymentId])
+  @@index([status, nextAttemptAt], map: "idx_refunds_status_next_attempt")
+  @@map("refunds")
+}
+
+// ---------------------------------------------------------------------
+// 10. PaymentWebhookEvent Model
+// ---------------------------------------------------------------------
+model PaymentWebhookEvent {
+  id              String             @id @default(uuid()) @db.Uuid
+  provider        String
+  providerEventId String             @map("provider_event_id")
+  eventType       String             @map("event_type")
+  payloadHash     String             @map("payload_hash")
+  receivedAt      DateTime           @default(now()) @map("received_at") @db.Timestamptz(3)
+  processedAt     DateTime?          @map("processed_at") @db.Timestamptz(3)
+  status          WebhookEventStatus @default(RECEIVED)
+  processingError String?            @map("processing_error")
+  createdAt       DateTime           @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime           @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@unique([provider, providerEventId], name: "uq_provider_event_id")
+  @@index([status])
+  @@map("payment_webhook_events")
+}
+
+// ---------------------------------------------------------------------
+// 11. IdempotencyRecord Model
+// ---------------------------------------------------------------------
+model IdempotencyRecord {
+  id                 String            @id @default(uuid()) @db.Uuid
+  scope              String
+  idempotencyKeyHash String            @map("idempotency_key_hash")
+  requestHash        String            @map("request_hash")
+  status             IdempotencyStatus @default(PROCESSING)
+  responseStatus     Int?              @map("response_status")
+  responseReference  String?           @map("response_reference")
+  expiresAt          DateTime          @map("expires_at") @db.Timestamptz(3)
+  createdAt          DateTime          @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt          DateTime          @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@unique([scope, idempotencyKeyHash], name: "uq_scope_key_hash")
+  @@index([expiresAt])
+  @@map("idempotency_records")
+}
+
+// ---------------------------------------------------------------------
+// 12. AuditLog Model
+// ---------------------------------------------------------------------
+model AuditLog {
+  id          String   @id @default(uuid()) @db.Uuid
+  actorUserId String?  @map("actor_user_id") @db.Uuid
+  action      String
+  entityType  String   @map("entity_type")
+  entityId    String?  @map("entity_id")
+  requestId   String?  @map("request_id")
+  metadata    Json     @default("{}")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  actor User? @relation(fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@index([entityType, entityId])
+  @@index([actorUserId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+// ---------------------------------------------------------------------
+// 13. EncryptionKeyMetadata Model
+// ---------------------------------------------------------------------
+model EncryptionKeyMetadata {
+  id         String    @id @default(uuid()) @db.Uuid
+  keyVersion String    @unique @map("key_version")
+  algorithm  String
+  status     KeyStatus @default(ACTIVE)
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  retiredAt  DateTime? @map("retired_at") @db.Timestamptz(3)
+
+  @@map("encryption_key_metadata")
+}
+
+// ---------------------------------------------------------------------
+// 14. RequestDeduplicationRecord Model
+// ---------------------------------------------------------------------
+model RequestDeduplicationRecord {
+  id               String              @id @default(uuid()) @db.Uuid
+  scope            String
+  deduplicationKey String              @map("deduplication_key")
+  status           DeduplicationStatus @default(IN_PROGRESS)
+  expiresAt        DateTime            @map("expires_at") @db.Timestamptz(3)
+  createdAt        DateTime            @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt        DateTime            @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@unique([scope, deduplicationKey], name: "uq_dedup_scope_key")
+  @@index([expiresAt])
+  @@map("request_deduplication_records")
+}
+
+// ---------------------------------------------------------------------
+// 15. SystemSetting Model
+// ---------------------------------------------------------------------
+model SystemSetting {
+  id          String   @id @default(uuid()) @db.Uuid
+  key         String   @unique
+  value       Json
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@map("system_settings")
+}
+
+// =====================================================================
+// PHASE 2 ADDITIONS: Domestic Tour Models & Refresh Token Security
+// =====================================================================
+
+// ---------------------------------------------------------------------
+// 16. RefreshToken Model (Deterministic 15s Leeway & Token Rotation)
+// ---------------------------------------------------------------------
+model RefreshToken {
+  id                        String    @id @default(uuid()) @db.Uuid
+  userId                    String    @map("user_id") @db.Uuid
+  tokenHash                 String    @unique @map("token_hash")
+  familyId                  String    @map("family_id") @db.Uuid
+  isRevoked                 Boolean   @default(false) @map("is_revoked")
+  rotatedAt                 DateTime? @map("rotated_at") @db.Timestamptz(3)
+  replacedByTokenId         String?   @map("replaced_by_token_id") @db.Uuid
+  replacedByTokenCiphertext String?   @map("replaced_by_token_ciphertext") // AES-256-GCM encrypted for 15s leeway window
+  expiresAt                 DateTime  @map("expires_at") @db.Timestamptz(3)
+  userAgent                 String?   @map("user_agent")
+  ipHash                    String?   @map("ip_hash")
+  createdAt                 DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt                 DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([familyId])
+  @@index([expiresAt])
+  @@map("refresh_tokens")
+}
+
+// ---------------------------------------------------------------------
+// 17. TourPackage Model (Domestic Holiday Packages)
+// ---------------------------------------------------------------------
+model TourPackage {
+  id                    String          @id @default(uuid()) @db.Uuid
+  title                 String
+  slug                  String          @unique
+  destination           TourDestination
+  durationDays          Int             @map("duration_days")
+  durationNights        Int             @map("duration_nights")
+  description           String          @db.Text
+  itineraryPlan         Json            @map("itinerary_plan")
+  inclusions            String[]
+  exclusions            String[]
+  defaultBoardingPoints String[]        @map("default_boarding_points")
+  isActive              Boolean         @default(true) @map("is_active")
+  createdAt             DateTime        @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt             DateTime        @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  departures TourDeparture[]
+  expenses   TourExpense[]
+
+  @@map("tour_packages")
+}
+
+// ---------------------------------------------------------------------
+// 18. TourDeparture Model (Scheduled Group Fixed Departures)
+// ---------------------------------------------------------------------
+model TourDeparture {
+  id                String          @id @default(uuid()) @db.Uuid
+  packageId         String          @map("package_id") @db.Uuid
+  departureDate     DateTime        @map("departure_date") @db.Date
+  returnDate        DateTime        @map("return_date") @db.Date
+  totalCapacity     Int             @map("total_capacity")
+  availableCapacity Int             @map("available_capacity")
+  pricePerPerson    Decimal         @map("price_per_person") @db.Decimal(12, 2)
+  depositPerPerson  Decimal         @default(0) @map("deposit_per_person") @db.Decimal(12, 2)
+  status            DepartureStatus @default(OPEN)
+  tourManagerId     String?         @map("tour_manager_id") @db.Uuid
+  transportType     String          @map("transport_type")
+  createdAt         DateTime        @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt         DateTime        @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  package          TourPackage       @relation(fields: [packageId], references: [id], onDelete: Restrict)
+  bookings         Booking[]
+  supplierBookings SupplierBooking[]
+  tourExpenses     TourExpense[]
+
+  @@index([packageId])
+  @@index([departureDate])
+  @@index([status])
+  @@map("tour_departures")
+}
+
+// ---------------------------------------------------------------------
+// 19. CustomTourRequest Model (Private Custom Itinerary Inquiries)
+// ---------------------------------------------------------------------
+model CustomTourRequest {
+  id                      String           @id @default(uuid()) @db.Uuid
+  customerId              String           @map("customer_id") @db.Uuid
+  destination             String
+  requestedStartDate      DateTime         @map("requested_start_date") @db.Date
+  requestedEndDate        DateTime         @map("requested_end_date") @db.Date
+  numberOfAdults          Int              @map("number_of_adults")
+  numberOfChildren        Int              @default(0) @map("number_of_children")
+  accommodationPreference String           @map("accommodation_preference")
+  transportPreference     String           @map("transport_preference")
+  estimatedBudget         Decimal?         @map("estimated_budget") @db.Decimal(12, 2)
+  notes                   String?          @db.Text
+  status                  CustomTourStatus @default(SUBMITTED)
+  assignedAgentId         String?          @map("assigned_agent_id") @db.Uuid
+  createdAt               DateTime         @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt               DateTime         @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  customer   CustomerProfile @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  agent      AgentProfile?   @relation(fields: [assignedAgentId], references: [id], onDelete: SetNull)
+  quotations TourQuotation[]
+
+  @@index([customerId])
+  @@index([status])
+  @@map("custom_tour_requests")
+}
+
+// ---------------------------------------------------------------------
+// 20. TourQuotation Model (Itemized Quotations for Custom Tours)
+// ---------------------------------------------------------------------
+model TourQuotation {
+  id                  String            @id @default(uuid()) @db.Uuid
+  customTourRequestId String            @map("custom_tour_request_id") @db.Uuid
+  quotationReference  String            @unique @map("quotation_reference")
+  version             Int               @default(1)
+  itineraryDetails    Json              @map("itinerary_details")
+  costBreakdown       Json              @map("cost_breakdown")
+  totalPrice          Decimal           @map("total_price") @db.Decimal(12, 2)
+  depositRequired     Decimal           @map("deposit_required") @db.Decimal(12, 2)
+  validUntil          DateTime          @map("valid_until") @db.Timestamptz(3)
+  status              QuotationStatus   @default(DRAFT)
+  createdAt           DateTime          @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt           DateTime          @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  customTourRequest CustomTourRequest @relation(fields: [customTourRequestId], references: [id], onDelete: Cascade)
+  bookings          Booking[]
+
+  @@index([customTourRequestId])
+  @@map("tour_quotations")
+}
+
+// ---------------------------------------------------------------------
+// 21. Supplier Model (Hotels, Buses, Resorts, Boat Operators)
+// ---------------------------------------------------------------------
+model Supplier {
+  id            String       @id @default(uuid()) @db.Uuid
+  name          String
+  supplierType  SupplierType @map("supplier_type")
+  contactPerson String?      @map("contact_person")
+  phone         String
+  email         String?
+  location      String
+  paymentTerms  String?      @map("payment_terms")
+  isActive      Boolean      @default(true) @map("is_active")
+  deletedAt     DateTime?    @map("deleted_at") @db.Timestamptz(3)
+  createdBy     String?      @map("created_by") @db.Uuid
+  updatedBy     String?      @map("updated_by") @db.Uuid
+  createdAt     DateTime     @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt     DateTime     @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  bookings SupplierBooking[]
+
+  @@map("suppliers")
+}
+
+// ---------------------------------------------------------------------
+// 22. SupplierBooking Model (B2B Commitments & Block Bookings)
+// ---------------------------------------------------------------------
+model SupplierBooking {
+  id              String                @id @default(uuid()) @db.Uuid
+  supplierId      String                @map("supplier_id") @db.Uuid
+  departureId     String?               @map("departure_id") @db.Uuid
+  bookingId       String?               @map("booking_id") @db.Uuid
+  serviceType     String                @map("service_type")
+  description     String?
+  cost            Decimal               @map("cost") @db.Decimal(12, 2)
+  paidAmount      Decimal               @default(0) @map("paid_amount") @db.Decimal(12, 2)
+  currency        String                @default("BDT") @db.VarChar(3)
+  status          SupplierBookingStatus @default(DRAFT)
+  paymentDueDate  DateTime?             @map("payment_due_date") @db.Date
+  referenceNumber String?               @map("reference_number")
+  deletedAt       DateTime?             @map("deleted_at") @db.Timestamptz(3)
+  createdBy       String?               @map("created_by") @db.Uuid
+  updatedBy       String?               @map("updated_by") @db.Uuid
+  createdAt       DateTime              @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime              @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  supplier  Supplier       @relation(fields: [supplierId], references: [id], onDelete: Restrict)
+  departure TourDeparture? @relation(fields: [departureId], references: [id], onDelete: SetNull)
+  booking   Booking?       @relation(fields: [bookingId], references: [id], onDelete: SetNull)
+  expenses  TourExpense[]
+  payments  SupplierPayment[]
+
+  @@index([supplierId])
+  @@index([departureId])
+  @@index([bookingId])
+  @@index([status])
+  @@map("supplier_bookings")
+}
+
+// ---------------------------------------------------------------------
+// 23. SupplierPayment Model (Dated Payments for Accrual & Cash Tracking)
+// ---------------------------------------------------------------------
+model SupplierPayment {
+  id                String                @id @default(uuid()) @db.Uuid
+  supplierBookingId String                @map("supplier_booking_id") @db.Uuid
+  amount            Decimal               @db.Decimal(12, 2)
+  currency          String                @db.VarChar(3)
+  paidDate          DateTime?             @map("paid_date") @db.Date
+  method            String                @db.VarChar(50)
+  reference         String?               @db.VarChar(255)
+  status            SupplierPaymentStatus @default(RECORDED)
+  reversedAt        DateTime?             @map("reversed_at") @db.Timestamptz(3)
+  reversalReason    String?               @map("reversal_reason") @db.Text
+  isLegacyUndated   Boolean               @default(false) @map("is_legacy_undated")
+  createdBy         String                @map("created_by") @db.Uuid
+  createdAt         DateTime              @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt         DateTime              @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  supplierBooking   SupplierBooking       @relation(fields: [supplierBookingId], references: [id], onDelete: Restrict)
+
+  @@index([supplierBookingId])
+  @@index([status])
+  @@index([paidDate])
+  @@map("supplier_payments")
+}
+
+// ---------------------------------------------------------------------
+// 23. TourExpense Model (Operational Cost Tracking)
+// ---------------------------------------------------------------------
+model TourExpense {
+  id                String           @id @default(uuid()) @db.Uuid
+  tourId            String           @map("tour_id") @db.Uuid
+  departureId       String?          @map("departure_id") @db.Uuid
+  supplierBookingId String?          @map("supplier_booking_id") @db.Uuid
+  bookingId         String?          @map("booking_id") @db.Uuid
+  category          String           @map("category")
+  amount            Decimal          @db.Decimal(12, 2)
+  currency          String           @default("BDT") @db.VarChar(3)
+  incurredDate      DateTime         @default(now()) @map("incurred_date") @db.Date
+  recordedByAgentId String?          @map("recorded_by_agent_id") @db.Uuid
+  receiptReference  String?          @map("receipt_reference")
+  notes             String?
+  deletedAt         DateTime?        @map("deleted_at") @db.Timestamptz(3)
+  createdBy         String?          @map("created_by") @db.Uuid
+  updatedBy         String?          @map("updated_by") @db.Uuid
+  createdAt         DateTime         @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt         DateTime         @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  tour            TourPackage      @relation(fields: [tourId], references: [id], onDelete: Restrict)
+  departure       TourDeparture?   @relation(fields: [departureId], references: [id], onDelete: SetNull)
+  supplierBooking SupplierBooking? @relation(fields: [supplierBookingId], references: [id], onDelete: SetNull)
+  booking         Booking?         @relation(fields: [bookingId], references: [id], onDelete: SetNull)
+
+  @@index([tourId])
+  @@index([departureId])
+  @@index([supplierBookingId])
+  @@index([bookingId])
+  @@index([incurredDate])
+  @@map("tour_expenses")
+}
+
+// ---------------------------------------------------------------------
+// 24. OutboxEvent Model (Transactional Outbox Pattern)
+// ---------------------------------------------------------------------
+model OutboxEvent {
+  id            String                 @id @default(uuid()) @db.Uuid
+  aggregateType String                 @map("aggregate_type")
+  aggregateId   String                 @map("aggregate_id")
+  eventType     String                 @map("event_type")
+  payload       Json                   @map("payload")
+  status        String                 @default("PENDING")
+  attempts      Int                    @default(0)
+  nextAttemptAt DateTime?              @map("next_attempt_at") @db.Timestamptz(3)
+  lastError     String?                @map("last_error")
+  createdAt     DateTime               @default(now()) @map("created_at") @db.Timestamptz(3)
+  publishedAt   DateTime?              @map("published_at") @db.Timestamptz(3)
+
+  deliveries    NotificationDelivery[]
+
+  @@index([status, createdAt])
+  @@index([aggregateType, aggregateId])
+  @@index([status, nextAttemptAt, createdAt])
+  @@map("outbox_events")
+}
+
+// ---------------------------------------------------------------------
+// 25. PaymentCapture Model (Authoritative Gateway Capture Identity)
+// ---------------------------------------------------------------------
+model PaymentCapture {
+  id                    String              @id @default(uuid()) @db.Uuid
+  paymentId             String              @map("payment_id") @db.Uuid
+  bookingId             String              @map("booking_id") @db.Uuid
+  providerTransactionId String              @unique @map("provider_transaction_id")
+  capturedAmount        Decimal             @map("captured_amount") @db.Decimal(12, 2)
+  currency              String              @default("BDT") @db.VarChar(3)
+  capturedAt            DateTime            @default(now()) @map("captured_at") @db.Timestamptz(3)
+  evidenceRef           String?             @map("evidence_ref")
+  createdAt             DateTime            @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  payment     Payment             @relation(fields: [paymentId], references: [id], onDelete: Restrict)
+  booking     Booking             @relation(fields: [bookingId], references: [id], onDelete: Restrict)
+  allocations PaymentAllocation[]
+
+  @@unique([id, bookingId], name: "uq_payment_captures_id_booking_id")
+  @@index([paymentId])
+  @@index([bookingId])
+  @@index([capturedAt])
+  @@map("payment_captures")
+}
+
+// ---------------------------------------------------------------------
+// 26. PaymentAllocation Model (Ledger Split: Booking Credit vs Suspense Quarantine)
+// ---------------------------------------------------------------------
+model PaymentAllocation {
+  id             String                @id @default(uuid()) @db.Uuid
+  captureId      String                @map("capture_id") @db.Uuid
+  bookingId      String                @map("booking_id") @db.Uuid
+  allocationType PaymentAllocationType @map("allocation_type")
+  amount         Decimal               @db.Decimal(12, 2)
+  reason         String?
+  createdAt      DateTime              @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  capture PaymentCapture @relation(fields: [captureId, bookingId], references: [id, bookingId], onDelete: Restrict)
+  booking Booking        @relation(fields: [bookingId], references: [id], onDelete: Restrict)
+
+  @@unique([captureId, allocationType], name: "uq_payment_allocations_capture_type")
+  @@index([bookingId])
+  @@index([allocationType])
+  @@map("payment_allocations")
+}
+
+// ---------------------------------------------------------------------
+// 27. NotificationDelivery Model (Idempotent Channel Deliveries)
+// ---------------------------------------------------------------------
+model NotificationDelivery {
+  id            String    @id @default(uuid()) @db.Uuid
+  outboxEventId String    @map("outbox_event_id") @db.Uuid
+  channel       String    @db.VarChar(10)
+  status        String    @default("PENDING")
+  attempts      Int       @default(0)
+  lastError     String?   @map("last_error")
+  sentAt        DateTime? @map("sent_at") @db.Timestamptz(3)
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  outboxEvent OutboxEvent @relation(fields: [outboxEventId], references: [id], onDelete: Cascade)
+
+  @@unique([outboxEventId, channel], name: "uq_notification_deliveries_event_channel")
+  @@index([outboxEventId])
+  @@map("notification_deliveries")
+}
