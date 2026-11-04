@@ -3,8 +3,8 @@ node_modules/
 .pnp
 .pnp.js
 
-# Production build outputs
-dist/
+# Production build outputs (only root directory)
+/dist/
 .astro/
 .netlify/
 
