@@ -22,10 +22,10 @@ try {
 // Default fallback items matching user's video slides if DB is empty
 if (dbSlides.length === 0) {
   dbSlides = [
-    { id: 'slide-1', title: "Cox's Bazar sunrise", order: 1, active: true, videoUrl: "/uploads/videos/coxs_bazar_optimized_60fps.mp4" },
-    { id: 'slide-2', title: "Sajek clouds", order: 2, active: true, videoUrl: "/uploads/videos/sajek_cut_2-5s-mvwdk5om.mp4" },
-    { id: 'slide-3', title: "St. Martin boat", order: 3, active: true, videoUrl: "/uploads/videos/sunamganj_short_16x10-mvwdaq9p.mp4" },
-    { id: 'slide-4', title: "Sylhet tea gardens", order: 4, active: false, videoUrl: "/uploads/videos/bandarban_short_16x10_no_logo__1_-mvwdic7l.mp4" }
+    { id: 'slide-1', title: "Sajek clouds", order: 1, active: true, videoUrl: "/uploads/videos/sajek_cut_2-5s-mvwdk5om.mp4" },
+    { id: 'slide-2', title: "Bandarban hills", order: 2, active: true, videoUrl: "/uploads/videos/bandarban_short_16x10_no_logo__1_-mvwdic7l.mp4" },
+    { id: 'slide-3', title: "Tanguar Haor boat", order: 3, active: true, videoUrl: "/uploads/videos/sunamganj_short_16x10-mvwdaq9p.mp4" },
+    { id: 'slide-4', title: "Luxury Travel", order: 4, active: true, videoUrl: "/luxury-travel-demo.mp4" }
   ];
 }
 
@@ -240,7 +240,7 @@ const liveResortRooms = (spotlightConfig?.resort?.rooms && Array.isArray(spotlig
   : defaultResortRooms;
 
 const liveHouseboatVideo = spotlightConfig?.houseboat?.heroVideo || houseboatConfig?.heroVideo || "/uploads/videos/sunamganj_short_16x10-mvwdaq9p.mp4";
-const liveResortVideo = spotlightConfig?.resort?.heroVideo || "/uploads/videos/coxs_bazar_optimized_60fps.mp4";
+const liveResortVideo = spotlightConfig?.resort?.heroVideo || "/luxury-resort-demo.mp4";
 
 // 5. Fetch Editorial Stories (What we do, Pursuit of feeling, Luxury travel guide)
 let storiesConfig: any = null;

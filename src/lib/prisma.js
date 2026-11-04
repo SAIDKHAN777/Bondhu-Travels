@@ -9,7 +9,7 @@ export const prisma =
       db: {
         url:
           process.env.DATABASE_URL ||
-          'postgresql://postgres.tzwoufloqfcjtnarbrtl:yWXZCRIK7Hif8bNc@aws-0-ap-northeast-1.pooler.supabase.com:5432/postgres?sslmode=require',
+          'postgresql://postgres.tzwoufloqfcjtnarbrtl:yWXZCRIK7Hif8bNc@aws-0-ap-northeast-1.pooler.supabase.com:6543/postgres?sslmode=require&pgbouncer=true',
       },
     },
   });
