@@ -150,7 +150,7 @@ const footerPopularDestinations = syncedPopularCards.map((card: any) => ({
 }));
 ---
 
-<BaseLayout>
+<BaseLayout title="Luxury Travel & Bespoke Holidays | Bondhu Travel">
   <Header 
     phone={headerConfig?.phone}
     enquireText={headerConfig?.enquireText || "ENQUIRE NOW"}
@@ -192,9 +192,9 @@ const footerPopularDestinations = syncedPopularCards.map((card: any) => ({
     <!-- 5. Editorial Stories (What we do, Pursuit of Feeling, Luxury Travel Guide) -->
     <EditorialStories stories={storiesConfig?.stories} />
 
-    <!-- 6. WHY BLACK TOMATO? (Numbers/Stats + Trustpilot Badge + Client Comments Slider) -->
+    <!-- 6. WHY BONDHU TRAVEL? (Numbers/Stats + Trustpilot Badge + Client Comments Slider) -->
     <WhyUsOriginal 
-      title={whyUsConfig?.title || "WHY BLACK TOMATO?"}
+      title={whyUsConfig?.title || "WHY BONDHU TRAVEL?"}
       subtitle={whyUsConfig?.subtitle || statsConfig?.subtitle || "Two decades of delivering the world's most inspiring, high-touch luxury travel experiences."}
       stats={statsConfig?.stats}
       reviews={testimonialsConfig?.reviews}
