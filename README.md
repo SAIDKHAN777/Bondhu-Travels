@@ -1,19 +1,19 @@
-# 🌍 Bondhu Travels (বন্ধু ট্রাভেলস)
+# Bondhu Travels
 ### Luxury Bespoke Travel Platform & Studio
 
 An ultra-luxury, high-performance travel and exploration web platform inspired by Black Tomato. Built with **Astro SSR**, **TypeScript**, **PostgreSQL (Supabase)**, and modern **Glassmorphism UI**.
 
 ---
 
-## ✨ Features
+##  Features
 
-- 💎 **Luxury Interactive Frontend**:
+-  **Luxury Interactive Frontend**:
   - Full-screen 60fps cinematic video carousel
   - Interactive destination showcases & bespoke itineraries (Cox's Bazar, Bandarban, Sajek, Sunamganj, France, Iceland, Morocco, etc.)
   - Real-time instant booking form with payment options
   - 100% responsive across mobile, tablet, and ultra-wide screens
 
-- 🔒 **Enterprise-Grade Security Shield**:
+-  **Enterprise-Grade Security Shield**:
   - **Admin Studio Gate**: Timing-safe HMAC SHA-256 session token gate (`/admin`)
   - **API Authorization**: All admin endpoints enforce authenticated Bearer tokens and HTTP cookies
   - **Anti-Spam Rate Limiting**: Max 3 bookings per 60s per client IP (HTTP 429 Too Many Requests)
@@ -27,7 +27,7 @@ An ultra-luxury, high-performance travel and exploration web platform inspired b
 
 ---
 
-## 🚀 Quick Start (Local Development)
+##  Quick Start (Local Development)
 
 ### 1. Clone the repository
 ```bash
@@ -54,7 +54,7 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ---
 
-## 🛠️ Build for Production
+##  Build for Production
 
 ```bash
 npm run build
@@ -63,6 +63,6 @@ npm start
 
 ---
 
-## 👨‍💻 Author
+##  Author
 - **Said Khan (সাইদ খান)** — Lead Architect & Developer
 - GitHub: [@SAIDKHAN777](https://github.com/SAIDKHAN777)
